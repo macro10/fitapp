@@ -1,7 +1,8 @@
 from rest_framework.routers import DefaultRouter
-from .views import ExerciseViewSet, WorkoutViewSet, PerformedExerciseViewSet
+from .views import ExerciseViewSet, WorkoutViewSet, PerformedExerciseViewSet, UserRegistrationView
 from django.contrib.auth.models import User
 from rest_framework import serializers, viewsets
+from django.urls import path
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,4 +19,6 @@ router.register(r'workouts', WorkoutViewSet)
 router.register(r'performed-exercises', PerformedExerciseViewSet)
 router.register(r'users', UserViewSet)
 
-urlpatterns = router.urls
+urlpatterns = router.urls + [
+    path('register/', UserRegistrationView.as_view(), name='user-register'),
+]

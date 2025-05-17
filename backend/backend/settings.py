@@ -137,15 +137,11 @@ CORS_ALLOWED_ORIGINS = [
 # REST Framework settings
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
-if DEBUG:
-  REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-      'rest_framework.permissions.AllowAny',
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+      'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-  }
-else:
-  REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-      'rest_framework.permissions.isAuthenticated',
-    ],
+      'rest_framework.permissions.AllowAny' if DEBUG else 'rest_framework.permissions.IsAuthenticated',
+    ]
   }
