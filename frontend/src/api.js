@@ -12,7 +12,7 @@ export const getWorkouts = async () => {
   return response.data
 }
 
-export const createPerfomedExercise = async (data) => {
+export const createPerformedExercise = async (data) => {
   const response = await axios.post(`${API_BASE}/api/performed-exercises/`, data)
   return response.data
 }
