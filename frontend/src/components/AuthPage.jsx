@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
-import axios from "axios";
+import api from "../apiClient";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,11 +14,13 @@ export default function AuthPage() {
     e.preventDefault();
     try {
       if (isLogin) {
-        const res = await axios.post("http://localhost:8000/api/login/", { username, password });
+        const res = await api.post("/login/", { username, password });
+        localStorage.setItem("token", res.data.access);
+        localStorage.setItem("refresh", res.data.refresh);
         setUser(res.data.access);
         navigate("/");
       } else {
-        await axios.post("http://localhost:8000/api/register/", { username, password });
+        await api.post("/register/", { username, password });
         setIsLogin(true);
       }
     } catch (err) {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getExercises } from "../api";
 import { useAuth } from "../App";
-import axios from "axios";
+import api from "../apiClient";
 
 export default function WorkoutLoggerPage() {
   const [exercises, setExercises] = useState([]);
@@ -37,13 +37,12 @@ export default function WorkoutLoggerPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post(
-      "http://localhost:8000/api/workouts/",
+    await api.post(
+      "/workouts/",
       {
         date: new Date().toISOString().split("T")[0],
         performed_exercises: performed,
-      },
-      { headers: { Authorization: `Bearer ${user}` } }
+      }
     );
     navigate("/");
   };

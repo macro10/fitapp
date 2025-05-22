@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getWorkouts } from "../api";
 import { useAuth } from "../App";
-import axios from "axios";
+import api from "../apiClient";
 
 export default function WorkoutListPage() {
   const [workouts, setWorkouts] = useState([]);
@@ -12,9 +11,7 @@ export default function WorkoutListPage() {
 
   useEffect(() => {
     const fetchWorkouts = async () => {
-      const res = await axios.get("http://localhost:8000/api/workouts/", {
-        headers: { Authorization: `Bearer ${user}` },
-      });
+      const res = await api.get("/workouts/");
       setWorkouts(res.data);
     };
     fetchWorkouts();
