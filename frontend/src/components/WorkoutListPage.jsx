@@ -3,6 +3,40 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
 import { getWorkouts } from "../api";
 
+// Subcomponent for displaying a performed exercise
+function PerformedExerciseItem({ pe }) {
+  return (
+    <li className="text-sm">
+      <div>
+        <b>{pe.exercise?.name}</b> — Sets: {pe.sets},
+        Reps: {Array.isArray(pe.reps_per_set) ? pe.reps_per_set.join(", ") : "N/A"},
+        Weights: {Array.isArray(pe.weights_per_set) ? pe.weights_per_set.join(", ") : "N/A"}
+      </div>
+    </li>
+  );
+}
+
+// Subcomponent for displaying a workout and its exercises
+function WorkoutItem({ workout, expanded, setExpanded }) {
+  return (
+    <li key={workout.id} className="border rounded mb-2 p-2">
+      <div
+        className="cursor-pointer font-semibold"
+        onClick={() => setExpanded(expanded === workout.id ? null : workout.id)}
+      >
+        {workout.date} {expanded === workout.id ? "▲" : "▼"}
+      </div>
+      {expanded === workout.id && workout.performed_exercises && (
+        <ul className="ml-4 mt-2">
+          {workout.performed_exercises.map((pe) => (
+            <PerformedExerciseItem key={pe.id} pe={pe} />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
 export default function WorkoutListPage() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,27 +108,12 @@ export default function WorkoutListPage() {
       ) : (
         <ul>
           {workouts.map((w) => (
-            <li key={w.id} className="border rounded mb-2 p-2">
-              <div
-                className="cursor-pointer font-semibold"
-                onClick={() => setExpanded(expanded === w.id ? null : w.id)}
-              >
-                {w.date} {expanded === w.id ? "▲" : "▼"}
-              </div>
-              {expanded === w.id && w.performed_exercises && (
-                <ul className="ml-4 mt-2">
-                  {w.performed_exercises.map((pe) => (
-                    <li key={pe.id} className="text-sm">
-                      <div>
-                        <b>{pe.exercise?.name}</b> — Sets: {pe.sets}, 
-                        Reps: {Array.isArray(pe.reps_per_set) ? pe.reps_per_set.join(", ") : "N/A"}, 
-                        Weights: {Array.isArray(pe.weights_per_set) ? pe.weights_per_set.join(", ") : "N/A"}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
+            <WorkoutItem
+              key={w.id}
+              workout={w}
+              expanded={expanded}
+              setExpanded={setExpanded}
+            />
           ))}
         </ul>
       )}
