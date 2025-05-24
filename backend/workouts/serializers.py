@@ -3,11 +3,17 @@ from .models import Exercise, Workout, PerformedExercise
 from django.contrib.auth.models import User
 
 class ExerciseSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Exercise objects.
+    """
     class Meta:
         model = Exercise
         fields = '__all__'
 
 class PerformedExerciseSerializer(serializers.ModelSerializer):
+    """
+    Serializer for PerformedExercise objects, including nested exercise details.
+    """
     exercise = ExerciseSerializer(read_only=True)
     exercise_id = serializers.PrimaryKeyRelatedField(
         queryset=Exercise.objects.all(), source='exercise', write_only=True
@@ -18,6 +24,9 @@ class PerformedExerciseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class WorkoutSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Workout objects, including nested performed exercises.
+    """
     performed_exercises = PerformedExerciseSerializer(many=True, read_only=True)
 
     class Meta:
@@ -30,6 +39,9 @@ class WorkoutSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for registering a new user.
+    """
     password = serializers.CharField(write_only=True)
 
     class Meta:
