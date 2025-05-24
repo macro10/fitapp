@@ -11,13 +11,11 @@ class PerformedExerciseService:
         return PerformedExercise.objects.filter(workout__user=user)
     
     @staticmethod
-    def create_performed_exercise(workout: Workout, data: dict) -> PerformedExercise:
+    def create_performed_exercise(data: dict) -> PerformedExercise:
         """
         Create a new performed exercise for a workout
         """
-        data = data.copy()
-        data.pop('workout', None)
-        return PerformedExercise.objects.create(workout=workout, **data)
+        return PerformedExercise.objects.create(**data)
     
     @staticmethod
     def verify_workout_ownership(workout: Workout, user: User) -> bool:

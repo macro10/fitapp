@@ -48,7 +48,7 @@ class PerformedExerciseViewSet(viewsets.ModelViewSet):
         workout = serializer.validated_data['workout']
         if not PerformedExerciseService.verify_workout_ownership(workout, self.request.user):
             raise PermissionError("You can only add exercises to your own workouts")
-        PerformedExerciseService.create_performed_exercise(workout, serializer.validated_data)
+        PerformedExerciseService.create_performed_exercise(serializer.validated_data)
 
 class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
