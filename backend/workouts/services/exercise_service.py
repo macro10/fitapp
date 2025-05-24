@@ -1,5 +1,6 @@
 from ..models import Exercise
 from typing import List
+from ..exceptions.exceptions import ExerciseNotFoundError
 
 class ExerciseService:
     @staticmethod
@@ -21,4 +22,7 @@ class ExerciseService:
         """
         Get a specific exercise by ID
         """
-        return Exercise.objects.get(id=exercise_id)
+        try:
+            return Exercise.objects.get(id=exercise_id)
+        except Exercise.DoesNotExist:
+            raise ExerciseNotFoundError()

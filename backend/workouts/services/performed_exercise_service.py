@@ -1,6 +1,7 @@
 from ..models import PerformedExercise, Workout
 from django.contrib.auth.models import User
 from typing import List
+from ..exceptions.exceptions import WorkoutPermissionError
 
 class PerformedExerciseService:
     @staticmethod
@@ -22,4 +23,6 @@ class PerformedExerciseService:
         """
         Verify that a workout belongs to the specified user
         """
-        return workout.user == user
+        if workout.user != user:
+            raise WorkoutPermissionError()
+        return True

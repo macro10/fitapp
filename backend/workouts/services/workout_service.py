@@ -1,6 +1,7 @@
 from ..models import Workout
 from django.contrib.auth.models import User
 from typing import List
+from ..exceptions.exceptions import WorkoutNotFoundError, WorkoutPermissionError
 
 class WorkoutService:
     @staticmethod
@@ -22,4 +23,10 @@ class WorkoutService:
         """
         Get a specific workout by ID, ensuring it belongs to the user
         """
-        return Workout.objects.get(id=workout_id, user=user)
+        try:
+            workout = Workout.objects.get(id=workout_id)
+            if workout.user != user:
+                raise WorkoutPermissionError()
+            return workout
+        except Workout.DoesNotExist:
+            raise WorkoutNotFoundError()
