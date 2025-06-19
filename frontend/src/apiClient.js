@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api/",
+  baseURL: "https://backend-spring-darkness-9130.fly.dev/api/",
 });
 
 api.interceptors.request.use(
@@ -49,7 +49,7 @@ api.interceptors.response.use(
       isRefreshing = true;
       const refreshToken = localStorage.getItem("refresh");
       try {
-        const res = await axios.post("http://localhost:8000/api/login/refresh/", {
+        const res = await axios.post("https://backend-spring-darkness-9130.fly.dev/api/login/refresh/", {
           refresh: refreshToken,
         });
         const newToken = res.data.access;
