@@ -24,4 +24,7 @@ if [ -d "static" ]; then
   rmdir static
 fi
 
+# Fix the manifest link
+sed -i '' 's/href="\.\/manifest\.json"/href="\/static\/manifest.json"/' index.html
+
 echo "Done! Static files are ready in backend/static/"
