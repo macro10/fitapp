@@ -5,6 +5,7 @@ __pycache__/
 *.so
 .Python
 env/
+.env
 build/
 develop-eggs/
 dist/
@@ -27,6 +28,9 @@ local_settings.py
 db.sqlite3
 db.sqlite3-journal
 media
+static
+staticfiles
+templates
 
 # React
 node_modules/
