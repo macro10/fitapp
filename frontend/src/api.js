@@ -1,6 +1,6 @@
 import api from './apiClient'
 
-const API_BASE = 'https://backend-spring-darkness-9130.fly.dev'
+const API_BASE = process.env.REACT_APP_API_URL
 
 export const getExercises = async () => {
   const response = await api.get(`${API_BASE}/api/exercises/`)
