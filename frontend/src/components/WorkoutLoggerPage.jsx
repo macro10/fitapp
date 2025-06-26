@@ -1,106 +1,129 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getExercises, createWorkoutWithExercises } from "../api";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Alert, AlertDescription } from "./ui/alert";
+import { DumbbellIcon, PlusIcon, SaveIcon, XIcon } from "lucide-react";
 
-// Subcomponent: Add Exercise Form
-function AddExerciseForm({
-  exercises,
-  selected,
-  sets,
-  reps,
-  weights,
-  onChange,
-  onAdd,
-  error,
-}) {
+// Component for inputting reps and weights for a single set
+function SetInputs({ setNumber, value, onChange }) {
   return (
-    <div className="space-y-2">
-      <select
-        value={selected}
-        onChange={e => onChange("selected", e.target.value)}
-        className="border p-2 w-full rounded"
-      >
-        <option value="">Select exercise</option>
-        {exercises.map((ex) => (
-          <option key={ex.id} value={ex.id}>{ex.name}</option>
-        ))}
-      </select>
-      <div className="flex gap-2">
-        <input
-          type="number"
-          min={1}
-          value={sets}
-          onChange={e => onChange("sets", Number(e.target.value))}
-          className="border p-2 rounded flex-1"
-          placeholder="Number of sets"
-        />
-        <input
-          type="text"
-          value={reps}
-          onChange={e => onChange("reps", e.target.value)}
-          className="border p-2 rounded flex-1"
-          placeholder="Reps per set (e.g. 10,8,6)"
-        />
-        <input
-          type="text"
-          value={weights}
-          onChange={e => onChange("weights", e.target.value)}
-          className="border p-2 rounded flex-1"
-          placeholder="Weights per set (e.g. 100,90,80)"
-        />
-      </div>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-      >
-        Add Exercise
-      </button>
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-center mt-2">
-          {error}
+    <Card className="mb-2">
+      <CardHeader className="p-4 pb-2">
+        <CardTitle className="text-sm font-medium">Set {setNumber}</CardTitle>
+      </CardHeader>
+      <CardContent className="p-4 pt-0">
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <label className="text-sm text-muted-foreground">Reps</label>
+            <Input
+              type="number"
+              min={1}
+              value={value.reps || ''}
+              onChange={(e) => onChange(setNumber - 1, 'reps', Number(e.target.value))}
+              placeholder="Number of reps"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-sm text-muted-foreground">Weight (lbs)</label>
+            <Input
+              type="number"
+              min={0}
+              step={5}
+              value={value.weight || ''}
+              onChange={(e) => onChange(setNumber - 1, 'weight', Number(e.target.value))}
+              placeholder="Weight in lbs"
+            />
+          </div>
         </div>
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
-// Subcomponent: Added Exercises List
-function AddedExercisesList({ performed, exercises }) {
-  if (performed.length === 0) return null;
+// Component for a single exercise entry
+function ExerciseEntry({ exercise, exercises, onRemove, onUpdate }) {
+  const [sets, setSets] = useState(1);
+  const [setDetails, setSetDetails] = useState([{ reps: '', weight: '' }]);
+
+  const handleSetsChange = (newSets) => {
+    const numSets = Number(newSets);
+    setSets(numSets);
+    setSetDetails(prev => {
+      if (numSets > prev.length) {
+        return [...prev, ...Array(numSets - prev.length).fill({ reps: '', weight: '' })];
+      }
+      return prev.slice(0, numSets);
+    });
+    onUpdate({
+      ...exercise,
+      sets: numSets,
+      reps_per_set: setDetails.slice(0, numSets).map(s => s.reps),
+      weights_per_set: setDetails.slice(0, numSets).map(s => s.weight)
+    });
+  };
+
+  const handleSetDetailChange = (setIndex, field, value) => {
+    setSetDetails(prev => {
+      const newDetails = [...prev];
+      newDetails[setIndex] = { ...newDetails[setIndex], [field]: value };
+      return newDetails;
+    });
+    onUpdate({
+      ...exercise,
+      sets,
+      reps_per_set: setDetails.map(s => s.reps),
+      weights_per_set: setDetails.map(s => s.weight)
+    });
+  };
+
   return (
-    <div className="border rounded p-4 space-y-2">
-      <h3 className="font-semibold">Added Exercises:</h3>
-      {performed.map((p, i) => (
-        <div key={i} className="text-sm bg-gray-50 p-2 rounded">
-          <div className="font-medium">
-            {exercises.find(ex => ex.id === Number(p.exercise))?.name}
-          </div>
-          <div className="text-gray-600">
-            {p.sets} sets: {p.reps_per_set.map((reps, idx) => (
-              <span key={idx}>
-                {reps} reps @ {p.weights_per_set[idx]}lbs
-                {idx < p.sets - 1 ? ", " : ""}
-              </span>
-            ))}
-          </div>
+    <Card className="mb-6">
+      <CardHeader className="space-y-1">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl">
+            {exercises.find(ex => ex.id === Number(exercise.exercise))?.name}
+          </CardTitle>
+          <Button variant="ghost" size="icon" onClick={onRemove}>
+            <XIcon className="h-4 w-4" />
+          </Button>
         </div>
-      ))}
-    </div>
+        <CardDescription>
+          <div className="flex items-center gap-2">
+            <label className="text-sm">Number of sets:</label>
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              value={sets}
+              onChange={(e) => handleSetsChange(e.target.value)}
+              className="w-20"
+            />
+          </div>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {Array.from({ length: sets }, (_, i) => (
+          <SetInputs
+            key={i}
+            setNumber={i + 1}
+            value={setDetails[i]}
+            onChange={handleSetDetailChange}
+          />
+        ))}
+      </CardContent>
+    </Card>
   );
 }
 
 export default function WorkoutLoggerPage() {
   const [exercises, setExercises] = useState([]);
   const [performed, setPerformed] = useState([]);
-  const [form, setForm] = useState({
-    selected: "",
-    sets: 1,
-    reps: "",
-    weights: "",
-  });
-  const [formError, setFormError] = useState(null);
-  const [submitError, setSubmitError] = useState(null);
+  const [selectedExercise, setSelectedExercise] = useState("");
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -108,67 +131,46 @@ export default function WorkoutLoggerPage() {
     getExercises().then(setExercises);
   }, []);
 
-  // Handle form field changes
-  const handleFormChange = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setFormError(null);
+  const handleAddExercise = () => {
+    if (!selectedExercise) return;
+    setPerformed(prev => [...prev, {
+      exercise: Number(selectedExercise),
+      sets: 1,
+      reps_per_set: [0],
+      weights_per_set: [0]
+    }]);
+    setSelectedExercise("");
   };
 
-  // Validate the add exercise form
-  const validateExercise = () => {
-    if (!form.selected) {
-      setFormError("Please select an exercise");
-      return false;
-    }
-    if (!form.reps.trim()) {
-      setFormError("Please enter reps");
-      return false;
-    }
-    if (!form.weights.trim()) {
-      setFormError("Please enter weights");
-      return false;
-    }
-    const repsArray = form.reps.split(",").map(Number);
-    const weightsArray = form.weights.split(",").map(Number);
-
-    if (repsArray.length !== form.sets) {
-      setFormError(`Please enter exactly ${form.sets} rep values`);
-      return false;
-    }
-    if (weightsArray.length !== form.sets) {
-      setFormError(`Please enter exactly ${form.sets} weight values`);
-      return false;
-    }
-    if (repsArray.some(isNaN) || weightsArray.some(isNaN)) {
-      setFormError("Please enter valid numbers for reps and weights");
-      return false;
-    }
-    return true;
+  const handleRemoveExercise = (index) => {
+    setPerformed(prev => prev.filter((_, i) => i !== index));
   };
 
-  // Add a performed exercise to the list
-  const addPerformed = () => {
-    if (!validateExercise()) return;
-    setPerformed([
-      ...performed,
-      {
-        exercise: Number(form.selected),
-        sets: form.sets,
-        reps_per_set: form.reps.split(",").map(Number),
-        weights_per_set: form.weights.split(",").map(Number),
-      },
-    ]);
-    setForm({ selected: "", sets: 1, reps: "", weights: "" });
-    setFormError(null);
+  const handleUpdateExercise = (index, updatedExercise) => {
+    setPerformed(prev => {
+      const newPerformed = [...prev];
+      newPerformed[index] = updatedExercise;
+      return newPerformed;
+    });
   };
 
-  // Handle workout submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitError(null);
+    setError(null);
 
     if (performed.length === 0) {
-      setSubmitError("Please add at least one exercise");
+      setError("Please add at least one exercise");
+      return;
+    }
+
+    // Validate all exercises have complete data
+    const isValid = performed.every(exercise => 
+      exercise.reps_per_set.every(reps => reps > 0) &&
+      exercise.weights_per_set.every(weight => weight >= 0)
+    );
+
+    if (!isValid) {
+      setError("Please fill in all sets with valid numbers");
       return;
     }
 
@@ -180,7 +182,7 @@ export default function WorkoutLoggerPage() {
       );
       navigate("/");
     } catch (err) {
-      setSubmitError("Failed to save workout. Please try again.");
+      setError("Failed to save workout. Please try again.");
       console.error(err);
     } finally {
       setIsSubmitting(false);
@@ -188,41 +190,81 @@ export default function WorkoutLoggerPage() {
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Log New Workout</h2>
-      {submitError && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {submitError}
-        </div>
+    <div className="container max-w-2xl mx-auto p-4">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DumbbellIcon className="h-6 w-6" />
+            Log New Workout
+          </CardTitle>
+          <CardDescription>
+            {new Date().toLocaleDateString(undefined, { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Select value={selectedExercise} onValueChange={setSelectedExercise}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Select an exercise" />
+              </SelectTrigger>
+              <SelectContent>
+                {exercises.map((ex) => (
+                  <SelectItem key={ex.id} value={ex.id.toString()}>
+                    {ex.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={handleAddExercise} disabled={!selectedExercise}>
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <AddExerciseForm
-          exercises={exercises}
-          selected={form.selected}
-          sets={form.sets}
-          reps={form.reps}
-          weights={form.weights}
-          onChange={handleFormChange}
-          onAdd={addPerformed}
-          error={formError}
-        />
-        <AddedExercisesList performed={performed} exercises={exercises} />
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-blue-300"
-          >
-            {isSubmitting ? "Saving..." : "Save Workout"}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="flex-1 border border-gray-300 px-4 py-2 rounded hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-        </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {performed.map((exercise, index) => (
+          <ExerciseEntry
+            key={index}
+            exercise={exercise}
+            exercises={exercises}
+            onRemove={() => handleRemoveExercise(index)}
+            onUpdate={(updated) => handleUpdateExercise(index, updated)}
+          />
+        ))}
+
+        {performed.length > 0 && (
+          <div className="flex gap-4">
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={isSubmitting}
+            >
+              <SaveIcon className="h-4 w-4 mr-2" />
+              {isSubmitting ? "Saving..." : "Save Workout"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => navigate("/")}
+            >
+              Cancel
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );
