@@ -7,6 +7,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Alert, AlertDescription } from "./ui/alert";
 import { DumbbellIcon, PlusIcon, SaveIcon, XIcon } from "lucide-react";
+import { Switch } from "./ui/switch";
 
 // Component for inputting reps and weights for a single set
 function SetInputs({ setNumber, value, onChange }) {
@@ -48,36 +49,87 @@ function SetInputs({ setNumber, value, onChange }) {
 function ExerciseEntry({ exercise, exercises, onRemove, onUpdate }) {
   const [sets, setSets] = useState(1);
   const [setDetails, setSetDetails] = useState([{ reps: '', weight: '' }]);
+  const [uniformSets, setUniformSets] = useState(false);
+  const [uniformValues, setUniformValues] = useState({ reps: '', weight: '' });
 
   const handleSetsChange = (newSets) => {
     const numSets = Number(newSets);
     setSets(numSets);
-    setSetDetails(prev => {
-      if (numSets > prev.length) {
-        return [...prev, ...Array(numSets - prev.length).fill({ reps: '', weight: '' })];
-      }
-      return prev.slice(0, numSets);
-    });
+    
+    // If uniform sets is enabled, fill all sets with the uniform values
+    if (uniformSets) {
+      const newDetails = Array(numSets).fill({ ...uniformValues });
+      setSetDetails(newDetails);
+      onUpdate({
+        ...exercise,
+        sets: numSets,
+        reps_per_set: newDetails.map(s => s.reps),
+        weights_per_set: newDetails.map(s => s.weight)
+      });
+    } else {
+      setSetDetails(prev => {
+        if (numSets > prev.length) {
+          return [...prev, ...Array(numSets - prev.length).fill({ reps: '', weight: '' })];
+        }
+        return prev.slice(0, numSets);
+      });
+      onUpdate({
+        ...exercise,
+        sets: numSets,
+        reps_per_set: setDetails.slice(0, numSets).map(s => s.reps),
+        weights_per_set: setDetails.slice(0, numSets).map(s => s.weight)
+      });
+    }
+  };
+
+  const handleUniformValueChange = (field, value) => {
+    const newUniformValues = { ...uniformValues, [field]: value };
+    setUniformValues(newUniformValues);
+    
+    // Update all sets with the new uniform value
+    const newDetails = Array(sets).fill({ ...newUniformValues });
+    setSetDetails(newDetails);
     onUpdate({
       ...exercise,
-      sets: numSets,
-      reps_per_set: setDetails.slice(0, numSets).map(s => s.reps),
-      weights_per_set: setDetails.slice(0, numSets).map(s => s.weight)
+      sets,
+      reps_per_set: newDetails.map(s => s.reps),
+      weights_per_set: newDetails.map(s => s.weight)
     });
   };
 
   const handleSetDetailChange = (setIndex, field, value) => {
-    setSetDetails(prev => {
-      const newDetails = [...prev];
-      newDetails[setIndex] = { ...newDetails[setIndex], [field]: value };
-      return newDetails;
-    });
-    onUpdate({
-      ...exercise,
-      sets,
-      reps_per_set: setDetails.map(s => s.reps),
-      weights_per_set: setDetails.map(s => s.weight)
-    });
+    if (uniformSets) {
+      handleUniformValueChange(field, value);
+    } else {
+      setSetDetails(prev => {
+        const newDetails = [...prev];
+        newDetails[setIndex] = { ...newDetails[setIndex], [field]: value };
+        return newDetails;
+      });
+      onUpdate({
+        ...exercise,
+        sets,
+        reps_per_set: setDetails.map(s => s.reps),
+        weights_per_set: setDetails.map(s => s.weight)
+      });
+    }
+  };
+
+  const handleUniformToggle = (checked) => {
+    setUniformSets(checked);
+    if (checked) {
+      // When enabling uniform sets, use the first set's values as the uniform values
+      const firstSet = setDetails[0] || { reps: '', weight: '' };
+      setUniformValues(firstSet);
+      const newDetails = Array(sets).fill({ ...firstSet });
+      setSetDetails(newDetails);
+      onUpdate({
+        ...exercise,
+        sets,
+        reps_per_set: newDetails.map(s => s.reps),
+        weights_per_set: newDetails.map(s => s.weight)
+      });
+    }
   };
 
   return (
@@ -92,28 +144,45 @@ function ExerciseEntry({ exercise, exercises, onRemove, onUpdate }) {
           </Button>
         </div>
         <CardDescription>
-          <div className="flex items-center gap-2">
-            <label className="text-sm">Number of sets:</label>
-            <Input
-              type="number"
-              min={1}
-              max={10}
-              value={sets}
-              onChange={(e) => handleSetsChange(e.target.value)}
-              className="w-20"
-            />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm">Number of sets:</label>
+              <Input
+                type="number"
+                min={1}
+                max={10}
+                value={sets}
+                onChange={(e) => handleSetsChange(e.target.value)}
+                className="w-20"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm">Uniform sets:</label>
+              <Switch
+                checked={uniformSets}
+                onCheckedChange={handleUniformToggle}
+              />
+            </div>
           </div>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        {Array.from({ length: sets }, (_, i) => (
+        {uniformSets ? (
           <SetInputs
-            key={i}
-            setNumber={i + 1}
-            value={setDetails[i]}
-            onChange={handleSetDetailChange}
+            setNumber={1}
+            value={uniformValues}
+            onChange={(_, field, value) => handleUniformValueChange(field, value)}
           />
-        ))}
+        ) : (
+          Array.from({ length: sets }, (_, i) => (
+            <SetInputs
+              key={i}
+              setNumber={i + 1}
+              value={setDetails[i]}
+              onChange={handleSetDetailChange}
+            />
+          ))
+        )}
       </CardContent>
     </Card>
   );
