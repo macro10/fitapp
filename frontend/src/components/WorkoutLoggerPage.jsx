@@ -193,10 +193,20 @@ export default function WorkoutLoggerPage() {
     <div className="container max-w-2xl mx-auto p-4">
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <DumbbellIcon className="h-6 w-6" />
-            Log New Workout
-          </CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="flex items-center gap-2">
+              <DumbbellIcon className="h-6 w-6" />
+              Log New Workout
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+              title="Exit"
+            >
+              <XIcon className="h-5 w-5" />
+            </Button>
+          </div>
           <CardDescription>
             {new Date().toLocaleDateString(undefined, { 
               weekday: 'long', 
@@ -245,8 +255,8 @@ export default function WorkoutLoggerPage() {
           />
         ))}
 
-        {performed.length > 0 && (
-          <div className="flex gap-4">
+        <div className="flex gap-4">
+          {performed.length > 0 && (
             <Button
               type="submit"
               className="flex-1"
@@ -255,16 +265,16 @@ export default function WorkoutLoggerPage() {
               <SaveIcon className="h-4 w-4 mr-2" />
               {isSubmitting ? "Saving..." : "Save Workout"}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => navigate("/")}
-            >
-              Cancel
-            </Button>
-          </div>
-        )}
+          )}
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1"
+            onClick={() => navigate("/")}
+          >
+            Cancel
+          </Button>
+        </div>
       </form>
     </div>
   );
