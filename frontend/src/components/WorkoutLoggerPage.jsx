@@ -8,6 +8,10 @@ import { Button } from "./ui/button";
 import { Alert, AlertDescription } from "./ui/alert";
 import { DumbbellIcon, PlusIcon, SaveIcon, XIcon } from "lucide-react";
 import { Switch } from "./ui/switch";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Check } from "lucide-react";
+import { cn } from "../lib/utils";
 
 // Component for inputting reps and weights for a single set
 function SetInputs({ setNumber, value, onChange }) {
@@ -188,6 +192,54 @@ function ExerciseEntry({ exercise, exercises, onRemove, onUpdate }) {
   );
 }
 
+function ExerciseSelector({ exercises, value, onValueChange }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="flex-1 justify-between"
+        >
+          {value
+            ? exercises.find((exercise) => exercise.id.toString() === value)?.name
+            : "Select an exercise..."}
+          <PlusIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[400px] p-0">
+        <Command>
+          <CommandInput placeholder="Search exercises..." />
+          <CommandEmpty>No exercise found.</CommandEmpty>
+          <CommandGroup className="max-h-[300px] overflow-auto">
+            {exercises.map((exercise) => (
+              <CommandItem
+                key={exercise.id}
+                value={exercise.name}
+                onSelect={() => {
+                  onValueChange(exercise.id.toString());
+                  setOpen(false);
+                }}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === exercise.id.toString() ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {exercise.name}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export default function WorkoutLoggerPage() {
   const [exercises, setExercises] = useState([]);
   const [performed, setPerformed] = useState([]);
@@ -287,18 +339,11 @@ export default function WorkoutLoggerPage() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
-            <Select value={selectedExercise} onValueChange={setSelectedExercise}>
-              <SelectTrigger className="flex-1">
-                <SelectValue placeholder="Select an exercise" />
-              </SelectTrigger>
-              <SelectContent>
-                {exercises.map((ex) => (
-                  <SelectItem key={ex.id} value={ex.id.toString()}>
-                    {ex.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <ExerciseSelector
+              exercises={exercises}
+              value={selectedExercise}
+              onValueChange={setSelectedExercise}
+            />
             <Button onClick={handleAddExercise} disabled={!selectedExercise}>
               <PlusIcon className="h-4 w-4 mr-2" />
               Add
