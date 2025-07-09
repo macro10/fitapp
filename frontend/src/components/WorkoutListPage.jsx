@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
-import { getWorkouts } from "../api";
+import { getWorkouts, deleteWorkout } from "../api";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon } from "lucide-react";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon } from "lucide-react";
 
 // Subcomponent for displaying a performed exercise
 function PerformedExerciseItem({ pe }) {
@@ -21,19 +21,35 @@ function PerformedExerciseItem({ pe }) {
   );
 }
 
-// Subcomponent for displaying a workout and its exercises
-function WorkoutItem({ workout, expanded, setExpanded }) {
+// Update the WorkoutItem component
+function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   return (
     <Card className="mb-4 hover:shadow-lg transition-shadow">
-      <CardHeader className="cursor-pointer" onClick={() => setExpanded(expanded === workout.id ? null : workout.id)}>
+      <CardHeader>
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
+          <div 
+            className="flex items-center gap-2 flex-1 cursor-pointer" 
+            onClick={() => setExpanded(expanded === workout.id ? null : workout.id)}
+          >
             <CalendarIcon className="h-5 w-5 text-muted-foreground" />
             <CardTitle className="text-lg">{workout.date}</CardTitle>
           </div>
-          <Badge variant="secondary">
-            {expanded === workout.id ? "▲" : "▼"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(workout.id);
+              }}
+            >
+              <Trash2Icon className="h-4 w-4" />
+            </Button>
+            <Badge variant="secondary">
+              {expanded === workout.id ? "▲" : "▼"}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       {expanded === workout.id && workout.performed_exercises && (
@@ -85,6 +101,16 @@ export default function WorkoutListPage() {
     fetchWorkouts();
   }, [user]);
 
+  const handleDeleteWorkout = async (workoutId) => {
+    try {
+      await deleteWorkout(workoutId);
+      setWorkouts(workouts.filter(w => w.id !== workoutId));
+    } catch (err) {
+      console.error('Error deleting workout:', err);
+      setError('Failed to delete workout. Please try again.');
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 max-w-3xl">
       <div className="flex justify-between items-center mb-6">
@@ -129,6 +155,7 @@ export default function WorkoutListPage() {
               workout={w}
               expanded={expanded}
               setExpanded={setExpanded}
+              onDelete={handleDeleteWorkout}
             />
           ))}
         </div>
