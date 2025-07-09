@@ -7,6 +7,8 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useToast } from "../hooks/use-toast"
+import { Toaster } from "./ui/toaster"
 
 // Subcomponent for displaying a performed exercise
 function PerformedExerciseItem({ pe }) {
@@ -83,6 +85,7 @@ export default function WorkoutListPage() {
   const [expanded, setExpanded] = useState(null);
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast()
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -105,68 +108,81 @@ export default function WorkoutListPage() {
     try {
       await deleteWorkout(workoutId);
       setWorkouts(workouts.filter(w => w.id !== workoutId));
+      toast({
+        title: "Workout deleted",
+        description: "Your workout has been successfully deleted.",
+        duration: 1500,
+      });
     } catch (err) {
       console.error('Error deleting workout:', err);
-      setError('Failed to delete workout. Please try again.');
+      toast({
+        title: "Error",
+        description: "Failed to delete workout. Please try again.",
+        variant: "destructive",
+        duration: 1500,
+      });
     }
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-3xl">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">My Workouts</h1>
-          <p className="text-muted-foreground">Track your fitness progress</p>
+    <>
+      <div className="container mx-auto p-4 max-w-3xl">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-3xl font-bold">My Workouts</h1>
+            <p className="text-muted-foreground">Track your fitness progress</p>
+          </div>
+          <Button 
+            variant="ghost"
+            size="icon"
+            onClick={() => { setUser(null); navigate("/auth"); }}
+          >
+            <LogOutIcon className="h-5 w-5" />
+          </Button>
         </div>
-        <Button 
-          variant="ghost"
-          size="icon"
-          onClick={() => { setUser(null); navigate("/auth"); }}
+
+        {loading ? (
+          <div className="text-center py-8 text-muted-foreground">
+            Loading workouts...
+          </div>
+        ) : error ? (
+          <Card className="p-4">
+            <div className="text-destructive mb-2">{error}</div>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Try again
+            </Button>
+          </Card>
+        ) : workouts.length === 0 ? (
+          <Card className="p-8 text-center">
+            <div className="text-muted-foreground mb-4">
+              No workouts yet. Start logging your first workout!
+            </div>
+            <Button onClick={() => navigate("/log")}>
+              Create Workout
+            </Button>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {workouts.map((w) => (
+              <WorkoutItem
+                key={w.id}
+                workout={w}
+                expanded={expanded}
+                setExpanded={setExpanded}
+                onDelete={handleDeleteWorkout}
+              />
+            ))}
+          </div>
+        )}
+
+        <Button
+          className="fixed bottom-8 right-8 rounded-full w-12 h-12 p-0"
+          onClick={() => navigate("/log")}
         >
-          <LogOutIcon className="h-5 w-5" />
+          <PlusIcon className="h-6 w-6" />
         </Button>
       </div>
-
-      {loading ? (
-        <div className="text-center py-8 text-muted-foreground">
-          Loading workouts...
-        </div>
-      ) : error ? (
-        <Card className="p-4">
-          <div className="text-destructive mb-2">{error}</div>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Try again
-          </Button>
-        </Card>
-      ) : workouts.length === 0 ? (
-        <Card className="p-8 text-center">
-          <div className="text-muted-foreground mb-4">
-            No workouts yet. Start logging your first workout!
-          </div>
-          <Button onClick={() => navigate("/log")}>
-            Create Workout
-          </Button>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {workouts.map((w) => (
-            <WorkoutItem
-              key={w.id}
-              workout={w}
-              expanded={expanded}
-              setExpanded={setExpanded}
-              onDelete={handleDeleteWorkout}
-            />
-          ))}
-        </div>
-      )}
-
-      <Button
-        className="fixed bottom-8 right-8 rounded-full w-12 h-12 p-0"
-        onClick={() => navigate("/log")}
-      >
-        <PlusIcon className="h-6 w-6" />
-      </Button>
-    </div>
+      <Toaster />
+    </>
   );
 }
