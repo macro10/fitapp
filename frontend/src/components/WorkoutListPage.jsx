@@ -116,21 +116,33 @@ export default function WorkoutListPage() {
   }, [user]);
 
   const handleDeleteWorkout = async (workoutId) => {
+    // Optimistically remove from UI
+    setWorkouts(prevWorkouts => prevWorkouts.filter(w => w.id !== workoutId));
+    
+    // Show success toast immediately
+    toast({
+      title: "Workout deleted",
+      description: "Your workout has been successfully deleted.",
+      duration: 2000,
+    });
+    
     try {
+      // Make API call in background
       await deleteWorkout(workoutId);
-      setWorkouts(workouts.filter(w => w.id !== workoutId));
-      toast({
-        title: "Workout deleted",
-        description: "Your workout has been successfully deleted.",
-        duration: 1500,
-      });
     } catch (err) {
+      // If deletion fails, restore the workout and show error
       console.error('Error deleting workout:', err);
+      setWorkouts(prevWorkouts => {
+        const deletedWorkout = workouts.find(w => w.id === workoutId);
+        return deletedWorkout ? [...prevWorkouts, deletedWorkout] : prevWorkouts;
+      });
+      
+      // Show error toast
       toast({
         title: "Error",
-        description: "Failed to delete workout. Please try again.",
+        description: "Failed to delete workout. Changes have been reverted.",
         variant: "destructive",
-        duration: 1500,
+        duration: 2000,
       });
     }
   };
