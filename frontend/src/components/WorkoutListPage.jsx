@@ -9,6 +9,7 @@ import { Separator } from "./ui/separator";
 import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
+import { motion, AnimatePresence } from "framer-motion";
 
 // Subcomponent for displaying a performed exercise
 function PerformedExerciseItem({ pe }) {
@@ -26,55 +27,65 @@ function PerformedExerciseItem({ pe }) {
 // Update the WorkoutItem component
 function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   return (
-    <Card className="mb-4 hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div 
-            className="flex items-center gap-2 flex-1 cursor-pointer" 
-            onClick={() => setExpanded(expanded === workout.id ? null : workout.id)}
-          >
-            <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-            <CardTitle className="text-lg">{workout.date}</CardTitle>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(workout.id);
-              }}
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ 
+        opacity: 0,
+        height: 0,
+        marginBottom: 0,
+        transition: { duration: 0.2 }
+      }}
+    >
+      <Card className="mb-4 hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div 
+              className="flex items-center gap-2 flex-1 cursor-pointer" 
+              onClick={() => setExpanded(expanded === workout.id ? null : workout.id)}
             >
-              <Trash2Icon className="h-4 w-4" />
-            </Button>
-            <Badge variant="secondary">
-              {expanded === workout.id ? "▲" : "▼"}
-            </Badge>
+              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">{workout.date}</CardTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-destructive hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(workout.id);
+                }}
+              >
+                <Trash2Icon className="h-4 w-4" />
+              </Button>
+              <Badge variant="secondary">
+                {expanded === workout.id ? "▲" : "▼"}
+              </Badge>
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      {expanded === workout.id && workout.performed_exercises && (
-        <CardContent>
-          <Separator className="my-2" />
-          <ul className="space-y-2">
-            {workout.performed_exercises.map((pe) => (
-              <li key={pe.id} className="flex items-start gap-2">
-                <DumbbellIcon className="h-5 w-5 text-muted-foreground mt-1" />
-                <div>
-                  <div className="font-medium">{pe.exercise?.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Sets: {pe.sets} • 
-                    Reps: {Array.isArray(pe.reps_per_set) ? pe.reps_per_set.join(", ") : "N/A"} •
-                    Weights: {Array.isArray(pe.weights_per_set) ? pe.weights_per_set.join(", ") : "N/A"}
+        </CardHeader>
+        {expanded === workout.id && workout.performed_exercises && (
+          <CardContent>
+            <Separator className="my-2" />
+            <ul className="space-y-2">
+              {workout.performed_exercises.map((pe) => (
+                <li key={pe.id} className="flex items-start gap-2">
+                  <DumbbellIcon className="h-5 w-5 text-muted-foreground mt-1" />
+                  <div>
+                    <div className="font-medium">{pe.exercise?.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      Sets: {pe.sets} • 
+                      Reps: {Array.isArray(pe.reps_per_set) ? pe.reps_per_set.join(", ") : "N/A"} •
+                      Weights: {Array.isArray(pe.weights_per_set) ? pe.weights_per_set.join(", ") : "N/A"}
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-      )}
-    </Card>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        )}
+      </Card>
+    </motion.div>
   );
 }
 
@@ -163,15 +174,17 @@ export default function WorkoutListPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {workouts.map((w) => (
-              <WorkoutItem
-                key={w.id}
-                workout={w}
-                expanded={expanded}
-                setExpanded={setExpanded}
-                onDelete={handleDeleteWorkout}
-              />
-            ))}
+            <AnimatePresence mode="popLayout">
+              {workouts.map((w) => (
+                <WorkoutItem
+                  key={w.id}
+                  workout={w}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
+                  onDelete={handleDeleteWorkout}
+                />
+              ))}
+            </AnimatePresence>
           </div>
         )}
 
