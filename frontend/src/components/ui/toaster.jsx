@@ -1,4 +1,5 @@
 import { useToast } from "../../hooks/use-toast"
+import { cn } from "../../lib/utils"
 import {
   Toast,
   ToastClose,
@@ -13,16 +14,22 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+      {toasts.map(function ({ id, title, description, action, className, ...props }) {
         return (
-          <Toast key={id} {...props}>
+          <Toast key={id} className={cn("group", className)} {...props}>
             <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
+              {title && (
+                <ToastTitle className="group-[.success]:text-green-900 group-[.warning]:text-yellow-900">
+                  {title}
+                </ToastTitle>
+              )}
               {description && (
-                <ToastDescription>{description}</ToastDescription>
+                <ToastDescription className="group-[.success]:text-green-800/90 group-[.warning]:text-yellow-800/90">
+                  {description}
+                </ToastDescription>
               )}
             </div>
-            {action}
+            {action && <div className="mt-2">{action}</div>}
             <ToastClose />
           </Toast>
         );
