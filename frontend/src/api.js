@@ -57,3 +57,13 @@ export const createWorkoutWithExercises = async (date, performedExercises) => {
     throw error
   }
 }
+
+export const deleteWorkout = async (workoutId) => {
+  const response = await api.delete(`${API_BASE}/api/workouts/${workoutId}/`);
+  return response.data;
+};
+
+export const updateWorkout = async (workoutId, data) => {
+  const response = await api.patch(`${API_BASE}/api/workouts/${workoutId}/`, data);
+  return response.data;
+};
