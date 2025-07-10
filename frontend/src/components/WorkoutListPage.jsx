@@ -6,26 +6,16 @@ import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
-
-// Subcomponent for displaying a performed exercise
-function PerformedExerciseItem({ pe }) {
-  return (
-    <li className="text-sm">
-      <div>
-        <b>{pe.exercise?.name}</b> — Sets: {pe.sets},
-        Reps: {Array.isArray(pe.reps_per_set) ? pe.reps_per_set.join(", ") : "N/A"},
-        Weights: {Array.isArray(pe.weights_per_set) ? pe.weights_per_set.join(", ") : "N/A"}
-      </div>
-    </li>
-  );
-}
+import { cn } from "../lib/utils";
 
 // Update the WorkoutItem component
 function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
+  const isExpanded = expanded === workout.id;
+  
   return (
     <motion.div
       initial={{ opacity: 1 }}
@@ -39,33 +29,41 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
       <Card className="mb-4 hover:shadow-lg transition-shadow">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <div 
-              className="flex items-center gap-2 flex-1 cursor-pointer" 
-              onClick={() => setExpanded(expanded === workout.id ? null : workout.id)}
+            <button 
+              className="flex items-center gap-2 flex-1 text-left group" 
+              onClick={() => setExpanded(isExpanded ? null : workout.id)}
+              aria-expanded={isExpanded}
+              aria-controls={`workout-details-${workout.id}`}
             >
               <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg">{workout.date}</CardTitle>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-destructive hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(workout.id);
-                }}
-              >
-                <Trash2Icon className="h-4 w-4" />
-              </Button>
-              <Badge variant="secondary">
-                {expanded === workout.id ? "▲" : "▼"}
-              </Badge>
-            </div>
+              <CardTitle className="text-lg flex-1">{workout.date}</CardTitle>
+              <ChevronDown 
+                className={cn(
+                  "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                  isExpanded && "transform rotate-180"
+                )}
+              />
+            </button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(workout.id);
+              }}
+              aria-label="Delete workout"
+            >
+              <Trash2Icon className="h-4 w-4" />
+            </Button>
           </div>
         </CardHeader>
-        {expanded === workout.id && workout.performed_exercises && (
-          <CardContent>
+        {isExpanded && workout.performed_exercises && (
+          <CardContent
+            id={`workout-details-${workout.id}`}
+            role="region"
+            aria-labelledby={`workout-title-${workout.id}`}
+          >
             <Separator className="my-2" />
             <ul className="space-y-2">
               {workout.performed_exercises.map((pe) => (
@@ -74,9 +72,11 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
                   <div>
                     <div className="font-medium">{pe.exercise?.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      Sets: {pe.sets} • 
-                      Reps: {Array.isArray(pe.reps_per_set) ? pe.reps_per_set.join(", ") : "N/A"} •
-                      Weights: {Array.isArray(pe.weights_per_set) ? pe.weights_per_set.join(", ") : "N/A"}
+                      <span>Sets: {pe.sets}</span>
+                      <span className="mx-1">•</span>
+                      <span>Reps: {Array.isArray(pe.reps_per_set) ? pe.reps_per_set.join(", ") : "N/A"}</span>
+                      <span className="mx-1">•</span>
+                      <span>Weights: {Array.isArray(pe.weights_per_set) ? pe.weights_per_set.join(", ") : "N/A"}</span>
                     </div>
                   </div>
                 </li>
@@ -89,6 +89,55 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   );
 }
 
+function LoadingState() {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((i) => (
+        <WorkoutSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+
+function ErrorState({ error, onRetry }) {
+  return (
+    <Card className="p-4">
+      <div className="text-destructive mb-2">{error}</div>
+      <Button onClick={onRetry} variant="outline">
+        Try again
+      </Button>
+    </Card>
+  );
+}
+
+function EmptyState({ onCreateWorkout }) {
+  return (
+    <Card className="p-8 text-center">
+      <div className="text-muted-foreground mb-4">
+        No workouts yet. Start logging your first workout!
+      </div>
+      <Button onClick={onCreateWorkout}>
+        Create Workout
+      </Button>
+    </Card>
+  );
+}
+
+function WorkoutSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <Card className="mb-4">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div className="w-1/3 h-6 bg-muted rounded" />
+            <div className="w-8 h-8 bg-muted rounded" />
+          </div>
+        </CardHeader>
+      </Card>
+    </div>
+  );
+}
+
 export default function WorkoutListPage() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -96,55 +145,83 @@ export default function WorkoutListPage() {
   const [expanded, setExpanded] = useState(null);
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchWorkouts = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getWorkouts();
-        setWorkouts(data || []);
-      } catch (err) {
-        console.error('Error fetching workouts:', err);
-        setError('Failed to load workouts. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchWorkouts();
   }, [user]);
 
+  const fetchWorkouts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getWorkouts();
+      setWorkouts(data || []);
+    } catch (err) {
+      console.error('Error fetching workouts:', err);
+      setError('Failed to load workouts. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteWorkout = async (workoutId) => {
-    // Optimistically remove from UI
-    setWorkouts(prevWorkouts => prevWorkouts.filter(w => w.id !== workoutId));
-    
-    // Show success toast immediately
-    toast({
-      title: "Workout deleted",
-      description: "Your workout has been successfully deleted.",
-      duration: 2000,
-    });
+    const originalWorkouts = workouts;
     
     try {
-      // Make API call in background
-      await deleteWorkout(workoutId);
-    } catch (err) {
-      // If deletion fails, restore the workout and show error
-      console.error('Error deleting workout:', err);
-      setWorkouts(prevWorkouts => {
-        const deletedWorkout = workouts.find(w => w.id === workoutId);
-        return deletedWorkout ? [...prevWorkouts, deletedWorkout] : prevWorkouts;
-      });
+      // Optimistically update UI
+      setWorkouts(prevWorkouts => prevWorkouts.filter(w => w.id !== workoutId));
       
-      // Show error toast
+      // Show success toast immediately
       toast({
-        title: "Error",
-        description: "Failed to delete workout. Changes have been reverted.",
-        variant: "destructive",
+        title: "Workout deleted",
+        description: "Your workout has been successfully deleted.",
+        variant: "success", // Using our new success variant
         duration: 2000,
       });
+      
+      // Make API call
+      await deleteWorkout(workoutId);
+    } catch (err) {
+      // Restore original state on error
+      setWorkouts(originalWorkouts);
+      
+      toast({
+        title: "Error",
+        description: "Failed to delete workout. Please try again.",
+        variant: "destructive",
+        duration: 3000,
+      });
+      
+      console.error('Error deleting workout:', err);
     }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    navigate("/auth");
+  };
+
+  const renderContent = () => {
+    if (loading) return <LoadingState />;
+    if (error) return <ErrorState error={error} onRetry={() => window.location.reload()} />;
+    if (workouts.length === 0) return <EmptyState onCreateWorkout={() => navigate("/log")} />;
+
+    return (
+      <div className="space-y-4">
+        <AnimatePresence mode="popLayout">
+          {workouts.map((workout) => (
+            <WorkoutItem
+              key={workout.id}
+              workout={workout}
+              expanded={expanded}
+              setExpanded={setExpanded}
+              onDelete={handleDeleteWorkout}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+    );
   };
 
   return (
@@ -158,51 +235,19 @@ export default function WorkoutListPage() {
           <Button 
             variant="ghost"
             size="icon"
-            onClick={() => { setUser(null); navigate("/auth"); }}
+            onClick={handleLogout}
+            aria-label="Logout"
           >
             <LogOutIcon className="h-5 w-5" />
           </Button>
         </div>
 
-        {loading ? (
-          <div className="text-center py-8 text-muted-foreground">
-            Loading workouts...
-          </div>
-        ) : error ? (
-          <Card className="p-4">
-            <div className="text-destructive mb-2">{error}</div>
-            <Button onClick={() => window.location.reload()} variant="outline">
-              Try again
-            </Button>
-          </Card>
-        ) : workouts.length === 0 ? (
-          <Card className="p-8 text-center">
-            <div className="text-muted-foreground mb-4">
-              No workouts yet. Start logging your first workout!
-            </div>
-            <Button onClick={() => navigate("/log")}>
-              Create Workout
-            </Button>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            <AnimatePresence mode="popLayout">
-              {workouts.map((w) => (
-                <WorkoutItem
-                  key={w.id}
-                  workout={w}
-                  expanded={expanded}
-                  setExpanded={setExpanded}
-                  onDelete={handleDeleteWorkout}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
+        {renderContent()}
 
         <Button
           className="fixed bottom-8 right-8 rounded-full w-12 h-12 p-0"
           onClick={() => navigate("/log")}
+          aria-label="Create new workout"
         >
           <PlusIcon className="h-6 w-6" />
         </Button>
