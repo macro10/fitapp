@@ -7,8 +7,18 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Input } from "./ui/input";
-import { ChevronLeft, DumbbellIcon, SaveIcon, XIcon, Plus } from "lucide-react";
+import { ChevronLeft, DumbbellIcon, SaveIcon, Plus, X } from "lucide-react";
 import { cn } from "../lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 // Step indicator component
 function StepIndicator({ currentStep, totalSteps }) {
@@ -185,6 +195,7 @@ export default function WorkoutLoggerPage2() {
   const [error, setError] = useState(null);
   const [workoutExercises, setWorkoutExercises] = useState([]);
   const navigate = useNavigate();
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   useEffect(() => {
     getExercises().then(setExercises);
@@ -228,6 +239,14 @@ export default function WorkoutLoggerPage2() {
     }
   };
 
+  const handleCancelWorkout = () => {
+    if (workoutExercises.length > 0 || (currentExercise && sets.length > 0)) {
+      setShowCancelDialog(true);
+    } else {
+      navigate("/");
+    }
+  };
+
   // Helper function to get the context-specific title
   const getHeaderTitle = () => {
     if (!currentExercise) {
@@ -255,10 +274,11 @@ export default function WorkoutLoggerPage2() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate("/")}
-                title="Exit"
+                onClick={handleCancelWorkout}
+                title="Cancel Workout"
+                className="text-muted-foreground hover:text-destructive transition-colors"
               >
-                <XIcon className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
             <CardDescription>
@@ -351,6 +371,32 @@ export default function WorkoutLoggerPage2() {
             )}
           </CardContent>
         </Card>
+
+        {/* Add the AlertDialog component */}
+        <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <X className="h-5 w-5 text-destructive" />
+                Cancel Workout?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-muted-foreground">
+                Are you sure you want to cancel this workout? All progress will be lost.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel className="flex-1">
+                Continue Workout
+              </AlertDialogCancel>
+              <AlertDialogAction 
+                className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => navigate("/")}
+              >
+                Cancel Workout
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
