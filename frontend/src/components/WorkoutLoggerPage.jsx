@@ -123,15 +123,14 @@ function SetLogger({ setNumber, onComplete, onBack }) {
       </div>
       <div className="flex gap-2">
         <Button variant="outline" onClick={onBack}>
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Back
+          Done
         </Button>
         <Button 
           className="flex-1" 
           onClick={handleNext}
           disabled={!reps || !weight}
         >
-          Next Set
+          Add Set
           <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
       </div>
@@ -163,8 +162,7 @@ function ReviewStep({ exercise, sets, onConfirm, onBack }) {
 
       <div className="flex gap-2">
         <Button variant="outline" onClick={onBack}>
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Back
+          Add Set
         </Button>
         <Button className="flex-1" onClick={onConfirm}>
           <SaveIcon className="h-4 w-4 mr-2" />
