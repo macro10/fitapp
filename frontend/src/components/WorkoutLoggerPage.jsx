@@ -34,7 +34,6 @@ function ExerciseSelector({ exercises, onSelect }) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">What exercise are you doing?</h2>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -122,16 +121,16 @@ function SetLogger({ setNumber, onComplete, onBack }) {
         </div>
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={onBack}>
-          Done
-        </Button>
         <Button 
-          className="flex-1" 
+          className="flex-1"
           onClick={handleNext}
           disabled={!reps || !weight}
         >
           Add Set
           <ChevronRight className="h-4 w-4 ml-2" />
+        </Button>
+        <Button variant="outline" onClick={onBack}>
+          Done
         </Button>
       </div>
     </div>
@@ -161,10 +160,14 @@ function ReviewStep({ exercise, sets, onConfirm, onBack }) {
       </div>
 
       <div className="flex gap-2">
-        <Button variant="outline" onClick={onBack}>
-          Add Set
+        <Button 
+          className="flex-1"
+          onClick={onBack}
+        >
+          Add Sets
+          <ChevronRight className="h-4 w-4 ml-2" />
         </Button>
-        <Button className="flex-1" onClick={onConfirm}>
+        <Button variant="outline" onClick={onConfirm}>
           <SaveIcon className="h-4 w-4 mr-2" />
           Complete Exercise
         </Button>
@@ -266,7 +269,8 @@ export default function WorkoutLoggerPage2() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {workoutExercises.length > 0 && (
+          {/* Only show completed exercises in the exercise selection screen */}
+          {step === 0 && workoutExercises.length > 0 && (
             <div className="mb-6">
               <h3 className="text-sm font-medium mb-2">Completed Exercises:</h3>
               <div className="space-y-2">
