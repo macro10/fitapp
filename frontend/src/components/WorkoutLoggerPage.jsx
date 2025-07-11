@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Input } from "./ui/input";
-import { Check, ChevronLeft, ChevronRight, DumbbellIcon, SaveIcon, XIcon, Plus } from "lucide-react";
+import { ChevronLeft, DumbbellIcon, SaveIcon, XIcon, Plus } from "lucide-react";
 import { cn } from "../lib/utils";
 
 // Step indicator component
