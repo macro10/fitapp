@@ -224,6 +224,20 @@ export default function WorkoutLoggerPage2() {
     }
   };
 
+  // Helper function to get the context-specific title
+  const getHeaderTitle = () => {
+    if (!currentExercise) {
+      return "Select Exercise";
+    }
+    if (step === 1) {
+      return "Log Sets";
+    }
+    if (step === 2) {
+      return "Review Exercise";
+    }
+    return "Log Workout";
+  };
+
   return (
     <div className="container max-w-md mx-auto p-4">
       <Card className="mb-6">
@@ -231,7 +245,7 @@ export default function WorkoutLoggerPage2() {
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2">
               <DumbbellIcon className="h-6 w-6" />
-              Log Workout
+              {getHeaderTitle()}
             </CardTitle>
             <Button
               variant="ghost"
