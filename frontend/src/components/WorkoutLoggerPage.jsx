@@ -7,7 +7,7 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Input } from "./ui/input";
-import { Check, ChevronLeft, ChevronRight, DumbbellIcon, SaveIcon, XIcon } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, DumbbellIcon, SaveIcon, XIcon, Plus } from "lucide-react";
 import { cn } from "../lib/utils";
 
 // Step indicator component
@@ -42,8 +42,8 @@ function ExerciseSelector({ exercises, onSelect }) {
             aria-expanded={open}
             className="w-full justify-between"
           >
-            {search || "Select an exercise..."}
-            <ChevronRight className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            {search || "Add exercise..."}
+            <Plus className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0">
@@ -127,7 +127,7 @@ function SetLogger({ setNumber, onComplete, onBack }) {
           disabled={!reps || !weight}
         >
           Add Set
-          <ChevronRight className="h-4 w-4 ml-2" />
+          <Plus className="h-4 w-4 ml-2" />
         </Button>
         <Button variant="outline" onClick={onBack}>
           Done
@@ -164,8 +164,9 @@ function ReviewStep({ exercise, sets, onConfirm, onBack }) {
           className="flex-1"
           onClick={onBack}
         >
+          <ChevronLeft className="h-4 w-4 ml-2" />
           Add Sets
-          <ChevronRight className="h-4 w-4 ml-2" />
+          
         </Button>
         <Button variant="outline" onClick={onConfirm}>
           <SaveIcon className="h-4 w-4 mr-2" />
@@ -230,7 +231,7 @@ export default function WorkoutLoggerPage2() {
   // Helper function to get the context-specific title
   const getHeaderTitle = () => {
     if (!currentExercise) {
-      return "Select Exercise";
+      return "Log Exercises";
     }
     if (step === 1) {
       return "Log Sets";
@@ -269,20 +270,6 @@ export default function WorkoutLoggerPage2() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Only show completed exercises in the exercise selection screen */}
-          {step === 0 && workoutExercises.length > 0 && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium mb-2">Completed Exercises:</h3>
-              <div className="space-y-2">
-                {workoutExercises.map((ex, i) => (
-                  <div key={i} className="text-sm text-muted-foreground">
-                    {exercises.find(e => e.id === ex.exercise)?.name} - {ex.sets} sets
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertDescription>{error}</AlertDescription>
@@ -302,15 +289,30 @@ export default function WorkoutLoggerPage2() {
                 exercises={exercises}
                 onSelect={handleExerciseSelect}
               />
+              
+              {/* Moved completed exercises section here */}
               {workoutExercises.length > 0 && (
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={handleFinishWorkout}
-                >
-                  <SaveIcon className="h-4 w-4 mr-2" />
-                  Finish Workout
-                </Button>
+                <>
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Completed Exercises:</h3>
+                    <div className="space-y-2">
+                      {workoutExercises.map((ex, i) => (
+                        <div key={i} className="text-sm text-muted-foreground">
+                          {exercises.find(e => e.id === ex.exercise)?.name} - {ex.sets} sets
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handleFinishWorkout}
+                  >
+                    <SaveIcon className="h-4 w-4 mr-2" />
+                    Finish Workout
+                  </Button>
+                </>
               )}
             </div>
           )}
