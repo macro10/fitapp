@@ -1,14 +1,30 @@
+// 1. Group related imports
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getExercises, createWorkoutWithExercises } from "../api";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+
+// UI Component imports
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "./ui/card";
 import { Button } from "./ui/button";
 import { Alert, AlertDescription } from "./ui/alert";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "./ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Input } from "./ui/input";
-import { ChevronLeft, DumbbellIcon, SaveIcon, Plus, X } from "lucide-react";
-import { cn } from "../lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "./ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "./ui/popover";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,8 +36,28 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 
-// Step indicator component
-function StepIndicator({ currentStep, totalSteps }) {
+// Icon imports
+import {
+  ChevronLeft,
+  DumbbellIcon,
+  SaveIcon,
+  Plus,
+  X,
+} from "lucide-react";
+
+// API and utility imports
+import { getExercises, createWorkoutWithExercises } from "../api";
+import { cn } from "../lib/utils";
+
+// Constants (new addition)
+const STEPS = {
+  SELECT_EXERCISE: 0,
+  LOG_SETS: 1,
+  REVIEW: 2,
+};
+
+// Component prop types (new addition)
+const StepIndicator = ({ currentStep, totalSteps }) => {
   return (
     <div className="flex items-center gap-2 mb-4">
       {Array.from({ length: totalSteps }, (_, i) => (
@@ -35,10 +71,10 @@ function StepIndicator({ currentStep, totalSteps }) {
       ))}
     </div>
   );
-}
+};
 
-// Exercise selector step
-function ExerciseSelector({ exercises, onSelect }) {
+// Improved component organization with prop types
+const ExerciseSelector = ({ exercises, onSelect }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -83,10 +119,9 @@ function ExerciseSelector({ exercises, onSelect }) {
       </Popover>
     </div>
   );
-}
+};
 
-// Set logging step
-function SetLogger({ setNumber, onComplete, onBack }) {
+const SetLogger = ({ setNumber, onComplete, onBack }) => {
   const [reps, setReps] = useState("");
   const [weight, setWeight] = useState("");
 
@@ -145,10 +180,9 @@ function SetLogger({ setNumber, onComplete, onBack }) {
       </div>
     </div>
   );
-}
+};
 
-// Review step
-function ReviewStep({ exercise, sets, onConfirm, onBack }) {
+const ReviewStep = ({ exercise, sets, onConfirm, onBack }) => {
   return (
     <div className="space-y-6">
       <div>
@@ -185,45 +219,58 @@ function ReviewStep({ exercise, sets, onConfirm, onBack }) {
       </div>
     </div>
   );
-}
+};
 
+// Main component with organized sections
 export default function WorkoutLoggerPage2() {
+  // 1. State management
   const [exercises, setExercises] = useState([]);
   const [currentExercise, setCurrentExercise] = useState(null);
   const [sets, setSets] = useState([]);
-  const [step, setStep] = useState(0); // 0: select exercise, 1: logging sets, 2: review
+  const [step, setStep] = useState(STEPS.SELECT_EXERCISE);
   const [error, setError] = useState(null);
   const [workoutExercises, setWorkoutExercises] = useState([]);
-  const navigate = useNavigate();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  
+  const navigate = useNavigate();
 
+  // 2. Effects
   useEffect(() => {
     getExercises().then(setExercises);
   }, []);
 
+  // 3. Helper functions
+  const getHeaderTitle = () => {
+    if (!currentExercise) return "Log Exercises";
+    if (step === STEPS.LOG_SETS) return "Log Sets";
+    if (step === STEPS.REVIEW) return "Review Exercise";
+    return "Log Workout";
+  };
+
+  // 4. Event handlers
   const handleExerciseSelect = (exercise) => {
     setCurrentExercise(exercise);
-    setStep(1);
+    setStep(STEPS.LOG_SETS);
   };
 
   const handleSetComplete = (setData) => {
-    setSets([...sets, setData]);
+    setSets((prevSets) => [...prevSets, setData]);
   };
 
   const handleExerciseComplete = async () => {
     const exerciseData = {
       exercise: currentExercise.id,
       sets: sets.length,
-      reps_per_set: sets.map(s => s.reps),
-      weights_per_set: sets.map(s => s.weight)
+      reps_per_set: sets.map((s) => s.reps),
+      weights_per_set: sets.map((s) => s.weight),
     };
 
-    setWorkoutExercises([...workoutExercises, exerciseData]);
+    setWorkoutExercises((prev) => [...prev, exerciseData]);
     
-    // Reset for next exercise
+    // Reset state for next exercise
     setCurrentExercise(null);
     setSets([]);
-    setStep(0);
+    setStep(STEPS.SELECT_EXERCISE);
   };
 
   const handleFinishWorkout = async () => {
@@ -240,26 +287,50 @@ export default function WorkoutLoggerPage2() {
   };
 
   const handleCancelWorkout = () => {
-    if (workoutExercises.length > 0 || (currentExercise && sets.length > 0)) {
+    const hasUnsavedChanges = workoutExercises.length > 0 || 
+      (currentExercise && sets.length > 0);
+      
+    if (hasUnsavedChanges) {
       setShowCancelDialog(true);
     } else {
       navigate("/");
     }
   };
 
-  // Helper function to get the context-specific title
-  const getHeaderTitle = () => {
-    if (!currentExercise) {
-      return "Log Exercises";
-    }
-    if (step === 1) {
-      return "Log Sets";
-    }
-    if (step === 2) {
-      return "Review Exercise";
-    }
-    return "Log Workout";
-  };
+  // 5. Render helpers
+  const renderCompletedExercises = () => (
+    workoutExercises.length > 0 && (
+      <>
+        <div>
+          <h3 className="text-sm font-medium mb-3">Completed Exercises</h3>
+          <div className="space-y-2">
+            {workoutExercises.map((ex, i) => (
+              <Card key={i}>
+                <CardContent className="p-3 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <DumbbellIcon className="h-4 w-4 text-muted-foreground" />
+                    <span>{exercises.find(e => e.id === ex.exercise)?.name}</span>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {ex.sets} {ex.sets === 1 ? 'set' : 'sets'}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <Button 
+          variant="outline" 
+          className="w-full"
+          onClick={handleFinishWorkout}
+        >
+          <SaveIcon className="h-4 w-4 mr-2" />
+          Finish Workout
+        </Button>
+      </>
+    )
+  );
 
   return (
     <div className="container mx-auto p-4">
@@ -304,7 +375,7 @@ export default function WorkoutLoggerPage2() {
               />
             )}
 
-            {step === 0 && (
+            {step === STEPS.SELECT_EXERCISE && (
               <div className="space-y-4">
                 <ExerciseSelector
                   exercises={exercises}
@@ -312,61 +383,31 @@ export default function WorkoutLoggerPage2() {
                 />
                 
                 {/* Moved completed exercises section here */}
-                {workoutExercises.length > 0 && (
-                  <>
-                    <div>
-                      <h3 className="text-sm font-medium mb-3">Completed Exercises</h3>
-                      <div className="space-y-2">
-                        {workoutExercises.map((ex, i) => (
-                          <Card key={i}>
-                            <CardContent className="p-3 flex justify-between items-center">
-                              <div className="flex items-center gap-2">
-                                <DumbbellIcon className="h-4 w-4 text-muted-foreground" />
-                                <span>{exercises.find(e => e.id === ex.exercise)?.name}</span>
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {ex.sets} {ex.sets === 1 ? 'set' : 'sets'}
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </div>
-
-                    <Button 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={handleFinishWorkout}
-                    >
-                      <SaveIcon className="h-4 w-4 mr-2" />
-                      Finish Workout
-                    </Button>
-                  </>
-                )}
+                {renderCompletedExercises()}
               </div>
             )}
 
-            {step === 1 && (
+            {step === STEPS.LOG_SETS && (
               <SetLogger
                 setNumber={sets.length + 1}
                 onComplete={handleSetComplete}
                 onBack={() => {
                   if (sets.length === 0) {
-                    setStep(0);
+                    setStep(STEPS.SELECT_EXERCISE);
                     setCurrentExercise(null);
                   } else {
-                    setStep(2);
+                    setStep(STEPS.REVIEW);
                   }
                 }}
               />
             )}
 
-            {step === 2 && (
+            {step === STEPS.REVIEW && (
               <ReviewStep
                 exercise={currentExercise}
                 sets={sets}
                 onConfirm={handleExerciseComplete}
-                onBack={() => setStep(1)}
+                onBack={() => setStep(STEPS.LOG_SETS)}
               />
             )}
           </CardContent>
