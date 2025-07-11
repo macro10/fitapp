@@ -243,113 +243,115 @@ export default function WorkoutLoggerPage2() {
   };
 
   return (
-    <div className="container max-w-md mx-auto p-4">
-      <Card className="mb-6">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle className="flex items-center gap-2">
-              <DumbbellIcon className="h-6 w-6" />
-              {getHeaderTitle()}
-            </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/")}
-              title="Exit"
-            >
-              <XIcon className="h-5 w-5" />
-            </Button>
-          </div>
-          <CardDescription>
-            {new Date().toLocaleDateString(undefined, {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {currentExercise && (
-            <StepIndicator 
-              currentStep={step - 1} 
-              totalSteps={2}
-            />
-          )}
-
-          {step === 0 && (
-            <div className="space-y-4">
-              <ExerciseSelector
-                exercises={exercises}
-                onSelect={handleExerciseSelect}
-              />
-              
-              {/* Moved completed exercises section here */}
-              {workoutExercises.length > 0 && (
-                <>
-                  <div>
-                    <h3 className="text-sm font-medium mb-3">Completed Exercises</h3>
-                    <div className="space-y-2">
-                      {workoutExercises.map((ex, i) => (
-                        <Card key={i}>
-                          <CardContent className="p-3 flex justify-between items-center">
-                            <div className="flex items-center gap-2">
-                              <DumbbellIcon className="h-4 w-4 text-muted-foreground" />
-                              <span>{exercises.find(e => e.id === ex.exercise)?.name}</span>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {ex.sets} {ex.sets === 1 ? 'set' : 'sets'}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={handleFinishWorkout}
-                  >
-                    <SaveIcon className="h-4 w-4 mr-2" />
-                    Finish Workout
-                  </Button>
-                </>
-              )}
+    <div className="container mx-auto p-4">
+      <div className="max-w-2xl mx-auto"> {/* Changed from max-w-md to max-w-2xl and wrapped in a div */}
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle className="flex items-center gap-2">
+                <DumbbellIcon className="h-6 w-6" />
+                {getHeaderTitle()}
+              </CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate("/")}
+                title="Exit"
+              >
+                <XIcon className="h-5 w-5" />
+              </Button>
             </div>
-          )}
+            <CardDescription>
+              {new Date().toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {error && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          {step === 1 && (
-            <SetLogger
-              setNumber={sets.length + 1}
-              onComplete={handleSetComplete}
-              onBack={() => {
-                if (sets.length === 0) {
-                  setStep(0);
-                  setCurrentExercise(null);
-                } else {
-                  setStep(2);
-                }
-              }}
-            />
-          )}
+            {currentExercise && (
+              <StepIndicator 
+                currentStep={step - 1} 
+                totalSteps={2}
+              />
+            )}
 
-          {step === 2 && (
-            <ReviewStep
-              exercise={currentExercise}
-              sets={sets}
-              onConfirm={handleExerciseComplete}
-              onBack={() => setStep(1)}
-            />
-          )}
-        </CardContent>
-      </Card>
+            {step === 0 && (
+              <div className="space-y-4">
+                <ExerciseSelector
+                  exercises={exercises}
+                  onSelect={handleExerciseSelect}
+                />
+                
+                {/* Moved completed exercises section here */}
+                {workoutExercises.length > 0 && (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-medium mb-3">Completed Exercises</h3>
+                      <div className="space-y-2">
+                        {workoutExercises.map((ex, i) => (
+                          <Card key={i}>
+                            <CardContent className="p-3 flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <DumbbellIcon className="h-4 w-4 text-muted-foreground" />
+                                <span>{exercises.find(e => e.id === ex.exercise)?.name}</span>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {ex.sets} {ex.sets === 1 ? 'set' : 'sets'}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={handleFinishWorkout}
+                    >
+                      <SaveIcon className="h-4 w-4 mr-2" />
+                      Finish Workout
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {step === 1 && (
+              <SetLogger
+                setNumber={sets.length + 1}
+                onComplete={handleSetComplete}
+                onBack={() => {
+                  if (sets.length === 0) {
+                    setStep(0);
+                    setCurrentExercise(null);
+                  } else {
+                    setStep(2);
+                  }
+                }}
+              />
+            )}
+
+            {step === 2 && (
+              <ReviewStep
+                exercise={currentExercise}
+                sets={sets}
+                onConfirm={handleExerciseComplete}
+                onBack={() => setStep(1)}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
