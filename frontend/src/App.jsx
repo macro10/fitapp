@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect, createContext, useContext } from "react";
 import WorkoutListPage from "./components/WorkoutListPage";
-import WorkoutLoggerPage from "./components/WorkoutLoggerPage";
+import WorkoutLoggerPage from "./components/workoutLogger/WorkoutLoggerPage";
 import AuthPage from "./components/AuthPage";
 
 const AuthContext = createContext();
