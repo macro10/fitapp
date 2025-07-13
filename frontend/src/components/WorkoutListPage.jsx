@@ -68,14 +68,19 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               {workout.performed_exercises.map((pe, index) => (
                 <li key={pe.id}>
                   <div className="py-3">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <DumbbellIcon className="h-4 w-4 text-muted-foreground" />
-                      <div className="font-medium">{pe.exercise?.name}</div>
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="bg-muted/10 p-1.5 rounded-md">
+                        <DumbbellIcon className="h-4 w-4 text-foreground/70" />
+                      </div>
+                      <div className="font-semibold text-base">{pe.exercise?.name}</div>
                     </div>
-                    <div className="pl-6 text-sm text-muted-foreground">
+                    <div className="pl-9 flex flex-wrap gap-3 text-sm">
                       {Array.from({ length: pe.sets }, (_, i) => (
-                        <span key={i} className="inline-block mr-4">
-                          <span className="text-foreground">{pe.reps_per_set[i]}</span> × <span className="text-foreground">{pe.weights_per_set[i]}lb</span>
+                        <span key={i} className="inline-flex items-center bg-muted/5 px-2.5 py-1 rounded-md">
+                          <span className="font-medium">{pe.reps_per_set[i]}</span>
+                          <span className="text-muted-foreground mx-1">×</span>
+                          <span className="font-medium">{pe.weights_per_set[i]}</span>
+                          <span className="text-muted-foreground text-xs ml-0.5">lb</span>
                         </span>
                       ))}
                     </div>
