@@ -11,6 +11,28 @@ import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 
+// First, let's add a helper function to calculate volume
+const calculateExerciseVolume = (performedExercise) => {
+  return performedExercise.reps_per_set.reduce((total, reps, index) => {
+    const weight = performedExercise.weights_per_set[index] || 0;
+    return total + (reps * weight);
+  }, 0);
+};
+
+const calculateTotalVolume = (exercises) => {
+  return exercises.reduce((total, exercise) => {
+    return total + calculateExerciseVolume(exercise);
+  }, 0);
+};
+
+// Add this helper function for formatting the volume
+const formatVolume = (volume) => {
+  if (volume >= 1000) {
+    return `${(volume / 1000).toFixed(1)}k`;
+  }
+  return `${volume}`;
+};
+
 // Update the WorkoutItem component
 function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const isExpanded = expanded === workout.id;
@@ -36,9 +58,12 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             >
               <CalendarIcon className="h-5 w-5 text-muted-foreground" />
               <CardTitle className="text-lg flex-1">{workout.date}</CardTitle>
+              <div className="bg-zinc-900 px-2.5 py-0.5 rounded-full text-sm font-bold text-white mr-2">
+                {formatVolume(calculateTotalVolume(workout.performed_exercises))}
+              </div>
               <ChevronDown 
                 className={cn(
-                  "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                  "h-6 w-6 text-muted-foreground transition-transform duration-200",
                   isExpanded && "transform rotate-180"
                 )}
               />
@@ -46,14 +71,14 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
+              className="h-9 w-9 text-destructive hover:text-destructive"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(workout.id);
               }}
               aria-label="Delete workout"
             >
-              <Trash2Icon className="h-4 w-4" />
+              <Trash2Icon className="h-5 w-5" />
             </Button>
           </div>
         </CardHeader>
