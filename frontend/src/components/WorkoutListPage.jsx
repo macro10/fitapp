@@ -11,6 +11,28 @@ import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 
+// First, let's add a helper function to calculate volume
+const calculateExerciseVolume = (performedExercise) => {
+  return performedExercise.reps_per_set.reduce((total, reps, index) => {
+    const weight = performedExercise.weights_per_set[index] || 0;
+    return total + (reps * weight);
+  }, 0);
+};
+
+const calculateTotalVolume = (exercises) => {
+  return exercises.reduce((total, exercise) => {
+    return total + calculateExerciseVolume(exercise);
+  }, 0);
+};
+
+// Add this helper function for formatting the volume
+const formatVolume = (volume) => {
+  if (volume >= 1000) {
+    return `${(volume / 1000).toFixed(1)}k`;
+  }
+  return `${volume}`;
+};
+
 // Update the WorkoutItem component
 function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const isExpanded = expanded === workout.id;
@@ -36,9 +58,12 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             >
               <CalendarIcon className="h-5 w-5 text-muted-foreground" />
               <CardTitle className="text-lg flex-1">{workout.date}</CardTitle>
+              <div className="bg-zinc-900 px-2.5 py-0.5 rounded-full text-sm font-bold text-white mr-2">
+                {formatVolume(calculateTotalVolume(workout.performed_exercises))}
+              </div>
               <ChevronDown 
                 className={cn(
-                  "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                  "h-6 w-6 text-muted-foreground transition-transform duration-200",
                   isExpanded && "transform rotate-180"
                 )}
               />
@@ -46,14 +71,14 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
+              className="h-9 w-9 text-destructive hover:text-destructive"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(workout.id);
               }}
               aria-label="Delete workout"
             >
-              <Trash2Icon className="h-4 w-4" />
+              <Trash2Icon className="h-5 w-5" />
             </Button>
           </div>
         </CardHeader>
@@ -65,19 +90,29 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
           >
             <Separator className="my-2" />
             <ul className="space-y-2">
-              {workout.performed_exercises.map((pe) => (
-                <li key={pe.id} className="flex items-start gap-2">
-                  <DumbbellIcon className="h-5 w-5 text-muted-foreground mt-1" />
-                  <div>
-                    <div className="font-medium">{pe.exercise?.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      <span>Sets: {pe.sets}</span>
-                      <span className="mx-1">•</span>
-                      <span>Reps: {Array.isArray(pe.reps_per_set) ? pe.reps_per_set.join(", ") : "N/A"}</span>
-                      <span className="mx-1">•</span>
-                      <span>Weights: {Array.isArray(pe.weights_per_set) ? pe.weights_per_set.join(", ") : "N/A"}</span>
+              {workout.performed_exercises.map((pe, index) => (
+                <li key={pe.id}>
+                  <div className="py-3">
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="bg-muted/10 p-1.5 rounded-md">
+                        <DumbbellIcon className="h-4 w-4 text-foreground/70" />
+                      </div>
+                      <div className="font-semibold text-base">{pe.exercise?.name}</div>
+                    </div>
+                    <div className="pl-9 flex flex-wrap gap-3 text-sm">
+                      {Array.from({ length: pe.sets }, (_, i) => (
+                        <span key={i} className="inline-flex items-center bg-muted/5 px-2.5 py-1 rounded-md">
+                          <span className="font-medium">{pe.reps_per_set[i]}</span>
+                          <span className="text-muted-foreground mx-1">×</span>
+                          <span className="font-medium">{pe.weights_per_set[i]}</span>
+                          <span className="text-muted-foreground text-xs ml-0.5">lb</span>
+                        </span>
+                      ))}
                     </div>
                   </div>
+                  {index < workout.performed_exercises.length - 1 && (
+                    <Separator className="bg-muted/90" />
+                  )}
                 </li>
               ))}
             </ul>
