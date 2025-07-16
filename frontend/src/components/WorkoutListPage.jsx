@@ -172,6 +172,9 @@ function WorkoutSkeleton() {
   );
 }
 
+// Add this constant at the top level (matching the one in useWorkoutLogger)
+const STORAGE_KEY = 'inProgressWorkout';
+
 export default function WorkoutListPage() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -182,8 +185,17 @@ export default function WorkoutListPage() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for in-progress workout first
+    const inProgressWorkout = localStorage.getItem(STORAGE_KEY);
+    if (inProgressWorkout) {
+      // If there's an in-progress workout, redirect to the logger
+      navigate("/log");
+      return;
+    }
+
+    // Otherwise proceed with fetching workouts
     fetchWorkouts();
-  }, [user]);
+  }, [user, navigate]);
 
   const fetchWorkouts = async () => {
     try {

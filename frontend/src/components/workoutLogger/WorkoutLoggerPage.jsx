@@ -40,7 +40,8 @@ export default function WorkoutLoggerPage() {
     workoutExercises,
     error,
     addExerciseToWorkout,
-    handleFinishWorkout
+    handleFinishWorkout,
+    clearWorkout
   } = useWorkoutLogger();
 
   const {
@@ -59,7 +60,7 @@ export default function WorkoutLoggerPage() {
     showCancelDialog,
     setShowCancelDialog,
     handleCancelWorkout
-  } = useCancelWorkout(hasUnsavedWork);
+  } = useCancelWorkout(hasUnsavedWork, clearWorkout);
 
   // Local state
   const [exercises, setExercises] = useState([]);
