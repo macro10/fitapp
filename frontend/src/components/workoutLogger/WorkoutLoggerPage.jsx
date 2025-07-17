@@ -110,6 +110,12 @@ export default function WorkoutLoggerPage() {
     resetExerciseState();
   };
 
+  const handleCancelConfirm = () => {
+    clearWorkout(); // Clear workout data from localStorage
+    resetExerciseState(); // Reset current exercise state
+    navigate("/"); // Navigate back to list
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="max-w-2xl mx-auto">
@@ -196,7 +202,7 @@ export default function WorkoutLoggerPage() {
         <CancelWorkoutDialog
           open={showCancelDialog}
           onOpenChange={setShowCancelDialog}
-          onConfirm={() => navigate("/")}
+          onConfirm={handleCancelConfirm} // Use the new handler
         />
       </div>
     </div>

@@ -9,7 +9,7 @@ export const useCancelWorkout = (hasUnsavedWork, onCancel) => {
     if (hasUnsavedWork) {
       setShowCancelDialog(true);
     } else {
-      onCancel?.(); // Call the onCancel callback if provided
+      // If no unsaved work, just navigate away
       navigate("/");
     }
   };
