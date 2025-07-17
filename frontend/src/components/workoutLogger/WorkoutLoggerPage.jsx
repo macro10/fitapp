@@ -88,7 +88,10 @@ export default function WorkoutLoggerPage() {
           navigate("/auth");
         }
       } finally {
-        setLoading(false);
+        // Add a small delay before setting loading to false to prevent flicker
+        setTimeout(() => {
+          setLoading(false);
+        }, 100);
       }
     };
 
@@ -160,6 +163,7 @@ export default function WorkoutLoggerPage() {
                   workoutExercises={workoutExercises}
                   exercises={exercises}
                   onFinish={handleFinishWorkout}
+                  loading={loading}
                 />
               </div>
             )}
