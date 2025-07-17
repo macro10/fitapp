@@ -13,6 +13,7 @@ import { useWorkoutLogger } from '../../hooks/useWorkoutLogger';
 import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../App"; // Make sure we import useAuth
 
 // UI Component imports
 import {
@@ -35,12 +36,15 @@ import {
 // Main component with organized sections
 export default function WorkoutLoggerPage() {
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get auth state
+  const [loading, setLoading] = useState(true);
   // Custom hooks
   const {
     workoutExercises,
     error,
     addExerciseToWorkout,
-    handleFinishWorkout
+    handleFinishWorkout,
+    clearWorkout
   } = useWorkoutLogger();
 
   const {
@@ -59,19 +63,44 @@ export default function WorkoutLoggerPage() {
     showCancelDialog,
     setShowCancelDialog,
     handleCancelWorkout
-  } = useCancelWorkout(hasUnsavedWork);
+  } = useCancelWorkout(hasUnsavedWork, clearWorkout);
 
   // Local state
   const [exercises, setExercises] = useState([]);
 
   // Effects
+  // Check auth and load exercises
   useEffect(() => {
-    getExercises().then(setExercises);
-  }, []);
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    const loadExercises = async () => {
+      try {
+        setLoading(true);
+        const data = await getExercises();
+        setExercises(data);
+      } catch (err) {
+        console.error("Failed to load exercises:", err);
+        // If we get a 401, redirect to auth
+        if (err.response?.status === 401) {
+          navigate("/auth");
+        }
+      } finally {
+        // Add a small delay before setting loading to false to prevent flicker
+        setTimeout(() => {
+          setLoading(false);
+        }, 100);
+      }
+    };
+
+    loadExercises();
+  }, [user, navigate]);
 
   const handleExerciseComplete = () => {
     const exerciseData = {
-      exercise: currentExercise.id,
+      exercise: currentExercise.id, // Make sure we're using the ID
       sets: sets.length,
       reps_per_set: sets.map((s) => s.reps),
       weights_per_set: sets.map((s) => s.weight),
@@ -79,6 +108,12 @@ export default function WorkoutLoggerPage() {
 
     addExerciseToWorkout(exerciseData);
     resetExerciseState();
+  };
+
+  const handleCancelConfirm = () => {
+    clearWorkout(); // Clear workout data from localStorage
+    resetExerciseState(); // Reset current exercise state
+    navigate("/"); // Navigate back to list
   };
 
   return (
@@ -134,6 +169,7 @@ export default function WorkoutLoggerPage() {
                   workoutExercises={workoutExercises}
                   exercises={exercises}
                   onFinish={handleFinishWorkout}
+                  loading={loading}
                 />
               </div>
             )}
@@ -166,7 +202,7 @@ export default function WorkoutLoggerPage() {
         <CancelWorkoutDialog
           open={showCancelDialog}
           onOpenChange={setShowCancelDialog}
-          onConfirm={() => navigate("/")}
+          onConfirm={handleCancelConfirm} // Use the new handler
         />
       </div>
     </div>

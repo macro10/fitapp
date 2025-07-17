@@ -10,6 +10,7 @@ import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
+import { WORKOUT_STORAGE_KEY, CURRENT_EXERCISE_STORAGE_KEY } from '../hooks/useWorkoutLogger';
 
 // First, let's add a helper function to calculate volume
 const calculateExerciseVolume = (performedExercise) => {
@@ -182,8 +183,19 @@ export default function WorkoutListPage() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for any in-progress workout data
+    const hasInProgressWorkout = localStorage.getItem(WORKOUT_STORAGE_KEY) || 
+                                localStorage.getItem(CURRENT_EXERCISE_STORAGE_KEY);
+    
+    if (hasInProgressWorkout) {
+      // If there's an in-progress workout or exercise, redirect to the logger
+      navigate("/log");
+      return;
+    }
+
+    // Otherwise proceed with fetching workouts
     fetchWorkouts();
-  }, [user]);
+  }, [user, navigate]);
 
   const fetchWorkouts = async () => {
     try {
