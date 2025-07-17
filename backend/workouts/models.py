@@ -3,11 +3,27 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Exercise(models.Model):
-  name = models.CharField(max_length=100)
-  description = models.TextField(blank=True)
+    MUSCLE_GROUPS = [
+        ('chest', 'Chest'),
+        ('back', 'Back'),
+        ('shoulders', 'Shoulders'),
+        ('arms', 'Arms'),
+        ('legs', 'Legs'),
+        ('core', 'Core'),
+    ]
 
-  def __str__(self):
-    return self.name
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    muscle_group = models.CharField(
+        max_length=20,
+        choices=MUSCLE_GROUPS,
+        default='core',
+        null=False,
+        blank=False
+    )
+
+    def __str__(self):
+        return self.name
 
 class Workout(models.Model):
   user = models.ForeignKey(User, on_delete=models.CASCADE)
