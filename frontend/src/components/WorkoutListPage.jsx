@@ -10,6 +10,7 @@ import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
+import { WORKOUT_STORAGE_KEY, CURRENT_EXERCISE_STORAGE_KEY } from '../hooks/useWorkoutLogger';
 
 // First, let's add a helper function to calculate volume
 const calculateExerciseVolume = (performedExercise) => {
@@ -172,9 +173,6 @@ function WorkoutSkeleton() {
   );
 }
 
-// Add this constant at the top level (matching the one in useWorkoutLogger)
-const STORAGE_KEY = 'inProgressWorkout';
-
 export default function WorkoutListPage() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -185,10 +183,12 @@ export default function WorkoutListPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for in-progress workout first
-    const inProgressWorkout = localStorage.getItem(STORAGE_KEY);
-    if (inProgressWorkout) {
-      // If there's an in-progress workout, redirect to the logger
+    // Check for any in-progress workout data
+    const hasInProgressWorkout = localStorage.getItem(WORKOUT_STORAGE_KEY) || 
+                                localStorage.getItem(CURRENT_EXERCISE_STORAGE_KEY);
+    
+    if (hasInProgressWorkout) {
+      // If there's an in-progress workout or exercise, redirect to the logger
       navigate("/log");
       return;
     }
