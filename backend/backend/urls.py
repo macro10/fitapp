@@ -33,8 +33,9 @@ urlpatterns = [
     path('api/login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    # Serve your React app at the root URL
     path('', FrontendAppView.as_view(), name='home'),
-    # Catch all other routes and serve React app
-    re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
+    # Catch all other frontend routes EXCEPT admin and api
+    re_path(r'^(?!admin|api).*$', TemplateView.as_view(template_name='index.html')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) \
   + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
