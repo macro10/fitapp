@@ -58,7 +58,8 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               aria-controls={`workout-details-${workout.id}`}
             >
               <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg flex-1">{workout.date}</CardTitle>
+              <CardTitle className="text-lg flex-1">{workout.name || 'Untitled Workout'}</CardTitle>
+              <div className="text-sm text-muted-foreground">{workout.date}</div>
               <div className="bg-zinc-900 px-2.5 py-0.5 rounded-full text-sm font-bold text-white mr-2">
                 {formatVolume(calculateTotalVolume(workout.performed_exercises))}
               </div>
