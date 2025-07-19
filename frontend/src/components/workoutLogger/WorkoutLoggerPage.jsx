@@ -57,8 +57,7 @@ export default function WorkoutLoggerPage() {
     handleExerciseSelect,
     handleSetComplete,
     resetExerciseState,
-    setStep,
-    getHeaderTitle
+    setStep
   } = useExerciseLogger();
 
   const hasUnsavedWork = workoutExercises.length > 0 || 
