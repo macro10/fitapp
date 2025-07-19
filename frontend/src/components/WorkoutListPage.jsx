@@ -71,36 +71,40 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
       }}
     >
       <Card className="mb-4 hover:shadow-lg transition-shadow">
-        <CardHeader>
+        <CardHeader className="py-4">
           <div className="flex justify-between items-center">
             <button 
-              className="flex items-center gap-2 flex-1 text-left group" 
+              className="flex items-center gap-3 flex-1 text-left group" 
               onClick={() => setExpanded(isExpanded ? null : workout.id)}
               aria-expanded={isExpanded}
               aria-controls={`workout-details-${workout.id}`}
             >
-              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg flex-1">{workout.name || 'Untitled Workout'}</CardTitle>
-              <div 
-                className="text-sm text-muted-foreground" 
-                title={workout.date}  // This will show the full date on hover
-              >
-                {getRelativeTimeString(workout.date)}
+              <div className="flex items-center gap-3 flex-1">
+                <div className="bg-muted/10 p-2 rounded-md">
+                  <CalendarIcon className="h-5 w-5 text-foreground/70" />
+                </div>
+                <div className="space-y-1">
+                  <CardTitle className="text-lg font-semibold">{workout.name || 'Untitled Workout'}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{getRelativeTimeString(workout.date)}</p>
+                </div>
               </div>
-              <div className="bg-zinc-900 px-2.5 py-0.5 rounded-full text-sm font-bold text-white mr-2">
-                {formatVolume(calculateTotalVolume(workout.performed_exercises))}
+              
+              <div className="flex items-center gap-3">
+                <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
+                  {formatVolume(calculateTotalVolume(workout.performed_exercises))}
+                </div>
+                <ChevronDown 
+                  className={cn(
+                    "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                    isExpanded && "transform rotate-180"
+                  )}
+                />
               </div>
-              <ChevronDown 
-                className={cn(
-                  "h-6 w-6 text-muted-foreground transition-transform duration-200",
-                  isExpanded && "transform rotate-180"
-                )}
-              />
             </button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-destructive hover:text-destructive"
+              className="h-9 w-9 text-destructive hover:text-destructive ml-2"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(workout.id);
@@ -230,11 +234,7 @@ export default function WorkoutListPage() {
       setLoading(true);
       setError(null);
       const data = await getWorkouts();
-      // Sort workouts by date in descending order (newest first)
-      const sortedWorkouts = [...data].sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
-      );
-      setWorkouts(sortedWorkouts || []);
+      setWorkouts(data || []);
     } catch (err) {
       console.error('Error fetching workouts:', err);
       setError('Failed to load workouts. Please try again.');
