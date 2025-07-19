@@ -234,7 +234,11 @@ export default function WorkoutListPage() {
       setLoading(true);
       setError(null);
       const data = await getWorkouts();
-      setWorkouts(data || []);
+      // Sort workouts by date in descending order (most recent first)
+      const sortedWorkouts = [...(data || [])].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
+      setWorkouts(sortedWorkouts);
     } catch (err) {
       console.error('Error fetching workouts:', err);
       setError('Failed to load workouts. Please try again.');
