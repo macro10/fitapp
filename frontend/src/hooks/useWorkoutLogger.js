@@ -6,27 +6,59 @@ export const WORKOUT_STORAGE_KEY = 'inProgressWorkout';
 export const CURRENT_EXERCISE_STORAGE_KEY = 'inProgressExercise';
 
 export const useWorkoutLogger = () => {
-  const [workoutExercises, setWorkoutExercises] = useState(() => {
+  // Initialize state from localStorage with both exercises and name
+  const [workoutState, setWorkoutState] = useState(() => {
     const saved = localStorage.getItem(WORKOUT_STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) {
+      return {
+        exercises: [],
+        name: "Untitled Workout"
+      };
+    }
+    
+    // Handle both old and new format
+    const parsedData = JSON.parse(saved);
+    if (Array.isArray(parsedData)) {
+      // Old format - just an array of exercises
+      return {
+        exercises: parsedData,
+        name: "Untitled Workout"
+      };
+    }
+    // New format - object with exercises and name
+    return parsedData;
   });
-  const [workoutName, setWorkoutName] = useState("Untitled Workout"); // Add this line
+
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Derive individual states from workoutState
+  const workoutExercises = workoutState.exercises || [];
+  const workoutName = workoutState.name || "Untitled Workout";
+
+  // Save both exercises and name to localStorage whenever either changes
   useEffect(() => {
-    localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(workoutExercises));
-  }, [workoutExercises]);
+    localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(workoutState));
+  }, [workoutState]);
+
+  const setWorkoutName = (name) => {
+    setWorkoutState(prev => ({
+      ...prev,
+      name
+    }));
+  };
 
   const addExerciseToWorkout = (exerciseData) => {
-    // Store both the ID and the exercise details
     const formattedExercise = {
-      exercise: exerciseData.exercise, // Store the ID
+      exercise: exerciseData.exercise,
       sets: exerciseData.sets,
       reps_per_set: exerciseData.reps_per_set,
       weights_per_set: exerciseData.weights_per_set,
     };
-    setWorkoutExercises(prev => [...prev, formattedExercise]);
+    setWorkoutState(prev => ({
+      ...prev,
+      exercises: [...(prev.exercises || []), formattedExercise]
+    }));
   };
 
   const handleFinishWorkout = async () => {
@@ -34,7 +66,7 @@ export const useWorkoutLogger = () => {
       await createWorkoutWithExercises(
         new Date().toISOString().split("T")[0],
         workoutExercises,
-        workoutName // Add workout name to the API call
+        workoutName
       );
       // Clear both storage keys after successful save
       localStorage.removeItem(WORKOUT_STORAGE_KEY);
@@ -49,13 +81,16 @@ export const useWorkoutLogger = () => {
   const clearWorkout = () => {
     localStorage.removeItem(WORKOUT_STORAGE_KEY);
     localStorage.removeItem(CURRENT_EXERCISE_STORAGE_KEY);
-    setWorkoutExercises([]);
+    setWorkoutState({
+      exercises: [],
+      name: "Untitled Workout"
+    });
   };
 
   return {
     workoutExercises,
     workoutName,
-    setWorkoutName, // Add these to the return object
+    setWorkoutName,
     error,
     addExerciseToWorkout,
     handleFinishWorkout,
