@@ -34,6 +34,47 @@ const formatVolume = (volume) => {
   return `${volume}`;
 };
 
+// Add this helper function near the other helper functions at the top
+const getRelativeTimeString = (dateStr) => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffTime = now - date;
+  const diffSeconds = Math.floor(diffTime / 1000);
+  const diffMinutes = Math.floor(diffTime / (1000 * 60));
+  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Just now: less than 30 seconds
+  if (diffSeconds < 30) return 'just now';
+  // Seconds: 30-59 seconds
+  if (diffSeconds < 60) return `${diffSeconds} seconds ago`;
+  // Minutes: 1-59 minutes
+  if (diffMinutes < 60) {
+    return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`;
+  }
+  // Hours: 1-23 hours
+  if (diffHours < 24) {
+    return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+  }
+  // Days: 1-6 days
+  if (diffDays < 7) {
+    return diffDays === 1 ? 'yesterday' : `${diffDays} days ago`;
+  }
+  // Weeks: 1-4 weeks
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+  }
+  // Months: 1-11 months
+  if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return `${months} ${months === 1 ? 'month' : 'months'} ago`;
+  }
+  // Years: 1+ years
+  const years = Math.floor(diffDays / 365);
+  return `${years} ${years === 1 ? 'year' : 'years'} ago`;
+};
+
 // Update the WorkoutItem component
 function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const isExpanded = expanded === workout.id;
@@ -49,30 +90,40 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
       }}
     >
       <Card className="mb-4 hover:shadow-lg transition-shadow">
-        <CardHeader>
+        <CardHeader className="py-4">
           <div className="flex justify-between items-center">
             <button 
-              className="flex items-center gap-2 flex-1 text-left group" 
+              className="flex items-center gap-3 flex-1 text-left group" 
               onClick={() => setExpanded(isExpanded ? null : workout.id)}
               aria-expanded={isExpanded}
               aria-controls={`workout-details-${workout.id}`}
             >
-              <CalendarIcon className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg flex-1">{workout.date}</CardTitle>
-              <div className="bg-zinc-900 px-2.5 py-0.5 rounded-full text-sm font-bold text-white mr-2">
-                {formatVolume(calculateTotalVolume(workout.performed_exercises))}
+              <div className="flex items-center gap-3 flex-1">
+                <div className="bg-muted/10 p-2 rounded-md">
+                  <CalendarIcon className="h-5 w-5 text-foreground/70" />
+                </div>
+                <div className="space-y-1">
+                  <CardTitle className="text-lg font-semibold">{workout.name || 'Untitled Workout'}</CardTitle>
+                  <p className="text-sm text-muted-foreground">{getRelativeTimeString(workout.date)}</p>
+                </div>
               </div>
-              <ChevronDown 
-                className={cn(
-                  "h-6 w-6 text-muted-foreground transition-transform duration-200",
-                  isExpanded && "transform rotate-180"
-                )}
-              />
+              
+              <div className="flex items-center gap-3">
+                <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
+                  {formatVolume(calculateTotalVolume(workout.performed_exercises))}
+                </div>
+                <ChevronDown 
+                  className={cn(
+                    "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                    isExpanded && "transform rotate-180"
+                  )}
+                />
+              </div>
             </button>
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-destructive hover:text-destructive"
+              className="h-9 w-9 text-destructive hover:text-destructive ml-2"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(workout.id);
@@ -202,7 +253,11 @@ export default function WorkoutListPage() {
       setLoading(true);
       setError(null);
       const data = await getWorkouts();
-      setWorkouts(data || []);
+      // Sort workouts by date in descending order (most recent first)
+      const sortedWorkouts = [...(data || [])].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
+      setWorkouts(sortedWorkouts);
     } catch (err) {
       console.error('Error fetching workouts:', err);
       setError('Failed to load workouts. Please try again.');
