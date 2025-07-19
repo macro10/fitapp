@@ -26,6 +26,7 @@ import {
 
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
+import { Input } from "../ui/input"; // Add this import if not already present
 
 // Icon imports
 import {
@@ -41,6 +42,8 @@ export default function WorkoutLoggerPage() {
   // Custom hooks
   const {
     workoutExercises,
+    workoutName,
+    setWorkoutName,
     error,
     addExerciseToWorkout,
     handleFinishWorkout,
@@ -121,17 +124,21 @@ export default function WorkoutLoggerPage() {
       <div className="max-w-2xl mx-auto">
         <Card className="mb-6">
           <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle className="flex items-center gap-2">
-                <DumbbellIcon className="h-6 w-6" />
-                {getHeaderTitle()}
-              </CardTitle>
+            <div className="flex justify-between items-center gap-3">
+              <div className="flex items-center gap-2 flex-grow">
+                <Input
+                  value={workoutName}
+                  onChange={(e) => setWorkoutName(e.target.value)}
+                  className="font-semibold text-lg"
+                  placeholder="Untitled Workout"
+                />
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleCancelWorkout}
                 title="Cancel Workout"
-                className="text-muted-foreground hover:text-destructive transition-colors"
+                className="text-muted-foreground hover:text-destructive transition-colors ml-2"
               >
                 <X className="h-5 w-5" />
               </Button>

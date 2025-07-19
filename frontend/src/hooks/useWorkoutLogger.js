@@ -10,6 +10,7 @@ export const useWorkoutLogger = () => {
     const saved = localStorage.getItem(WORKOUT_STORAGE_KEY);
     return saved ? JSON.parse(saved) : [];
   });
+  const [workoutName, setWorkoutName] = useState("Untitled Workout"); // Add this line
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -32,7 +33,8 @@ export const useWorkoutLogger = () => {
     try {
       await createWorkoutWithExercises(
         new Date().toISOString().split("T")[0],
-        workoutExercises
+        workoutExercises,
+        workoutName // Add workout name to the API call
       );
       // Clear both storage keys after successful save
       localStorage.removeItem(WORKOUT_STORAGE_KEY);
@@ -52,6 +54,8 @@ export const useWorkoutLogger = () => {
 
   return {
     workoutExercises,
+    workoutName,
+    setWorkoutName, // Add these to the return object
     error,
     addExerciseToWorkout,
     handleFinishWorkout,
