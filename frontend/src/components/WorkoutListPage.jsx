@@ -34,6 +34,28 @@ const formatVolume = (volume) => {
   return `${volume}`;
 };
 
+// Add this helper function near the other helper functions at the top
+const getRelativeTimeString = (dateStr) => {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffTime = now - date;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+  }
+  if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return `${months} ${months === 1 ? 'month' : 'months'} ago`;
+  }
+  const years = Math.floor(diffDays / 365);
+  return `${years} ${years === 1 ? 'year' : 'years'} ago`;
+};
+
 // Update the WorkoutItem component
 function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const isExpanded = expanded === workout.id;
@@ -59,7 +81,12 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             >
               <CalendarIcon className="h-5 w-5 text-muted-foreground" />
               <CardTitle className="text-lg flex-1">{workout.name || 'Untitled Workout'}</CardTitle>
-              <div className="text-sm text-muted-foreground">{workout.date}</div>
+              <div 
+                className="text-sm text-muted-foreground" 
+                title={workout.date}  // This will show the full date on hover
+              >
+                {getRelativeTimeString(workout.date)}
+              </div>
               <div className="bg-zinc-900 px-2.5 py-0.5 rounded-full text-sm font-bold text-white mr-2">
                 {formatVolume(calculateTotalVolume(workout.performed_exercises))}
               </div>
