@@ -61,12 +61,22 @@ export default function WorkoutLoggerPage() {
     getHeaderTitle
   } = useExerciseLogger();
 
-  const hasUnsavedWork = workoutExercises.length > 0 || (currentExercise && sets.length > 0);
+  const hasUnsavedWork = workoutExercises.length > 0 || 
+    (currentExercise && sets.length > 0) || 
+    (workoutName !== "Untitled Workout");
+
+  const handleCancelConfirm = () => {
+    clearWorkout(); // Clear workout data from localStorage
+    resetExerciseState(); // Reset current exercise state
+    navigate("/"); // Navigate back to list
+  };
+
+  // Update the useCancelWorkout hook usage to always clear state
   const {
     showCancelDialog,
     setShowCancelDialog,
     handleCancelWorkout
-  } = useCancelWorkout(hasUnsavedWork, clearWorkout);
+  } = useCancelWorkout(hasUnsavedWork, handleCancelConfirm);
 
   // Local state
   const [exercises, setExercises] = useState([]);
@@ -112,12 +122,6 @@ export default function WorkoutLoggerPage() {
 
     addExerciseToWorkout(exerciseData);
     resetExerciseState();
-  };
-
-  const handleCancelConfirm = () => {
-    clearWorkout(); // Clear workout data from localStorage
-    resetExerciseState(); // Reset current exercise state
-    navigate("/"); // Navigate back to list
   };
 
   return (
