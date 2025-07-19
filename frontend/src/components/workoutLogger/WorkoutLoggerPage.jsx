@@ -83,6 +83,7 @@ export default function WorkoutLoggerPage() {
       try {
         setLoading(true);
         const data = await getExercises();
+        console.log("Loaded exercises:", data); // Add this line
         setExercises(data);
       } catch (err) {
         console.error("Failed to load exercises:", err);

@@ -1,9 +1,43 @@
 import { useState, useEffect } from 'react';
-import { createWorkoutWithExercises } from "../api";
+import { createWorkoutWithExercises, getExercises } from "../api";
 import { useNavigate } from "react-router-dom";
 
 export const WORKOUT_STORAGE_KEY = 'inProgressWorkout';
 export const CURRENT_EXERCISE_STORAGE_KEY = 'inProgressExercise';
+
+// Helper function to generate smart workout name
+const generateWorkoutName = (workoutExercises, exerciseMap) => {
+  // If no exercises, return default name
+  if (!workoutExercises.length) return "Untitled Workout";
+
+  // Count exercises by muscle group
+  const muscleGroupCounts = workoutExercises.reduce((counts, exercise) => {
+    const muscleGroup = exerciseMap[exercise.exercise]?.muscle_group;
+    if (muscleGroup) {
+      counts[muscleGroup] = (counts[muscleGroup] || 0) + 1;
+    }
+    return counts;
+  }, {});
+
+  // Sort muscle groups by count (descending)
+  const sortedMuscleGroups = Object.entries(muscleGroupCounts)
+    .sort(([, countA], [, countB]) => countB - countA)
+    .map(([group]) => group);
+
+  // Capitalize first letter of each muscle group
+  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+  // Generate name based on number of muscle groups
+  if (sortedMuscleGroups.length === 0) return "Untitled Workout";
+  if (sortedMuscleGroups.length === 1) {
+    return `${capitalize(sortedMuscleGroups[0])} Workout`;
+  }
+  if (sortedMuscleGroups.length === 2) {
+    return `${capitalize(sortedMuscleGroups[0])} and ${capitalize(sortedMuscleGroups[1])} Workout`;
+  }
+  // If more than 2 muscle groups, use the top 2 by exercise count
+  return `${capitalize(sortedMuscleGroups[0])} and ${capitalize(sortedMuscleGroups[1])} Workout`;
+};
 
 export const useWorkoutLogger = () => {
   // Initialize state from localStorage with both exercises and name
@@ -12,31 +46,59 @@ export const useWorkoutLogger = () => {
     if (!saved) {
       return {
         exercises: [],
-        name: "Untitled Workout"
+        name: "Untitled Workout",
+        isCustomName: false
       };
     }
     
     // Handle both old and new format
     const parsedData = JSON.parse(saved);
     if (Array.isArray(parsedData)) {
-      // Old format - just an array of exercises
       return {
         exercises: parsedData,
-        name: "Untitled Workout"
+        name: "Untitled Workout",
+        isCustomName: false
       };
     }
-    // New format - object with exercises and name
-    return parsedData;
+    return {
+      ...parsedData,
+      isCustomName: parsedData.isCustomName || false
+    };
   });
 
+  const [exerciseMap, setExerciseMap] = useState({});
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Derive individual states from workoutState
-  const workoutExercises = workoutState.exercises || [];
-  const workoutName = workoutState.name || "Untitled Workout";
+  // Effect to update exercise map when available
+  useEffect(() => {
+    const loadExerciseMap = async () => {
+      try {
+        const exercises = await getExercises();
+        const map = exercises.reduce((acc, exercise) => {
+          acc[exercise.id] = exercise;
+          return acc;
+        }, {});
+        setExerciseMap(map);
+      } catch (err) {
+        console.error('Failed to load exercises:', err);
+      }
+    };
+    loadExerciseMap();
+  }, []);
 
-  // Save both exercises and name to localStorage whenever either changes
+  // Effect to update workout name when exercises change
+  useEffect(() => {
+    if (!workoutState.isCustomName && Object.keys(exerciseMap).length > 0) {
+      const smartName = generateWorkoutName(workoutState.exercises, exerciseMap);
+      setWorkoutState(prev => ({
+        ...prev,
+        name: smartName
+      }));
+    }
+  }, [workoutState.exercises, exerciseMap, workoutState.isCustomName]);
+
+  // Save state to localStorage
   useEffect(() => {
     localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(workoutState));
   }, [workoutState]);
@@ -44,7 +106,8 @@ export const useWorkoutLogger = () => {
   const setWorkoutName = (name) => {
     setWorkoutState(prev => ({
       ...prev,
-      name
+      name,
+      isCustomName: true // Set flag when user manually changes name
     }));
   };
 
@@ -57,7 +120,7 @@ export const useWorkoutLogger = () => {
     };
     setWorkoutState(prev => ({
       ...prev,
-      exercises: [...(prev.exercises || []), formattedExercise]
+      exercises: [...prev.exercises, formattedExercise]
     }));
   };
 
@@ -65,10 +128,9 @@ export const useWorkoutLogger = () => {
     try {
       await createWorkoutWithExercises(
         new Date().toISOString().split("T")[0],
-        workoutExercises,
-        workoutName
+        workoutState.exercises,
+        workoutState.name
       );
-      // Clear both storage keys after successful save
       localStorage.removeItem(WORKOUT_STORAGE_KEY);
       localStorage.removeItem(CURRENT_EXERCISE_STORAGE_KEY);
       navigate("/");
@@ -83,13 +145,14 @@ export const useWorkoutLogger = () => {
     localStorage.removeItem(CURRENT_EXERCISE_STORAGE_KEY);
     setWorkoutState({
       exercises: [],
-      name: "Untitled Workout"
+      name: "Untitled Workout",
+      isCustomName: false
     });
   };
 
   return {
-    workoutExercises,
-    workoutName,
+    workoutExercises: workoutState.exercises,
+    workoutName: workoutState.name,
     setWorkoutName,
     error,
     addExerciseToWorkout,
