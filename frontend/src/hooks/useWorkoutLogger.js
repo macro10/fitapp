@@ -127,7 +127,7 @@ export const useWorkoutLogger = () => {
   const handleFinishWorkout = async () => {
     try {
       await createWorkoutWithExercises(
-        new Date().toISOString().split("T")[0],
+        new Date().toISOString(),
         workoutState.exercises,
         workoutState.name
       );

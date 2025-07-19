@@ -39,19 +39,38 @@ const getRelativeTimeString = (dateStr) => {
   const date = new Date(dateStr);
   const now = new Date();
   const diffTime = now - date;
+  const diffSeconds = Math.floor(diffTime / 1000);
+  const diffMinutes = Math.floor(diffTime / (1000 * 60));
+  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
+  // Just now: less than 30 seconds
+  if (diffSeconds < 30) return 'just now';
+  // Seconds: 30-59 seconds
+  if (diffSeconds < 60) return `${diffSeconds} seconds ago`;
+  // Minutes: 1-59 minutes
+  if (diffMinutes < 60) {
+    return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`;
+  }
+  // Hours: 1-23 hours
+  if (diffHours < 24) {
+    return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+  }
+  // Days: 1-6 days
+  if (diffDays < 7) {
+    return diffDays === 1 ? 'yesterday' : `${diffDays} days ago`;
+  }
+  // Weeks: 1-4 weeks
   if (diffDays < 30) {
     const weeks = Math.floor(diffDays / 7);
     return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
   }
+  // Months: 1-11 months
   if (diffDays < 365) {
     const months = Math.floor(diffDays / 30);
     return `${months} ${months === 1 ? 'month' : 'months'} ago`;
   }
+  // Years: 1+ years
   const years = Math.floor(diffDays / 365);
   return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 };
