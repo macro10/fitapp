@@ -4,6 +4,7 @@ from django.utils import timezone
 
 # Create your models here.
 class Exercise(models.Model):
+    # Existing choices
     MUSCLE_GROUPS = [
         ('chest', 'Chest'),
         ('back', 'Back'),
@@ -13,18 +14,72 @@ class Exercise(models.Model):
         ('core', 'Core'),
     ]
 
+    # New choices from free-exercise-db
+    FORCE_TYPES = [
+        ('static', 'Static'),
+        ('pull', 'Pull'),
+        ('push', 'Push'),
+    ]
+
+    LEVEL_CHOICES = [
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('expert', 'Expert'),
+    ]
+
+    MECHANIC_TYPES = [
+        ('isolation', 'Isolation'),
+        ('compound', 'Compound'),
+    ]
+
+    EQUIPMENT_TYPES = [
+        ('medicine ball', 'Medicine Ball'),
+        ('dumbbell', 'Dumbbell'),
+        ('body only', 'Body Only'),
+        ('bands', 'Bands'),
+        ('kettlebells', 'Kettlebells'),
+        ('foam roll', 'Foam Roll'),
+        ('cable', 'Cable'),
+        ('machine', 'Machine'),
+        ('barbell', 'Barbell'),
+        ('exercise ball', 'Exercise Ball'),
+        ('e-z curl bar', 'EZ Curl Bar'),
+        ('other', 'Other'),
+    ]
+
+    CATEGORY_CHOICES = [
+        ('powerlifting', 'Powerlifting'),
+        ('strength', 'Strength'),
+        ('stretching', 'Stretching'),
+        ('cardio', 'Cardio'),
+        ('olympic weightlifting', 'Olympic Weightlifting'),
+        ('strongman', 'Strongman'),
+        ('plyometrics', 'Plyometrics'),
+    ]
+
+    # Keep the auto-incrementing ID
+    # id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')
+
+    # Required fields (maintaining existing ones)
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    muscle_group = models.CharField(
-        max_length=20,
-        choices=MUSCLE_GROUPS,
-        default='core',
-        null=False,
-        blank=False
-    )
+    muscle_group = models.CharField(max_length=20, choices=MUSCLE_GROUPS, default='core')
+
+    # New fields from free-exercise-db
+    force = models.CharField(max_length=10, choices=FORCE_TYPES, null=True, blank=True)
+    level = models.CharField(max_length=20, choices=LEVEL_CHOICES, default='beginner')
+    mechanic = models.CharField(max_length=20, choices=MECHANIC_TYPES, null=True, blank=True)
+    equipment = models.CharField(max_length=20, choices=EQUIPMENT_TYPES, null=True, blank=True)
+    primaryMuscles = models.JSONField(default=list)  # Using JSONField for arrays
+    secondaryMuscles = models.JSONField(default=list)
+    instructions = models.JSONField(default=list)
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='strength')
+    images = models.JSONField(default=list)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        db_table = 'exercise'  # Optional: explicitly set table name
 
 class Workout(models.Model):
   user = models.ForeignKey(User, on_delete=models.CASCADE)
