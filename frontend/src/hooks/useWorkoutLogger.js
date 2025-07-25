@@ -5,6 +5,22 @@ import { useNavigate } from "react-router-dom";
 export const WORKOUT_STORAGE_KEY = 'inProgressWorkout';
 export const CURRENT_EXERCISE_STORAGE_KEY = 'inProgressExercise';
 
+// Add this mapping object at the top of the file
+const MUSCLE_GROUP_MAPPING = {
+  'legs': 'leg',
+  'shoulders': 'shoulder',
+  'arms': 'arm',
+  'chest': 'chest', // Some words stay the same
+  'back': 'back',
+  'core': 'core',
+  // Add any other muscle groups that need mapping
+};
+
+// Helper function to get singular form of muscle group
+const getSingularForm = (muscleGroup) => {
+  return MUSCLE_GROUP_MAPPING[muscleGroup.toLowerCase()] || muscleGroup;
+};
+
 // Helper function to generate smart workout name
 const generateWorkoutName = (workoutExercises, exerciseMap) => {
   // If no exercises, return default name
@@ -22,7 +38,7 @@ const generateWorkoutName = (workoutExercises, exerciseMap) => {
   // Sort muscle groups by count (descending)
   const sortedMuscleGroups = Object.entries(muscleGroupCounts)
     .sort(([, countA], [, countB]) => countB - countA)
-    .map(([group]) => group);
+    .map(([group]) => getSingularForm(group)); // Apply singular form here
 
   // Capitalize first letter of each muscle group
   const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
