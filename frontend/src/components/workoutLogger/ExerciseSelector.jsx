@@ -1,11 +1,9 @@
-import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { DumbbellIcon, Plus } from "lucide-react";
+import { useState, useRef } from "react";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
 } from "../ui/command";
 import {
@@ -14,53 +12,70 @@ import {
   PopoverTrigger,
 } from "../ui/popover";
 
-
-
-// Improved component organization with prop types
 const ExerciseSelector = ({ exercises, onSelect }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const inputRef = useRef(null);
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(true);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  };
 
   return (
-    <div className="space-y-4">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            {search || "Add exercise..."}
-            <Plus className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
-          <Command>
-            <CommandInput 
-              placeholder="Search exercises..." 
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <div
+          className="flex items-center justify-between p-4 rounded-lg border cursor-text hover:bg-accent/50 transition-colors"
+          role="combobox"
+          aria-expanded={open}
+          onClick={handleClick}
+        >
+          <div className="flex items-center gap-2 flex-1" onClick={handleClick}>
+            <DumbbellIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <input
+              ref={inputRef}
+              type="text"
+              className="bg-transparent border-none outline-none w-full text-muted-foreground placeholder:text-muted-foreground focus:outline-none"
+              placeholder="Add exercise..."
               value={search}
-              onValueChange={setSearch}
+              onChange={(e) => setSearch(e.target.value)}
+              onFocus={() => setOpen(true)}
+              onClick={handleClick}
             />
-            <CommandEmpty>No exercise found.</CommandEmpty>
-            <CommandGroup className="max-h-[300px] overflow-auto">
-              {exercises.map((exercise) => (
+          </div>
+          <Plus className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+        </div>
+      </PopoverTrigger>
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+        <Command>
+          <CommandEmpty>No exercise found.</CommandEmpty>
+          <CommandGroup className="max-h-[300px] overflow-auto">
+            {exercises
+              .filter(exercise => 
+                exercise.name.toLowerCase().includes(search.toLowerCase())
+              )
+              .map((exercise) => (
                 <CommandItem
                   key={exercise.id}
                   value={exercise.name}
                   onSelect={() => {
                     onSelect(exercise);
+                    setSearch("");
                     setOpen(false);
                   }}
                 >
                   {exercise.name}
                 </CommandItem>
               ))}
-            </CommandGroup>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
+          </CommandGroup>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 };
 

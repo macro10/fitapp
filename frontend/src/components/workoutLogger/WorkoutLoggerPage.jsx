@@ -27,6 +27,7 @@ import {
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Input } from "../ui/input"; // Add this import if not already present
+import { Skeleton } from "../ui/skeleton";
 
 // Icon imports
 import {
@@ -133,7 +134,8 @@ export default function WorkoutLoggerPage() {
                 <Input
                   value={workoutName}
                   onChange={(e) => setWorkoutName(e.target.value)}
-                  className="font-semibold text-lg"
+                  className="font-bold text-2xl h-12 border rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
+                  style={{ fontSize: '24px' }}  // Adding explicit font size
                   placeholder="Untitled Workout"
                 />
               </div>
@@ -172,16 +174,24 @@ export default function WorkoutLoggerPage() {
 
             {step === STEPS.SELECT_EXERCISE && (
               <div className="space-y-4">
+                <CompletedExercises
+                  workoutExercises={workoutExercises}
+                  exercises={exercises}
+                  loading={loading}
+                />
                 <ExerciseSelector
                   exercises={exercises}
                   onSelect={handleExerciseSelect}
                 />
-                <CompletedExercises
-                  workoutExercises={workoutExercises}
-                  exercises={exercises}
-                  onFinish={handleFinishWorkout}
-                  loading={loading}
-                />
+                {workoutExercises.length > 0 && (
+                  <Button
+                    className="w-full"
+                    onClick={handleFinishWorkout}
+                    disabled={loading || !exercises?.length}
+                  >
+                    Finish Workout
+                  </Button>
+                )}
               </div>
             )}
 

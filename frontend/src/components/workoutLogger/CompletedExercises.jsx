@@ -3,7 +3,7 @@ import { DumbbellIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 
-export const CompletedExercises = ({ workoutExercises, exercises, onFinish, loading = false }) => {
+export const CompletedExercises = ({ workoutExercises, exercises, loading = false }) => {
   // Only create the exercise map if exercises array exists and has items
   const exerciseMap = exercises?.reduce((map, exercise) => {
     map[exercise.id] = exercise;
@@ -37,13 +37,6 @@ export const CompletedExercises = ({ workoutExercises, exercises, onFinish, load
           </div>
         ))}
       </div>
-      <Button
-        className="w-full"
-        onClick={onFinish}
-        disabled={loading || !exercises?.length}
-      >
-        Finish Workout
-      </Button>
     </div>
   );
 };
