@@ -1,4 +1,4 @@
-import { DumbbellIcon } from "lucide-react";
+import { DumbbellIcon, Plus } from "lucide-react";
 import { useState, useRef } from "react";
 import {
   Command,
@@ -21,7 +21,6 @@ const ExerciseSelector = ({ exercises, onSelect }) => {
     e.preventDefault();
     e.stopPropagation();
     setOpen(true);
-    // Ensure input gets focus after a short delay
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
@@ -49,6 +48,7 @@ const ExerciseSelector = ({ exercises, onSelect }) => {
               onClick={handleClick}
             />
           </div>
+          <Plus className="h-5 w-5 text-muted-foreground flex-shrink-0" />
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
