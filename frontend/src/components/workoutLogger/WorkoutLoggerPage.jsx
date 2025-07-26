@@ -134,7 +134,8 @@ export default function WorkoutLoggerPage() {
                 <Input
                   value={workoutName}
                   onChange={(e) => setWorkoutName(e.target.value)}
-                  className="font-semibold text-lg"
+                  className="font-bold text-2xl h-12 border rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
+                  style={{ fontSize: '24px' }}  // Adding explicit font size
                   placeholder="Untitled Workout"
                 />
               </div>
