@@ -27,6 +27,7 @@ import {
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Input } from "../ui/input"; // Add this import if not already present
+import { Skeleton } from "../ui/skeleton";
 
 // Icon imports
 import {
@@ -172,16 +173,24 @@ export default function WorkoutLoggerPage() {
 
             {step === STEPS.SELECT_EXERCISE && (
               <div className="space-y-4">
+                <CompletedExercises
+                  workoutExercises={workoutExercises}
+                  exercises={exercises}
+                  loading={loading}
+                />
                 <ExerciseSelector
                   exercises={exercises}
                   onSelect={handleExerciseSelect}
                 />
-                <CompletedExercises
-                  workoutExercises={workoutExercises}
-                  exercises={exercises}
-                  onFinish={handleFinishWorkout}
-                  loading={loading}
-                />
+                {workoutExercises.length > 0 && (
+                  <Button
+                    className="w-full"
+                    onClick={handleFinishWorkout}
+                    disabled={loading || !exercises?.length}
+                  >
+                    Finish Workout
+                  </Button>
+                )}
               </div>
             )}
 
