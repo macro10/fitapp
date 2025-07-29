@@ -1,51 +1,68 @@
 // frontend/src/components/workoutLogger/SetLogger.jsx
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Plus } from "lucide-react";
+import { WheelPicker, WheelPickerWrapper } from "../../components/wheel-picker";
+
+// Helper function to create arrays of options
+const createOptions = (length, add = 0, step = 1) => 
+  Array.from({ length }, (_, i) => {
+    const value = (i * step) + add;
+    return {
+      label: value.toString(),
+      value: value.toString(),
+    };
+  });
+
+// Create options for reps (1-30) and weights (0-500 by 5s)
+const repOptions = createOptions(30, 1); // 1-30 reps
+const weightOptions = createOptions(101, 0, 5); // 0-500 in steps of 5
 
 export const SetLogger = ({ setNumber, onComplete, onBack }) => {
-  const [reps, setReps] = useState("");
-  const [weight, setWeight] = useState("");
+  const [reps, setReps] = useState("10");
+  const [weight, setWeight] = useState("45");
 
   const handleNext = () => {
     if (reps && weight) {
       onComplete({ reps: Number(reps), weight: Number(weight) });
-      setReps("");
-      setWeight("");
+      setReps("10");
+      setWeight("45");
     }
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Set {setNumber}</h2>
-      <div className="space-y-4">
+      <div className="space-y-8">
         <div>
           <label className="text-sm text-muted-foreground block mb-2">
             How many reps?
           </label>
-          <Input
-            type="number"
-            min={1}
-            value={reps}
-            onChange={(e) => setReps(e.target.value)}
-            placeholder="Enter number of reps"
-            className="w-full"
-          />
+          <div className="rounded-lg border bg-background">
+            <WheelPickerWrapper>
+              <WheelPicker 
+                options={repOptions} 
+                value={reps}
+                onChange={setReps}
+                infinite={false}
+              />
+            </WheelPickerWrapper>
+          </div>
         </div>
         <div>
           <label className="text-sm text-muted-foreground block mb-2">
             What weight (lbs)?
           </label>
-          <Input
-            type="number"
-            min={0}
-            step={5}
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            placeholder="Enter weight in lbs"
-            className="w-full"
-          />
+          <div className="rounded-lg border bg-background">
+            <WheelPickerWrapper>
+              <WheelPicker 
+                options={weightOptions}
+                value={weight}
+                onChange={setWeight}
+                infinite={false}
+              />
+            </WheelPickerWrapper>
+          </div>
         </div>
       </div>
       <div className="flex gap-2">
