@@ -196,17 +196,20 @@ export default function WorkoutLoggerPage() {
             )}
 
             {step === STEPS.LOG_SETS && (
-              <SetLogger
-                setNumber={sets.length + 1}
-                onComplete={handleSetComplete}
-                onBack={() => {
-                  if (sets.length === 0) {
-                    setStep(STEPS.SELECT_EXERCISE);
-                  } else {
-                    setStep(STEPS.REVIEW);
-                  }
-                }}
-              />
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <SetLogger
+                  key={sets.length} // Add this key prop to force remount when sets.length changes
+                  setNumber={sets.length + 1}
+                  onComplete={handleSetComplete}
+                  onBack={() => {
+                    if (sets.length === 0) {
+                      setStep(STEPS.SELECT_EXERCISE);
+                    } else {
+                      setStep(STEPS.REVIEW);
+                    }
+                  }}
+                />
+              </div>
             )}
 
             {step === STEPS.REVIEW && (
