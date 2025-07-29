@@ -22,10 +22,6 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
   const [reps, setReps] = useState("10");
   const [weight, setWeight] = useState("45");
   
-  // Track the actual selected values separately
-  const [selectedReps, setSelectedReps] = useState(reps);
-  const [selectedWeight, setSelectedWeight] = useState(weight);
-
   const handleNext = () => {
     if (reps && weight) {
       console.log('Submitting values:', { reps, weight });
@@ -39,8 +35,9 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
   return (
     <div className="space-y-6">
       <h2 className="text-lg font-semibold">Set {setNumber}</h2>
-      <div className="space-y-8">
-        <div>
+      {/* Change this div to use flex and gap instead of space-y */}
+      <div className="flex gap-4">
+        <div className="flex-1">
           <label className="text-sm text-muted-foreground block mb-2">
             How many reps?
           </label>
@@ -48,8 +45,8 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
             <WheelPickerWrapper>
               <WheelPicker 
                 options={repOptions} 
-                defaultValue={reps}  // Changed to defaultValue
-                onValueChange={(value) => {  // Changed to onValueChange
+                defaultValue={reps}
+                onValueChange={(value) => {
                   console.log('Reps changing to:', value);
                   setReps(value);
                 }}
@@ -58,7 +55,7 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
             </WheelPickerWrapper>
           </div>
         </div>
-        <div>
+        <div className="flex-1">
           <label className="text-sm text-muted-foreground block mb-2">
             What weight (lbs)?
           </label>
@@ -66,8 +63,8 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
             <WheelPickerWrapper>
               <WheelPicker 
                 options={weightOptions}
-                defaultValue={weight}  // Changed to defaultValue
-                onValueChange={(value) => {  // Changed to onValueChange
+                defaultValue={weight}
+                onValueChange={(value) => {
                   console.log('Weight changing to:', value);
                   setWeight(value);
                 }}
