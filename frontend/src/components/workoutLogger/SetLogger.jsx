@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
-import { WheelPicker, WheelPickerWrapper } from "../../components/wheel-picker";
+import { WheelPicker, WheelPickerWrapper } from "../../components/ui/wheel-picker";
 
 // Helper function to create arrays of options
 const createOptions = (length, add = 0, step = 1) => 
@@ -21,12 +21,18 @@ const weightOptions = createOptions(101, 0, 5); // 0-500 in steps of 5
 export const SetLogger = ({ setNumber, onComplete, onBack }) => {
   const [reps, setReps] = useState("10");
   const [weight, setWeight] = useState("45");
+  
+  // Track the actual selected values separately
+  const [selectedReps, setSelectedReps] = useState(reps);
+  const [selectedWeight, setSelectedWeight] = useState(weight);
 
   const handleNext = () => {
     if (reps && weight) {
-      onComplete({ reps: Number(reps), weight: Number(weight) });
-      setReps("10");
-      setWeight("45");
+      console.log('Submitting values:', { reps, weight });
+      onComplete({ 
+        reps: Number(reps), 
+        weight: Number(weight) 
+      });
     }
   };
 
@@ -42,8 +48,11 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
             <WheelPickerWrapper>
               <WheelPicker 
                 options={repOptions} 
-                value={reps}
-                onChange={setReps}
+                defaultValue={reps}  // Changed to defaultValue
+                onValueChange={(value) => {  // Changed to onValueChange
+                  console.log('Reps changing to:', value);
+                  setReps(value);
+                }}
                 infinite={false}
               />
             </WheelPickerWrapper>
@@ -57,8 +66,11 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
             <WheelPickerWrapper>
               <WheelPicker 
                 options={weightOptions}
-                value={weight}
-                onChange={setWeight}
+                defaultValue={weight}  // Changed to defaultValue
+                onValueChange={(value) => {  // Changed to onValueChange
+                  console.log('Weight changing to:', value);
+                  setWeight(value);
+                }}
                 infinite={false}
               />
             </WheelPickerWrapper>
