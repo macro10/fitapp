@@ -3,6 +3,7 @@ import { useState, useEffect, createContext, useContext } from "react";
 import WorkoutListPage from "./components/WorkoutListPage";
 import WorkoutLoggerPage from "./components/workoutLogger/WorkoutLoggerPage";
 import AuthPage from "./components/AuthPage";
+import Layout from "./components/Layout";
 
 const AuthContext = createContext();
 
@@ -26,25 +27,27 @@ function App() {
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <Router>
-        <Routes>
-          <Route path="/auth" element={<AuthPage />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <WorkoutListPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/log"
-            element={
-              <ProtectedRoute>
-                <WorkoutLoggerPage />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
+        <Layout>
+          <Routes>
+            <Route path="/auth" element={<AuthPage />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <WorkoutListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/log"
+              element={
+                <ProtectedRoute>
+                  <WorkoutLoggerPage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Layout>
       </Router>
     </AuthContext.Provider>
   );
