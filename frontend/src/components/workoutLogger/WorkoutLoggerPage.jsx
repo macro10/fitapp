@@ -137,29 +137,28 @@ export default function WorkoutLoggerPage() {
     >
       <div className="container mx-auto">
         <div className="max-w-2xl mx-auto">
-          <Card className="backdrop-blur-xl bg-white/70 border border-white/20 shadow-lg">
+          <Card className="backdrop-blur-xl bg-white/80 border border-indigo-100/20 shadow-lg">
             <CardHeader>
               <div className="flex justify-between items-center gap-3">
-                <div className="flex items-center gap-2 flex-grow">
-                  <Input
-                    value={workoutName}
-                    onChange={(e) => setWorkoutName(e.target.value)}
-                    className="font-bold text-2xl h-12 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm border-white/20 dark:border-slate-700/50 rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
-                    style={{ fontSize: '24px' }}
-                    placeholder="Untitled Workout"
-                  />
-                </div>
+                <Input
+                  value={workoutName}
+                  onChange={(e) => setWorkoutName(e.target.value)}
+                  className="font-bold text-2xl h-12 bg-white/50 backdrop-blur-sm
+                   border border-indigo-100/20 rounded-lg
+                   focus-visible:ring-1 focus-visible:ring-indigo-500/30
+                   focus-visible:ring-offset-0"
+                  placeholder="Untitled Workout"
+                />
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="text-slate-500 hover:text-red-500 hover:bg-red-50/50"
                   onClick={handleCancelWorkout}
-                  title="Cancel Workout"
-                  className="text-muted-foreground hover:text-destructive transition-colors ml-2"
                 >
                   <X className="h-5 w-5" />
                 </Button>
               </div>
-              <CardDescription>
+              <CardDescription className="text-slate-500">
                 {new Date().toLocaleDateString(undefined, {
                   weekday: 'long',
                   year: 'numeric',
@@ -168,7 +167,7 @@ export default function WorkoutLoggerPage() {
                 })}
               </CardDescription>
             </CardHeader>
-            <CardContent className="relative">
+            <CardContent>
               {/* Add a subtle gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/5 dark:to-slate-900/5 pointer-events-none" />
               {error && (

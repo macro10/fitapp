@@ -40,16 +40,14 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold animate-in fade-in slide-in-from-bottom-2 duration-300">
-        Set {setNumber}
-      </h2>
+      <h2 className="text-lg font-semibold text-slate-900">Set {setNumber}</h2>
       <div className="flex gap-4">
         <div className="flex-1">
-          <label className="text-sm text-muted-foreground block mb-2">
+          <label className="text-sm text-slate-500 block mb-2">
             How many reps?
           </label>
-          <div className="rounded-lg border border-indigo-100 
-                bg-white/60 backdrop-blur-md shadow-sm">
+          <div className="rounded-lg border border-indigo-100/20 
+                    bg-white/60 backdrop-blur-md shadow-sm">
             <WheelPickerWrapper>
               <WheelPicker 
                 options={repOptions} 
@@ -61,11 +59,11 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
           </div>
         </div>
         <div className="flex-1">
-          <label className="text-sm text-muted-foreground block mb-2">
+          <label className="text-sm text-slate-500 block mb-2">
             What weight (lbs)?
           </label>
-          <div className="rounded-lg border border-indigo-100 
-                bg-white/60 backdrop-blur-md shadow-sm">
+          <div className="rounded-lg border border-indigo-100/20 
+                    bg-white/60 backdrop-blur-md shadow-sm">
             <WheelPickerWrapper>
               <WheelPicker 
                 options={weightOptions}
@@ -79,9 +77,8 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
       </div>
       <div className="flex gap-2">
         <Button 
-          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white
-               shadow-md hover:shadow-lg
-               transition-all duration-300"
+          className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white
+                 shadow-md hover:shadow-lg transition-all duration-300"
           onClick={handleNext}
           disabled={!reps || !weight || isLoading}
         >
@@ -100,8 +97,8 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
         <Button 
           variant="outline" 
           onClick={onBack}
-          className="border-indigo-200 hover:bg-indigo-50 text-indigo-700
-               transition-all duration-300"
+          className="border-indigo-200 hover:bg-indigo-50 text-indigo-600
+                 transition-all duration-300"
         >
           Done
         </Button>
