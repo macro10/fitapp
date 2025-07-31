@@ -89,7 +89,12 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
         transition: { duration: 0.2 }
       }}
     >
-      <Card className="mb-4 hover:shadow-lg transition-shadow">
+      <Card className={cn(
+        "mb-4 hover:shadow-lg transition-all duration-300",
+        "bg-gradient-to-r from-slate-100 to-gray-200 dark:from-slate-800 dark:to-slate-700",
+        "border border-slate-200 dark:border-slate-700",
+        "hover:scale-[1.02]"
+      )}>
         <CardHeader className="py-4">
           <div className="flex justify-between items-center">
             <button 
@@ -99,22 +104,26 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               aria-controls={`workout-details-${workout.id}`}
             >
               <div className="flex items-center gap-3 flex-1">
-                <div className="bg-muted/10 p-2 rounded-md">
-                  <CalendarIcon className="h-5 w-5 text-foreground/70" />
+                <div className="bg-slate-200 dark:bg-slate-700 p-2 rounded-md">
+                  <CalendarIcon className="h-5 w-5 text-slate-700 dark:text-slate-200" />
                 </div>
                 <div className="space-y-1">
-                  <CardTitle className="text-lg font-semibold">{workout.name || 'Untitled Workout'}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{getRelativeTimeString(workout.date)}</p>
+                  <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                    {workout.name || 'Untitled Workout'}
+                  </CardTitle>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {getRelativeTimeString(workout.date)}
+                  </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
+                <div className="bg-slate-800 dark:bg-slate-700 px-3 py-1 rounded-full text-sm font-medium text-white">
                   {formatVolume(calculateTotalVolume(workout.performed_exercises))}
                 </div>
                 <ChevronDown 
                   className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                    "h-5 w-5 text-slate-500 dark:text-slate-400 transition-transform duration-200",
                     isExpanded && "transform rotate-180"
                   )}
                 />
@@ -123,7 +132,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-destructive hover:text-destructive ml-2"
+              className="h-9 w-9 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 ml-2"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(workout.id);
@@ -140,30 +149,32 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             role="region"
             aria-labelledby={`workout-title-${workout.id}`}
           >
-            <Separator className="my-2" />
+            <Separator className="my-2 bg-slate-200 dark:bg-slate-600" />
             <ul className="space-y-2">
               {workout.performed_exercises.map((pe, index) => (
                 <li key={pe.id}>
                   <div className="py-3">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="bg-muted/10 p-1.5 rounded-md">
-                        <DumbbellIcon className="h-4 w-4 text-foreground/70" />
+                      <div className="bg-slate-200 dark:bg-slate-700 p-1.5 rounded-md">
+                        <DumbbellIcon className="h-4 w-4 text-slate-700 dark:text-slate-200" />
                       </div>
-                      <div className="font-semibold text-base">{pe.exercise?.name}</div>
+                      <div className="font-semibold text-base text-slate-900 dark:text-slate-100">
+                        {pe.exercise?.name}
+                      </div>
                     </div>
                     <div className="pl-9 flex flex-wrap gap-3 text-sm">
                       {Array.from({ length: pe.sets }, (_, i) => (
-                        <span key={i} className="inline-flex items-center bg-muted/5 px-2.5 py-1 rounded-md">
-                          <span className="font-medium">{pe.reps_per_set[i]}</span>
-                          <span className="text-muted-foreground mx-1">×</span>
-                          <span className="font-medium">{pe.weights_per_set[i]}</span>
-                          <span className="text-muted-foreground text-xs ml-0.5">lb</span>
+                        <span key={i} className="inline-flex items-center bg-slate-200 dark:bg-slate-700 px-2.5 py-1 rounded-md">
+                          <span className="font-medium text-slate-900 dark:text-slate-100">{pe.reps_per_set[i]}</span>
+                          <span className="text-slate-500 dark:text-slate-400 mx-1">×</span>
+                          <span className="font-medium text-slate-900 dark:text-slate-100">{pe.weights_per_set[i]}</span>
+                          <span className="text-slate-500 dark:text-slate-400 text-xs ml-0.5">lb</span>
                         </span>
                       ))}
                     </div>
                   </div>
                   {index < workout.performed_exercises.length - 1 && (
-                    <Separator className="bg-muted/90" />
+                    <Separator className="bg-slate-200 dark:bg-slate-600" />
                   )}
                 </li>
               ))}
