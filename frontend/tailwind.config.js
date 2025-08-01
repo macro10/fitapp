@@ -53,6 +53,22 @@ module.exports = {
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',
       },
+      animation: {
+        'slow-spin': 'spin 60s linear infinite',
+        'slow-drift': 'drift 20s ease-in-out infinite',
+        'slow-drift-reverse': 'drift 25s ease-in-out infinite reverse',
+        'slow-pulse': 'pulse 15s ease-in-out infinite',
+      },
+      keyframes: {
+        drift: {
+          '0%, 100%': { transform: 'translate(0, 0)' },
+          '50%': { transform: 'translate(2%, 2%)' },
+        },
+        pulse: {
+          '0%, 100%': { opacity: 1 },
+          '50%': { opacity: 0.8 },
+        }
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],

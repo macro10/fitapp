@@ -91,11 +91,21 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
     >
       <Card className={cn(
         "mb-4 transition-all duration-300",
-        "backdrop-blur-md bg-white/80 dark:bg-slate-900/80",
-        "border border-indigo-100/30 dark:border-indigo-500/20",
-        "hover:shadow-lg hover:scale-[1.02]"
+        "backdrop-blur-xl bg-white/40", // Keep our transparent background
+        "shadow-[0_1px_3px_0_rgba(0,0,0,0.1)]", // Subtle shadow all around
+        "hover:scale-[1.02]",
+        "relative overflow-hidden"
       )}>
-        <CardHeader className="py-4">
+        {/* Optional inner gradient for depth */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0))'
+          }}
+        />
+        
+        {/* Existing CardHeader content */}
+        <CardHeader className="py-4 relative">
           <div className="flex justify-between items-center">
             <button 
               className="flex items-center gap-3 flex-1 text-left group" 
@@ -104,26 +114,26 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               aria-controls={`workout-details-${workout.id}`}
             >
               <div className="flex items-center gap-3 flex-1">
-                <div className="bg-indigo-50 dark:bg-indigo-900/50 p-2 rounded-md">
-                  <CalendarIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                <div className="bg-indigo-100/50 backdrop-blur-sm p-2 rounded-md">
+                  <CalendarIcon className="h-5 w-5 text-indigo-600" />
                 </div>
                 <div className="space-y-1">
-                  <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  <CardTitle className="text-lg font-semibold text-slate-900">
                     {workout.name || 'Untitled Workout'}
                   </CardTitle>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-slate-500">
                     {getRelativeTimeString(workout.date)}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="bg-indigo-500 dark:bg-indigo-600 px-3 py-1 rounded-full text-sm font-medium text-white shadow-sm">
+                <div className="bg-indigo-500/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-white">
                   {formatVolume(calculateTotalVolume(workout.performed_exercises))}
                 </div>
                 <ChevronDown 
                   className={cn(
-                    "h-5 w-5 text-indigo-400 dark:text-indigo-500 transition-transform duration-200",
+                    "h-5 w-5 text-slate-400 transition-transform duration-200",
                     isExpanded && "transform rotate-180"
                   )}
                 />
@@ -337,17 +347,50 @@ export default function WorkoutListPage() {
   };
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        background: `
-          linear-gradient(120deg, rgba(99, 102, 241, 0.03), rgba(99, 102, 241, 0.05)),
-          linear-gradient(300deg, rgba(79, 70, 229, 0.03), rgba(79, 70, 229, 0.05)),
-          linear-gradient(45deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98))
-        `
-      }}
-    >
-      <div className="container mx-auto p-4 max-w-3xl">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background gradient base - slightly lighter */}
+      <div 
+        className="fixed inset-0 w-full h-full"
+        style={{
+          background: 'linear-gradient(to bottom right, rgb(245, 246, 255), rgb(250, 250, 255))'
+        }}
+      />
+
+      {/* Background shapes - more subtle now */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Top left blob */}
+        <div 
+          className="absolute top-0 left-0 w-[800px] h-[800px] rounded-full animate-slow-drift"
+          style={{
+            background: 'radial-gradient(circle at center, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.02))',
+            filter: 'blur(80px)',
+            transform: 'translate(-25%, -25%)',
+          }}
+        />
+        
+        {/* Middle right blob */}
+        <div 
+          className="absolute top-1/2 right-0 w-[600px] h-[600px] rounded-full animate-slow-drift-reverse"
+          style={{
+            background: 'radial-gradient(circle at center, rgba(79, 70, 229, 0.07), rgba(79, 70, 229, 0.02))',
+            filter: 'blur(80px)',
+            transform: 'translate(25%, -50%)',
+          }}
+        />
+        
+        {/* Bottom left blob */}
+        <div 
+          className="absolute bottom-0 left-1/3 w-[700px] h-[700px] rounded-full animate-slow-pulse"
+          style={{
+            background: 'radial-gradient(circle at center, rgba(129, 140, 248, 0.08), rgba(129, 140, 248, 0.02))',
+            filter: 'blur(80px)',
+            transform: 'translate(-50%, 25%)',
+          }}
+        />
+      </div>
+
+      {/* Content container */}
+      <div className="relative z-10 container mx-auto p-4 max-w-3xl">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">My Workouts</h1>
@@ -358,7 +401,6 @@ export default function WorkoutListPage() {
             size="icon"
             onClick={handleLogout}
             className="text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50"
-            aria-label="Logout"
           >
             <LogOutIcon className="h-5 w-5" />
           </Button>
@@ -372,7 +414,6 @@ export default function WorkoutListPage() {
                      shadow-lg hover:shadow-xl
                      transition-all duration-300"
           onClick={() => navigate("/log")}
-          aria-label="Create new workout"
         >
           <PlusIcon className="h-6 w-6" />
         </Button>

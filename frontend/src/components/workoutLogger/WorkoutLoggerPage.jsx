@@ -126,18 +126,22 @@ export default function WorkoutLoggerPage() {
 
   return (
     <div 
-      className="min-h-screen p-4"
+      className="min-h-screen relative overflow-hidden"
       style={{
-        background: `
-          linear-gradient(120deg, rgba(99, 102, 241, 0.05), rgba(99, 102, 241, 0.1)),
-          linear-gradient(300deg, rgba(14, 165, 233, 0.05), rgba(14, 165, 233, 0.1)),
-          linear-gradient(45deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.95))
-        `
+        background: `linear-gradient(to bottom right, white, #f5f5ff)`
       }}
     >
-      <div className="container mx-auto">
+      {/* Background shapes */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-200/30 blur-3xl animate-slow-spin" />
+        <div className="absolute top-[20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-200/30 blur-3xl animate-slow-drift" />
+        <div className="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] rounded-full bg-purple-200/30 blur-3xl animate-slow-pulse" />
+      </div>
+
+      {/* Content */}
+      <div className="relative container mx-auto p-4">
         <div className="max-w-2xl mx-auto">
-          <Card className="backdrop-blur-xl bg-white/80 border border-indigo-100/20 shadow-lg">
+          <Card className="backdrop-blur-xl bg-white/70 border border-white/20 shadow-lg">
             <CardHeader>
               <div className="flex justify-between items-center gap-3">
                 <Input
