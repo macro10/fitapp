@@ -1,8 +1,9 @@
 // frontend/src/components/workoutLogger/SetLogger.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { Plus, Loader2 } from "lucide-react"; // Add Loader2 import
+import { Plus, Loader2, Timer } from "lucide-react"; // Add Loader2 and Timer import
 import { WheelPicker, WheelPickerWrapper } from "../../components/ui/wheel-picker";
+import { RestTimer } from "./RestTimer";
 
 // Helper function to create arrays of options
 const createOptions = (length, add = 0, step = 1) => 
@@ -34,15 +35,21 @@ export const SetLogger = ({ setNumber, onComplete, onBack }) => {
         weight: Number(weight) 
       });
       
+      // Reset the rest timer by updating the start time in localStorage
+      localStorage.setItem("workout_rest_timer_start", Date.now().toString());
+      
       setIsLoading(false);
     }
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold animate-in fade-in slide-in-from-bottom-2 duration-300">
-        Set {setNumber}
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold animate-in fade-in slide-in-from-bottom-2 duration-300">
+          Set {setNumber}
+        </h2>
+        <RestTimer />
+      </div>
       {/* Change this div to use flex and gap instead of space-y */}
       <div className="flex gap-4">
         <div className="flex-1">
