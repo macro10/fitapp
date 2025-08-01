@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export const WORKOUT_STORAGE_KEY = 'inProgressWorkout';
 export const CURRENT_EXERCISE_STORAGE_KEY = 'inProgressExercise';
+export const REST_TIMER_KEY = 'workout_rest_timer_start'; // Add this constant
 
 // Add this mapping object at the top of the file
 const MUSCLE_GROUP_MAPPING = {
@@ -149,6 +150,7 @@ export const useWorkoutLogger = () => {
       );
       localStorage.removeItem(WORKOUT_STORAGE_KEY);
       localStorage.removeItem(CURRENT_EXERCISE_STORAGE_KEY);
+      localStorage.removeItem(REST_TIMER_KEY); // Add this line
       navigate("/");
     } catch (err) {
       setError("Failed to save workout. Please try again.");
@@ -159,6 +161,7 @@ export const useWorkoutLogger = () => {
   const clearWorkout = () => {
     localStorage.removeItem(WORKOUT_STORAGE_KEY);
     localStorage.removeItem(CURRENT_EXERCISE_STORAGE_KEY);
+    localStorage.removeItem(REST_TIMER_KEY); // Add this line
     setWorkoutState({
       exercises: [],
       name: "Untitled Workout",
