@@ -90,10 +90,10 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
       }}
     >
       <Card className={cn(
-        "mb-4 hover:shadow-lg transition-all duration-300",
-        "bg-gradient-to-r from-slate-100 to-gray-200 dark:from-slate-800 dark:to-slate-700",
-        "border border-slate-200 dark:border-slate-700",
-        "hover:scale-[1.02]"
+        "mb-4 transition-all duration-300",
+        "backdrop-blur-md bg-white/80 dark:bg-slate-900/80",
+        "border border-indigo-100/30 dark:border-indigo-500/20",
+        "hover:shadow-lg hover:scale-[1.02]"
       )}>
         <CardHeader className="py-4">
           <div className="flex justify-between items-center">
@@ -104,8 +104,8 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               aria-controls={`workout-details-${workout.id}`}
             >
               <div className="flex items-center gap-3 flex-1">
-                <div className="bg-slate-200 dark:bg-slate-700 p-2 rounded-md">
-                  <CalendarIcon className="h-5 w-5 text-slate-700 dark:text-slate-200" />
+                <div className="bg-indigo-50 dark:bg-indigo-900/50 p-2 rounded-md">
+                  <CalendarIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div className="space-y-1">
                   <CardTitle className="text-lg font-semibold text-slate-900 dark:text-slate-100">
@@ -118,12 +118,12 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="bg-slate-800 dark:bg-slate-700 px-3 py-1 rounded-full text-sm font-medium text-white">
+                <div className="bg-indigo-500 dark:bg-indigo-600 px-3 py-1 rounded-full text-sm font-medium text-white shadow-sm">
                   {formatVolume(calculateTotalVolume(workout.performed_exercises))}
                 </div>
                 <ChevronDown 
                   className={cn(
-                    "h-5 w-5 text-slate-500 dark:text-slate-400 transition-transform duration-200",
+                    "h-5 w-5 text-indigo-400 dark:text-indigo-500 transition-transform duration-200",
                     isExpanded && "transform rotate-180"
                   )}
                 />
@@ -132,7 +132,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 ml-2"
+              className="h-9 w-9 text-slate-500 hover:text-red-600 hover:bg-red-50/50 dark:hover:bg-red-900/20 ml-2"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(workout.id);
@@ -149,14 +149,14 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             role="region"
             aria-labelledby={`workout-title-${workout.id}`}
           >
-            <Separator className="my-2 bg-slate-200 dark:bg-slate-600" />
+            <Separator className="my-2 bg-indigo-100/50 dark:bg-indigo-200/10" />
             <ul className="space-y-2">
               {workout.performed_exercises.map((pe, index) => (
                 <li key={pe.id}>
                   <div className="py-3">
                     <div className="flex items-center gap-2.5 mb-2">
-                      <div className="bg-slate-200 dark:bg-slate-700 p-1.5 rounded-md">
-                        <DumbbellIcon className="h-4 w-4 text-slate-700 dark:text-slate-200" />
+                      <div className="bg-indigo-50 dark:bg-indigo-900/50 p-1.5 rounded-md">
+                        <DumbbellIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                       </div>
                       <div className="font-semibold text-base text-slate-900 dark:text-slate-100">
                         {pe.exercise?.name}
@@ -164,7 +164,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
                     </div>
                     <div className="pl-9 flex flex-wrap gap-3 text-sm">
                       {Array.from({ length: pe.sets }, (_, i) => (
-                        <span key={i} className="inline-flex items-center bg-slate-200 dark:bg-slate-700 px-2.5 py-1 rounded-md">
+                        <span key={i} className="inline-flex items-center bg-indigo-50/50 dark:bg-indigo-900/50 px-2.5 py-1 rounded-md">
                           <span className="font-medium text-slate-900 dark:text-slate-100">{pe.reps_per_set[i]}</span>
                           <span className="text-slate-500 dark:text-slate-400 mx-1">×</span>
                           <span className="font-medium text-slate-900 dark:text-slate-100">{pe.weights_per_set[i]}</span>
@@ -174,7 +174,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
                     </div>
                   </div>
                   {index < workout.performed_exercises.length - 1 && (
-                    <Separator className="bg-slate-200 dark:bg-slate-600" />
+                    <Separator className="bg-indigo-100/50 dark:bg-indigo-200/10" />
                   )}
                 </li>
               ))}
@@ -337,17 +337,27 @@ export default function WorkoutListPage() {
   };
 
   return (
-    <>
+    <div 
+      className="min-h-screen"
+      style={{
+        background: `
+          linear-gradient(120deg, rgba(99, 102, 241, 0.03), rgba(99, 102, 241, 0.05)),
+          linear-gradient(300deg, rgba(79, 70, 229, 0.03), rgba(79, 70, 229, 0.05)),
+          linear-gradient(45deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98))
+        `
+      }}
+    >
       <div className="container mx-auto p-4 max-w-3xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">My Workouts</h1>
-            <p className="text-muted-foreground">Track your fitness progress</p>
+            <h1 className="text-3xl font-bold text-slate-900">My Workouts</h1>
+            <p className="text-slate-500">Track your fitness progress</p>
           </div>
           <Button 
             variant="ghost"
             size="icon"
             onClick={handleLogout}
+            className="text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50"
             aria-label="Logout"
           >
             <LogOutIcon className="h-5 w-5" />
@@ -357,7 +367,10 @@ export default function WorkoutListPage() {
         {renderContent()}
 
         <Button
-          className="fixed bottom-8 right-8 rounded-full w-12 h-12 p-0"
+          className="fixed bottom-8 right-8 rounded-full w-12 h-12 p-0
+                     bg-indigo-500 hover:bg-indigo-600 text-white
+                     shadow-lg hover:shadow-xl
+                     transition-all duration-300"
           onClick={() => navigate("/log")}
           aria-label="Create new workout"
         >
@@ -365,6 +378,6 @@ export default function WorkoutListPage() {
         </Button>
       </div>
       <Toaster />
-    </>
+    </div>
   );
 }
