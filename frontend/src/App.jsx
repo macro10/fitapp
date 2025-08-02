@@ -1,19 +1,20 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { 
+  BrowserRouter as Router, 
+  Routes, 
+  Route, 
+  Navigate
+} from "react-router-dom";
 import { useState, useEffect, createContext, useContext } from "react";
 import WorkoutListPage from "./components/WorkoutListPage";
 import WorkoutLoggerPage from "./components/workoutLogger/WorkoutLoggerPage";
 import AuthPage from "./components/AuthPage";
 import Layout from "./components/Layout";
+import AnalyticsPage from "./components/AnalyticsPage";
 
 const AuthContext = createContext();
 
 export function useAuth() {
   return useContext(AuthContext);
-}
-
-function ProtectedRoute({ children }) {
-  const { user } = useAuth();
-  return user ? children : <Navigate to="/auth" />;
 }
 
 function App() {
@@ -27,27 +28,14 @@ function App() {
   return (
     <AuthContext.Provider value={{ user, setUser }}>
       <Router>
-        <Layout>
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <WorkoutListPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/log"
-              element={
-                <ProtectedRoute>
-                  <WorkoutLoggerPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Layout>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<WorkoutListPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+          </Route>
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/log" element={<WorkoutLoggerPage />} />
+        </Routes>
       </Router>
     </AuthContext.Provider>
   );
