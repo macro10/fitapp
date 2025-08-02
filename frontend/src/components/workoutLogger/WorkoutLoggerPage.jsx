@@ -125,109 +125,111 @@ export default function WorkoutLoggerPage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="max-w-2xl mx-auto">
-        <Card className="mb-6">
-          <CardHeader>
-            <div className="flex justify-between items-center gap-3">
-              <div className="flex items-center gap-2 flex-grow">
-                <Input
-                  value={workoutName}
-                  onChange={(e) => setWorkoutName(e.target.value)}
-                  className="font-bold text-2xl h-12 border rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
-                  style={{ fontSize: '24px' }}  // Adding explicit font size
-                  placeholder="Untitled Workout"
-                />
+    <div className="min-h-screen pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
+      <div className="container mx-auto p-4">
+        <div className="max-w-2xl mx-auto">
+          <Card className="mb-6">
+            <CardHeader>
+              <div className="flex justify-between items-center gap-3">
+                <div className="flex items-center gap-2 flex-grow">
+                  <Input
+                    value={workoutName}
+                    onChange={(e) => setWorkoutName(e.target.value)}
+                    className="font-bold text-2xl h-12 border rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
+                    style={{ fontSize: '24px' }}  // Adding explicit font size
+                    placeholder="Untitled Workout"
+                  />
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleCancelWorkout}
+                  title="Cancel Workout"
+                  className="text-muted-foreground hover:text-destructive transition-colors ml-2"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleCancelWorkout}
-                title="Cancel Workout"
-                className="text-muted-foreground hover:text-destructive transition-colors ml-2"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            <CardDescription>
-              {new Date().toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+              <CardDescription>
+                {new Date().toLocaleDateString(undefined, {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
 
-            {currentExercise && (
-              <StepIndicator 
-                currentStep={step - 1} 
-                totalSteps={2}
-              />
-            )}
-
-            {step === STEPS.SELECT_EXERCISE && (
-              <div className="space-y-4">
-                <CompletedExercises
-                  workoutExercises={workoutExercises}
-                  exercises={exercises}
-                  loading={loading}
+              {currentExercise && (
+                <StepIndicator 
+                  currentStep={step - 1} 
+                  totalSteps={2}
                 />
-                <ExerciseSelector
-                  exercises={exercises}
-                  onSelect={handleExerciseSelect}
+              )}
+
+              {step === STEPS.SELECT_EXERCISE && (
+                <div className="space-y-4">
+                  <CompletedExercises
+                    workoutExercises={workoutExercises}
+                    exercises={exercises}
+                    loading={loading}
+                  />
+                  <ExerciseSelector
+                    exercises={exercises}
+                    onSelect={handleExerciseSelect}
+                  />
+                  {workoutExercises.length > 0 && (
+                    <Button
+                      className="w-full"
+                      onClick={handleFinishWorkout}
+                      disabled={loading || !exercises?.length}
+                    >
+                      Finish Workout
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {step === STEPS.LOG_SETS && (
+                <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <SetLogger
+                    key={sets.length} // Add this key prop to force remount when sets.length changes
+                    setNumber={sets.length + 1}
+                    onComplete={handleSetComplete}
+                    onBack={() => {
+                      if (sets.length === 0) {
+                        setStep(STEPS.SELECT_EXERCISE);
+                      } else {
+                        setStep(STEPS.REVIEW);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+              {step === STEPS.REVIEW && (
+                <ReviewStep
+                  exercise={currentExercise}
+                  sets={sets}
+                  onConfirm={handleExerciseComplete}
+                  onBack={() => setStep(STEPS.LOG_SETS)}
                 />
-                {workoutExercises.length > 0 && (
-                  <Button
-                    className="w-full"
-                    onClick={handleFinishWorkout}
-                    disabled={loading || !exercises?.length}
-                  >
-                    Finish Workout
-                  </Button>
-                )}
-              </div>
-            )}
+              )}
+            </CardContent>
+          </Card>
 
-            {step === STEPS.LOG_SETS && (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <SetLogger
-                  key={sets.length} // Add this key prop to force remount when sets.length changes
-                  setNumber={sets.length + 1}
-                  onComplete={handleSetComplete}
-                  onBack={() => {
-                    if (sets.length === 0) {
-                      setStep(STEPS.SELECT_EXERCISE);
-                    } else {
-                      setStep(STEPS.REVIEW);
-                    }
-                  }}
-                />
-              </div>
-            )}
-
-            {step === STEPS.REVIEW && (
-              <ReviewStep
-                exercise={currentExercise}
-                sets={sets}
-                onConfirm={handleExerciseComplete}
-                onBack={() => setStep(STEPS.LOG_SETS)}
-              />
-            )}
-          </CardContent>
-        </Card>
-
-        <CancelWorkoutDialog
-          open={showCancelDialog}
-          onOpenChange={setShowCancelDialog}
-          onConfirm={handleCancelConfirm} // Use the new handler
-        />
+          <CancelWorkoutDialog
+            open={showCancelDialog}
+            onOpenChange={setShowCancelDialog}
+            onConfirm={handleCancelConfirm} // Use the new handler
+          />
+        </div>
       </div>
     </div>
   );
