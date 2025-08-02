@@ -2,8 +2,7 @@ import {
   BrowserRouter as Router, 
   Routes, 
   Route, 
-  Navigate,
-  Outlet 
+  Navigate
 } from "react-router-dom";
 import { useState, useEffect, createContext, useContext } from "react";
 import WorkoutListPage from "./components/WorkoutListPage";
@@ -16,11 +15,6 @@ const AuthContext = createContext();
 
 export function useAuth() {
   return useContext(AuthContext);
-}
-
-function ProtectedRoute({ children }) {
-  const { user } = useAuth();
-  return user ? children : <Navigate to="/auth" />;
 }
 
 function App() {
