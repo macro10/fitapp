@@ -345,13 +345,6 @@ export default function WorkoutListPage() {
 
         {renderContent()}
 
-        <Button
-          className="fixed bottom-20 right-8 rounded-full w-12 h-12 p-0"
-          onClick={() => navigate("/log")}
-          aria-label="Create new workout"
-        >
-          <PlusIcon className="h-6 w-6" />
-        </Button>
       </div>
       <Toaster />
     </>
