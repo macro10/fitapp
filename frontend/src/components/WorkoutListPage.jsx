@@ -330,8 +330,8 @@ export default function WorkoutListPage() {
       <div className="container mx-auto p-4 max-w-3xl">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-3xl font-bold">My Workouts</h1>
-            <p className="text-muted-foreground">Track your fitness progress</p>
+            <h1 className="text-3xl font-bold">FitApp</h1>
+            <p className="text-muted-foreground">Track your workouts</p>
           </div>
           <Button 
             variant="ghost"
