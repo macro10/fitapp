@@ -8,7 +8,7 @@ export function BottomNav() {
   const navigate = useNavigate();
   
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background">
+    <div className="fixed bottom-0 left-0 right-0 border-t bg-background pb-[env(safe-area-inset-bottom,0px)]">
       <nav className="container mx-auto max-w-3xl px-4 relative">
         <div className="grid grid-cols-2 relative h-16">
           <div className="relative flex items-center justify-center">
