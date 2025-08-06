@@ -5,12 +5,22 @@ import { getWorkouts, deleteWorkout } from "../api";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown } from "lucide-react";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 import { WORKOUT_STORAGE_KEY, CURRENT_EXERCISE_STORAGE_KEY } from '../hooks/useWorkoutLogger';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 // First, let's add a helper function to calculate volume
 const calculateExerciseVolume = (performedExercise) => {
@@ -75,8 +85,39 @@ const getRelativeTimeString = (dateStr) => {
   return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 };
 
-// Update the WorkoutItem component
+// Replace the existing DeleteWorkoutDialog with this version
+function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <X className="h-5 w-5 text-destructive" />
+            Delete Workout?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-muted-foreground">
+            Are you sure you want to delete "{workoutName || 'Untitled Workout'}"? This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2">
+          <AlertDialogCancel className="flex-1">
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={onConfirm}
+          >
+            Delete Workout
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// Modify the WorkoutItem component to use the dialog
 function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isExpanded = expanded === workout.id;
   
   return (
@@ -123,10 +164,10 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-destructive hover:text-destructive ml-2"
+              className="h-9 w-9 text-muted-foreground hover:text-destructive ml-2"
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete(workout.id);
+                setDeleteDialogOpen(true);
               }}
               aria-label="Delete workout"
             >
@@ -171,6 +212,13 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
           </CardContent>
         )}
       </Card>
+      
+      <DeleteWorkoutDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={() => onDelete(workout.id)}
+        workoutName={workout.name}
+      />
     </motion.div>
   );
 }
