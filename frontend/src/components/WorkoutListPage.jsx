@@ -5,20 +5,22 @@ import { getWorkouts, deleteWorkout } from "../api";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown } from "lucide-react";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 import { WORKOUT_STORAGE_KEY, CURRENT_EXERCISE_STORAGE_KEY } from '../hooks/useWorkoutLogger';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 // First, let's add a helper function to calculate volume
 const calculateExerciseVolume = (performedExercise) => {
@@ -83,36 +85,33 @@ const getRelativeTimeString = (dateStr) => {
   return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 };
 
-// Add this new component before the WorkoutItem component
+// Replace the existing DeleteWorkoutDialog with this version
 function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Workout</DialogTitle>
-          <DialogDescription>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <X className="h-5 w-5 text-destructive" />
+            Delete Workout?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-muted-foreground">
             Are you sure you want to delete "{workoutName || 'Untitled Workout'}"? This action cannot be undone.
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="mt-4">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2">
+          <AlertDialogCancel className="flex-1">
             Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => {
-              onConfirm();
-              onOpenChange(false);
-            }}
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={onConfirm}
           >
-            Delete
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            Delete Workout
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
