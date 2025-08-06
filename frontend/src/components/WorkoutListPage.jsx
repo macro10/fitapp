@@ -11,6 +11,14 @@ import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 import { WORKOUT_STORAGE_KEY, CURRENT_EXERCISE_STORAGE_KEY } from '../hooks/useWorkoutLogger';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 
 // First, let's add a helper function to calculate volume
 const calculateExerciseVolume = (performedExercise) => {
@@ -75,8 +83,42 @@ const getRelativeTimeString = (dateStr) => {
   return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 };
 
-// Update the WorkoutItem component
+// Add this new component before the WorkoutItem component
+function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Workout</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete "{workoutName || 'Untitled Workout'}"? This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="mt-4">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onConfirm();
+              onOpenChange(false);
+            }}
+          >
+            Delete
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// Modify the WorkoutItem component to use the dialog
 function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isExpanded = expanded === workout.id;
   
   return (
@@ -123,10 +165,10 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-destructive hover:text-destructive ml-2"
+              className="h-9 w-9 text-muted-foreground hover:text-destructive ml-2"
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete(workout.id);
+                setDeleteDialogOpen(true);
               }}
               aria-label="Delete workout"
             >
@@ -171,6 +213,13 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
           </CardContent>
         )}
       </Card>
+      
+      <DeleteWorkoutDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={() => onDelete(workout.id)}
+        workoutName={workout.name}
+      />
     </motion.div>
   );
 }
