@@ -214,14 +214,24 @@ export default function WorkoutLoggerPage() {
                     }}
                     {...(() => {
                       const defaults = getExerciseDefaults(currentExercise.id);
-                      // If no history exists, use the last set's values if available
-                      if (defaults.defaultReps === "10" && defaults.defaultWeight === "45" && sets.length > 0) {
+                      
+                      // If we have a previous set in this workout, compare it with the historical max
+                      if (sets.length > 0) {
                         const lastSet = sets[sets.length - 1];
-                        return {
-                          defaultReps: lastSet.reps.toString(),
-                          defaultWeight: lastSet.weight.toString()
-                        };
+                        const lastWeight = lastSet.weight;
+                        const historyWeight = parseInt(defaults.defaultWeight, 10);
+                        
+                        // Use the last set's values if:
+                        // 1. There's no history (defaults are 10/45)
+                        // 2. OR the last set's weight is greater than the historical max
+                        if (defaults.defaultWeight === "45" || lastWeight >= historyWeight) {
+                          return {
+                            defaultReps: lastSet.reps.toString(),
+                            defaultWeight: lastSet.weight.toString()
+                          };
+                        }
                       }
+                      
                       return defaults;
                     })()}
                   />
