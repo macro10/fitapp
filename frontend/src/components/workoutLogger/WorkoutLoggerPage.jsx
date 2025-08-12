@@ -14,6 +14,7 @@ import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../App"; // Make sure we import useAuth
+import useExerciseHistory from '../../hooks/useExerciseHistory';
 
 // UI Component imports
 import {
@@ -77,6 +78,8 @@ export default function WorkoutLoggerPage() {
     setShowCancelDialog,
     handleCancelWorkout
   } = useCancelWorkout(hasUnsavedWork, handleCancelConfirm);
+
+  const { getExerciseDefaults } = useExerciseHistory();
 
   // Local state
   const [exercises, setExercises] = useState([]);
@@ -209,6 +212,11 @@ export default function WorkoutLoggerPage() {
                         setStep(STEPS.REVIEW);
                       }
                     }}
+                    {...(() => {
+                      const defaults = getExerciseDefaults(currentExercise.id);
+                      console.log('Exercise defaults for', currentExercise.id, ':', defaults); // Debug log
+                      return defaults;
+                    })()}
                   />
                 </div>
               )}
