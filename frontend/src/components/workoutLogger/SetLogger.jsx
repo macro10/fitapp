@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { Plus, Loader2, Timer } from "lucide-react"; // Add Loader2 and Timer import
 import { WheelPicker, WheelPickerWrapper } from "../../components/ui/wheel-picker";
 import { RestTimer } from "./RestTimer";
+import { getWorkouts } from '../../api';
 
 // Helper function to create arrays of options
 const createOptions = (length, add = 0, step = 1) => 
@@ -19,11 +20,18 @@ const createOptions = (length, add = 0, step = 1) =>
 const repOptions = createOptions(30, 1); // 1-30 reps
 const weightOptions = createOptions(101, 0, 5); // 0-500 in steps of 5
 
-export const SetLogger = ({ setNumber, onComplete, onBack }) => {
-  const [reps, setReps] = useState("10");
-  const [weight, setWeight] = useState("45");
+export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", defaultWeight = "45" }) => {
+  console.log('SetLogger props:', { defaultReps, defaultWeight }); // Debug log
+  const [reps, setReps] = useState(defaultReps);
+  const [weight, setWeight] = useState(defaultWeight);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Update state when defaults change
+  useEffect(() => {
+    setReps(defaultReps);
+    setWeight(defaultWeight);
+  }, [defaultReps, defaultWeight]);
+
   const handleNext = async () => {
     if (reps && weight) {
       setIsLoading(true);

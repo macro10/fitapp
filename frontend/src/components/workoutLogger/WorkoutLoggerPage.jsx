@@ -14,6 +14,7 @@ import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../App"; // Make sure we import useAuth
+import useExerciseHistory from '../../hooks/useExerciseHistory';
 
 // UI Component imports
 import {
@@ -77,6 +78,8 @@ export default function WorkoutLoggerPage() {
     setShowCancelDialog,
     handleCancelWorkout
   } = useCancelWorkout(hasUnsavedWork, handleCancelConfirm);
+
+  const { getExerciseDefaults } = useExerciseHistory();
 
   // Local state
   const [exercises, setExercises] = useState([]);
@@ -199,7 +202,7 @@ export default function WorkoutLoggerPage() {
               {step === STEPS.LOG_SETS && (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <SetLogger
-                    key={sets.length} // Add this key prop to force remount when sets.length changes
+                    key={sets.length}
                     setNumber={sets.length + 1}
                     onComplete={handleSetComplete}
                     onBack={() => {
@@ -209,6 +212,28 @@ export default function WorkoutLoggerPage() {
                         setStep(STEPS.REVIEW);
                       }
                     }}
+                    {...(() => {
+                      const defaults = getExerciseDefaults(currentExercise.id);
+                      
+                      // If we have a previous set in this workout, compare it with the historical max
+                      if (sets.length > 0) {
+                        const lastSet = sets[sets.length - 1];
+                        const lastWeight = lastSet.weight;
+                        const historyWeight = parseInt(defaults.defaultWeight, 10);
+                        
+                        // Use the last set's values if:
+                        // 1. There's no history (defaults are 10/45)
+                        // 2. OR the last set's weight is greater than the historical max
+                        if (defaults.defaultWeight === "45" || lastWeight >= historyWeight) {
+                          return {
+                            defaultReps: lastSet.reps.toString(),
+                            defaultWeight: lastSet.weight.toString()
+                          };
+                        }
+                      }
+                      
+                      return defaults;
+                    })()}
                   />
                 </div>
               )}
