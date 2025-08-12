@@ -26,6 +26,12 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
   const [weight, setWeight] = useState(defaultWeight);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Update state when defaults change
+  useEffect(() => {
+    setReps(defaultReps);
+    setWeight(defaultWeight);
+  }, [defaultReps, defaultWeight]);
+
   const handleNext = async () => {
     if (reps && weight) {
       setIsLoading(true);

@@ -202,7 +202,7 @@ export default function WorkoutLoggerPage() {
               {step === STEPS.LOG_SETS && (
                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <SetLogger
-                    key={sets.length} // Add this key prop to force remount when sets.length changes
+                    key={sets.length}
                     setNumber={sets.length + 1}
                     onComplete={handleSetComplete}
                     onBack={() => {
@@ -214,7 +214,14 @@ export default function WorkoutLoggerPage() {
                     }}
                     {...(() => {
                       const defaults = getExerciseDefaults(currentExercise.id);
-                      console.log('Exercise defaults for', currentExercise.id, ':', defaults); // Debug log
+                      // If no history exists, use the last set's values if available
+                      if (defaults.defaultReps === "10" && defaults.defaultWeight === "45" && sets.length > 0) {
+                        const lastSet = sets[sets.length - 1];
+                        return {
+                          defaultReps: lastSet.reps.toString(),
+                          defaultWeight: lastSet.weight.toString()
+                        };
+                      }
                       return defaults;
                     })()}
                   />
