@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from .views import ExerciseViewSet, WorkoutViewSet, PerformedExerciseViewSet, UserRegistrationView
+from .views import ExerciseViewSet, WorkoutViewSet, PerformedExerciseViewSet, UserRegistrationView, weekly_volume_analytics
 from django.contrib.auth.models import User
 from rest_framework import serializers, viewsets
 from django.urls import path
@@ -21,4 +21,5 @@ router.register(r'users', UserViewSet)
 
 urlpatterns = router.urls + [
     path('register/', UserRegistrationView.as_view(), name='user-register'),
+    path('analytics/weekly-volume/', weekly_volume_analytics, name='weekly-volume-analytics'),
 ]

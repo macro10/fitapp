@@ -67,3 +67,10 @@ export const updateWorkout = async (workoutId, data) => {
   const response = await api.patch(`${API_BASE}/api/workouts/${workoutId}/`, data);
   return response.data;
 };
+
+export const getWeeklyVolumeAnalytics = async (startDate, endDate) => {
+  const response = await api.get(
+    `analytics/weekly-volume/?start_date=${startDate}&end_date=${endDate}`
+  );
+  return response.data;
+};
