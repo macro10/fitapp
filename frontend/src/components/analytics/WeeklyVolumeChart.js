@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { subMonths } from 'date-fns';
 import { getWeeklyVolumeAnalytics } from '../../api';
+import { parseISO, format, startOfISOWeek, endOfISOWeek } from 'date-fns';
 
 const WeeklyVolumeChart = () => {
   const [data, setData] = useState([]);
@@ -29,6 +30,26 @@ const WeeklyVolumeChart = () => {
     fetchData();
   }, []);
 
+  const formatWeekLabel = (weekStr) => {
+    try {
+      // Parse the year and week number from the string (e.g., "2025-W31")
+      const [year, week] = weekStr.split('-W');
+      
+      // Create a date from the year and week number
+      const date = new Date(year);
+      date.setDate(date.getDate() + (week - 1) * 7);
+      
+      const weekStart = startOfISOWeek(date);
+      const weekEnd = endOfISOWeek(date);
+      
+      // Format as "MMM d" or just "d" if in same month
+      return format(weekStart, 'MMM d');
+    } catch (e) {
+      console.error('Error parsing date:', e);
+      return weekStr;
+    }
+  };
+
   if (isLoading) return (
     <div className="flex items-center justify-center h-64">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -46,12 +67,21 @@ const WeeklyVolumeChart = () => {
       <ResponsiveContainer width="100%" height={400}>
         <LineChart 
           data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
         >
           <XAxis 
             dataKey="week" 
             stroke="#888888"
-            tick={{ fill: '#888888' }}
+            tick={{ 
+              fill: '#888888',
+              fontSize: 12,
+              dy: 10
+            }}
+            tickFormatter={formatWeekLabel}
+            angle={-45}
+            textAnchor="end"
+            height={70}
+            interval={0}
           />
           <YAxis 
             stroke="#888888"
