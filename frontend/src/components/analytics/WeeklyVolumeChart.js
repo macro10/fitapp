@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { subMonths } from 'date-fns';
 import { getWeeklyVolumeAnalytics } from '../../api';
-import { parseISO, format, startOfISOWeek, endOfISOWeek } from 'date-fns';
+import { format, startOfISOWeek } from 'date-fns';
 
 const WeeklyVolumeChart = () => {
   const [data, setData] = useState([]);
@@ -40,7 +40,6 @@ const WeeklyVolumeChart = () => {
       date.setDate(date.getDate() + (week - 1) * 7);
       
       const weekStart = startOfISOWeek(date);
-      const weekEnd = endOfISOWeek(date);
       
       // Format as "MMM d" or just "d" if in same month
       return format(weekStart, 'MMM d');
