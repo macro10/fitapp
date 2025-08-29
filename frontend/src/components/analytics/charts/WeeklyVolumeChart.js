@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { subMonths } from 'date-fns';
-import { getWeeklyVolumeAnalytics } from '../../api';
+import { getWeeklyVolumeAnalytics } from '../../../api';
 import { format, startOfISOWeek } from 'date-fns';
 
 const WeeklyVolumeChart = () => {

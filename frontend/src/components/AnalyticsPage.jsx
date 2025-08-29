@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
-import WeeklyVolumeChart from "./analytics/WeeklyVolumeChart";
+import WeeklyVolumeChart from "./analytics/charts/WeeklyVolumeChart";
 
 export default function AnalyticsPage() {
   return (
