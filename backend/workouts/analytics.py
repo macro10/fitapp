@@ -63,3 +63,27 @@ def get_weekly_volume_data(user, start_date=None, end_date=None):
         })
 
     return formatted_data
+
+def get_top_workouts_by_volume(user, limit=5):
+    """Get the top workouts by total volume for a user"""
+    workouts = Workout.objects.filter(user=user).prefetch_related('performed_exercises')
+    
+    # Calculate volume for each workout
+    workout_volumes = []
+    for workout in workouts:
+        total_volume = 0
+        for performed_exercise in workout.performed_exercises.all():
+            total_volume += calculate_volume_per_set(performed_exercise)
+            
+        workout_volumes.append({
+            'id': workout.id,
+            'date': workout.date,
+            'name': workout.name,
+            'total_volume': total_volume,
+            'exercise_count': workout.performed_exercises.count()
+        })
+    
+    # Sort by volume and get top N
+    sorted_workouts = sorted(workout_volumes, key=lambda x: x['total_volume'], reverse=True)[:limit]
+    
+    return sorted_workouts

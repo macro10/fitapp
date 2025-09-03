@@ -2,7 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from datetime import datetime
-from ...analytics import get_weekly_volume_data
+from ...analytics import get_weekly_volume_data, get_top_workouts_by_volume, calculate_volume_per_set
+from ...models import Workout
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -25,4 +26,22 @@ def weekly_volume_analytics(request):
 
     return Response({
         'weekly_volumes': data
+    })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def top_workouts_by_volume(request):
+    limit = request.query_params.get('limit', 5)
+    try:
+        limit = int(limit)
+    except ValueError:
+        limit = 5
+        
+    data = get_top_workouts_by_volume(
+        user=request.user,
+        limit=limit
+    )
+    
+    return Response({
+        'top_workouts': data
     })
