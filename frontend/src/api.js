@@ -74,3 +74,8 @@ export const getWeeklyVolumeAnalytics = async (startDate, endDate) => {
   );
   return response.data;
 };
+
+export const getTopWorkouts = async (limit = 5) => {
+  const response = await api.get(`analytics/top-workouts/?limit=${limit}`);
+  return response.data;
+};

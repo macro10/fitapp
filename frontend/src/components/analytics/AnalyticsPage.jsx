@@ -4,6 +4,8 @@ import MuscleGroupsTab from "./tabs/MuscleGroupsTab";
 import ExercisesTab from "./tabs/ExercisesTab";
 
 export default function AnalyticsPage() {
+  console.log('AnalyticsPage rendered');
+
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       <div className="mb-6">
