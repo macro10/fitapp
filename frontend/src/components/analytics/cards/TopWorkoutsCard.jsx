@@ -47,8 +47,8 @@ export default function TopWorkoutsCard() {
           <div className="bg-muted/10 p-2 rounded-md">
             <TrophyIcon className="h-5 w-5 text-foreground/70" />
           </div>
-          <div>
-            <CardTitle>Top Workouts</CardTitle>
+          <div className="space-y-1">
+            <CardTitle className="text-2xl">Top Workouts</CardTitle>
             <p className="text-muted-foreground">Your strongest performances</p>
           </div>
         </div>
