@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
 import { getTopWorkouts } from "../../../api";
 import { format } from "date-fns";
-import { CalendarIcon, DumbbellIcon, TrophyIcon } from "lucide-react";
+import { DumbbellIcon, TrophyIcon } from "lucide-react";
+
+// Add the formatVolume helper function from WorkoutListPage
+const formatVolume = (volume) => {
+  if (volume >= 1000) {
+    return `${(volume / 1000).toFixed(1)}k`;
+  }
+  return `${volume}`;
+};
 
 export default function TopWorkoutsCard() {
   const [topWorkouts, setTopWorkouts] = useState([]);
@@ -64,9 +72,6 @@ export default function TopWorkoutsCard() {
                         #{index + 1}
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="bg-muted/10 p-2 rounded-md">
-                          <CalendarIcon className="h-5 w-5 text-foreground/70" />
-                        </div>
                         <div className="space-y-1">
                           <h4 className="text-lg font-semibold">{workout.name}</h4>
                           <p className="text-sm text-muted-foreground">
@@ -76,7 +81,7 @@ export default function TopWorkoutsCard() {
                       </div>
                     </div>
                     <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
-                      {workout.total_volume.toLocaleString()}
+                      {formatVolume(workout.total_volume)}
                     </div>
                   </div>
                 </CardHeader>
