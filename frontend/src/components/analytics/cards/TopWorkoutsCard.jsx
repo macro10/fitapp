@@ -4,12 +4,20 @@ import { getTopWorkouts } from "../../../api";
 import { format } from "date-fns";
 import { DumbbellIcon, TrophyIcon } from "lucide-react";
 
-// Add the formatVolume helper function from WorkoutListPage
 const formatVolume = (volume) => {
   if (volume >= 1000) {
     return `${(volume / 1000).toFixed(1)}k`;
   }
   return `${volume}`;
+};
+
+const getRankingColor = (index) => {
+  switch (index) {
+    case 0: return "text-yellow-500"; // Gold
+    case 1: return "text-gray-400";   // Silver
+    case 2: return "text-amber-700";  // Bronze
+    default: return "text-zinc-900";  // Same as volume pills
+  }
 };
 
 export default function TopWorkoutsCard() {
@@ -68,16 +76,14 @@ export default function TopWorkoutsCard() {
                 <CardHeader className="py-4">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                      <div className="text-lg font-medium text-muted-foreground">
+                      <div className={`text-lg font-bold ${getRankingColor(index)}`}>
                         #{index + 1}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="space-y-1">
-                          <h4 className="text-lg font-semibold">{workout.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {format(new Date(workout.date), "MMM d, yyyy")} • {workout.exercise_count} exercises
-                          </p>
-                        </div>
+                      <div className="space-y-1">
+                        <h4 className="text-lg font-semibold">{workout.name}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {format(new Date(workout.date), "MMM d, yyyy")} • {workout.exercise_count} exercises
+                        </p>
                       </div>
                     </div>
                     <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
