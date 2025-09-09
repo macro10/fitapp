@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
 import { getTopWorkouts } from "../../../api";
 import { format } from "date-fns";
-import { DumbbellIcon, TrophyIcon } from "lucide-react";
+import { TrophyIcon } from "lucide-react";
 
 const formatVolume = (volume) => {
   if (volume >= 1000) {

@@ -96,8 +96,21 @@ const WeeklyVolumeChart = () => {
               color: '#ffffff',
               padding: '12px'
             }}
-            formatter={(value) => [`${(value / 1000).toFixed(1)}k`, '']}
+            formatter={(value, name, props) => {
+              // Color the values to match their lines
+              const color = name === "Total Volume" ? "#f97316" : "#0d9488";
+              return [
+                `${(value / 1000).toFixed(1)}k`,
+                name,
+                { color }  // This will color the value text
+              ];
+            }}
             labelFormatter={(label) => formatWeekLabel(label)}
+            wrapperStyle={{ zIndex: 1000 }}
+            itemSorter={(item) => {
+              // Sort Total Volume first, then Avg Volume
+              return item.dataKey === "totalVolume" ? -1 : 1;
+            }}
           />
           <Legend 
             verticalAlign="top"
@@ -110,9 +123,9 @@ const WeeklyVolumeChart = () => {
           />
           <Line 
             type="monotone" 
-            dataKey="avgVolumePerWorkout" 
+            dataKey="avgVolumePerWorkout"
             stroke="#0d9488"
-            name="Avg Volume per Workout"
+            name="Avg Volume"
             strokeWidth={2.5}
             dot={false}
             activeDot={{ r: 6, strokeWidth: 0 }}
