@@ -66,7 +66,7 @@ const WeeklyVolumeChart = () => {
       <ResponsiveContainer width="100%" height={400}>
         <LineChart 
           data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
+          margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
         >
           <XAxis 
             dataKey="week" 
@@ -85,31 +85,46 @@ const WeeklyVolumeChart = () => {
           <YAxis 
             stroke="#888888"
             tick={{ fill: '#888888' }}
+            width={60}
+            tickFormatter={(value) => `${(value / 1000).toFixed(1)}k`}
           />
           <Tooltip 
             contentStyle={{ 
               backgroundColor: 'rgba(24, 24, 27, 0.9)',
               border: 'none',
               borderRadius: '8px',
-              color: '#ffffff'
+              color: '#ffffff',
+              padding: '12px'
+            }}
+            formatter={(value) => [`${(value / 1000).toFixed(1)}k`, '']}
+            labelFormatter={(label) => formatWeekLabel(label)}
+          />
+          <Legend 
+            verticalAlign="top"
+            height={36}
+            iconType="circle"
+            iconSize={8}
+            wrapperStyle={{
+              paddingBottom: '20px'
             }}
           />
-          <Legend />
           <Line 
             type="monotone" 
             dataKey="avgVolumePerWorkout" 
-            stroke="#0d9488" // Soft teal (teal-600)
+            stroke="#0d9488"
             name="Avg Volume per Workout"
-            strokeWidth={2}
+            strokeWidth={2.5}
             dot={false}
+            activeDot={{ r: 6, strokeWidth: 0 }}
           />
           <Line 
             type="monotone" 
             dataKey="totalVolume" 
-            stroke="#f97316" // Muted coral/orange (orange-500)
+            stroke="#f97316"
             name="Total Volume"
-            strokeWidth={2}
+            strokeWidth={2.5}
             dot={false}
+            activeDot={{ r: 6, strokeWidth: 0 }}
           />
         </LineChart>
       </ResponsiveContainer>

@@ -3,12 +3,14 @@ import WeeklyVolumeChart from "../charts/WeeklyVolumeChart";
 
 export default function VolumeProgressCard() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Volume Progress</CardTitle>
-        <p className="text-muted-foreground">
-          Track your total workout volume over time
-        </p>
+    <Card className="pb-4">
+      <CardHeader className="pb-2">
+        <div className="space-y-1">
+          <CardTitle className="text-2xl">Volume Progress</CardTitle>
+          <p className="text-muted-foreground">
+            Track your total workout volume over time
+          </p>
+        </div>
       </CardHeader>
       <CardContent>
         <WeeklyVolumeChart />
