@@ -98,7 +98,7 @@ const WeeklyVolumeChart = () => {
           <Line 
             type="monotone" 
             dataKey="avgVolumePerWorkout" 
-            stroke="#8884d8" 
+            stroke="#0d9488" // Soft teal (teal-600)
             name="Avg Volume per Workout"
             strokeWidth={2}
             dot={false}
@@ -106,7 +106,7 @@ const WeeklyVolumeChart = () => {
           <Line 
             type="monotone" 
             dataKey="totalVolume" 
-            stroke="#82ca9d" 
+            stroke="#f97316" // Muted coral/orange (orange-500)
             name="Total Volume"
             strokeWidth={2}
             dot={false}

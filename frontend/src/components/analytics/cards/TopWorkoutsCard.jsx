@@ -15,7 +15,7 @@ const getRankingColor = (index) => {
   switch (index) {
     case 0: return "text-yellow-500"; // Gold
     case 1: return "text-gray-400";   // Silver
-    case 2: return "text-amber-700";  // Bronze
+    case 2: return "text-amber-800";  // Darker bronze (changed from amber-700)
     default: return "text-zinc-900";  // Same as volume pills
   }
 };
