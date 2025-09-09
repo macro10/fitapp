@@ -43,45 +43,44 @@ export default function TopWorkoutsCard() {
         ) : loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                  <div className="space-y-2">
-                    <div className="h-5 w-40 bg-muted rounded" />
-                    <div className="h-4 w-24 bg-muted rounded" />
+              <Card key={i} className="animate-pulse mb-4">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div className="w-1/3 h-6 bg-muted rounded" />
+                    <div className="w-8 h-8 bg-muted rounded" />
                   </div>
-                  <div className="h-8 w-20 bg-muted rounded" />
-                </div>
-              </div>
+                </CardHeader>
+              </Card>
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {topWorkouts.map((workout, index) => (
-              <div
-                key={workout.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="text-lg font-medium text-muted-foreground w-8">
-                    #{index + 1}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-semibold">{workout.name}</h4>
+              <Card key={workout.id} className="mb-4 hover:shadow-lg transition-shadow">
+                <CardHeader className="py-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="text-lg font-medium text-muted-foreground">
+                        #{index + 1}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-muted/10 p-2 rounded-md">
+                          <CalendarIcon className="h-5 w-5 text-foreground/70" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-lg font-semibold">{workout.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {format(new Date(workout.date), "MMM d, yyyy")} • {workout.exercise_count} exercises
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CalendarIcon className="h-4 w-4" />
-                      <span>{format(new Date(workout.date), "MMM d, yyyy")}</span>
-                      <span>•</span>
-                      <DumbbellIcon className="h-4 w-4" />
-                      <span>{workout.exercise_count} exercises</span>
+                    <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
+                      {workout.total_volume.toLocaleString()}
                     </div>
                   </div>
-                </div>
-                <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
-                  {workout.total_volume.toLocaleString()}
-                </div>
-              </div>
+                </CardHeader>
+              </Card>
             ))}
           </div>
         )}
