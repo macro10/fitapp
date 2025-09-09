@@ -86,7 +86,7 @@ const WeeklyVolumeChart = () => {
             stroke="#888888"
             tick={{ fill: '#888888' }}
             width={60}
-            tickFormatter={(value) => `${(value / 1000).toFixed(1)}k`}
+            tickFormatter={(value) => `${Math.round(value / 1000)}k`}
           />
           <Tooltip 
             contentStyle={{ 
@@ -124,7 +124,7 @@ const WeeklyVolumeChart = () => {
           <Line 
             type="monotone" 
             dataKey="avgVolumePerWorkout"
-            stroke="#0d9488"
+            stroke="#94a3b8" // text-gray-400 (silver)
             name="Avg Volume"
             strokeWidth={2.5}
             dot={false}
@@ -133,7 +133,7 @@ const WeeklyVolumeChart = () => {
           <Line 
             type="monotone" 
             dataKey="totalVolume" 
-            stroke="#f97316"
+            stroke="#eab308" // text-yellow-500 (gold)
             name="Total Volume"
             strokeWidth={2.5}
             dot={false}
