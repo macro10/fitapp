@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter
 from .views import ExerciseViewSet, WorkoutViewSet, PerformedExerciseViewSet, UserRegistrationView
 from django.contrib.auth.models import User
 from rest_framework import serializers, viewsets
-from django.urls import path
+from django.urls import path, include
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,4 +21,5 @@ router.register(r'users', UserViewSet)
 
 urlpatterns = router.urls + [
     path('register/', UserRegistrationView.as_view(), name='user-register'),
+    path('analytics/', include('workouts.api.analytics.urls')),
 ]

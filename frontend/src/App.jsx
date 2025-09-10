@@ -9,7 +9,7 @@ import WorkoutListPage from "./components/WorkoutListPage";
 import WorkoutLoggerPage from "./components/workoutLogger/WorkoutLoggerPage";
 import AuthPage from "./components/AuthPage";
 import Layout from "./components/Layout";
-import AnalyticsPage from "./components/AnalyticsPage";
+import AnalyticsPage from "./components/analytics/AnalyticsPage";
 
 const AuthContext = createContext();
 
