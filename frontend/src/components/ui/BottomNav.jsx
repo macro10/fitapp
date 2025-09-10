@@ -34,7 +34,7 @@ export function BottomNav() {
               )}
             >
               <BarChart2Icon className="h-6 w-6" />
-              <span className="text-xs font-medium">Analytics</span>
+              <span className="text-xs font-medium">Progress</span>
             </Link>
           </div>
           <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 top-0">

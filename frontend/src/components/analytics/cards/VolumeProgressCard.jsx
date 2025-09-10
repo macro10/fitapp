@@ -13,7 +13,7 @@ export default function VolumeProgressCard() {
           <div className="space-y-1">
             <CardTitle className="text-2xl">Strength</CardTitle>
             <p className="text-muted-foreground">
-              See your workout volume by week
+              Your workout volume by week
             </p>
           </div>
         </div>
