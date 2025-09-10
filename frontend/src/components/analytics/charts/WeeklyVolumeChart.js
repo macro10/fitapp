@@ -125,7 +125,7 @@ const WeeklyVolumeChart = () => {
             type="monotone" 
             dataKey="avgVolumePerWorkout"
             stroke="#94a3b8" // text-gray-400 (silver)
-            name="Avg Volume"
+            name="Average"
             strokeWidth={2.5}
             dot={false}
             activeDot={{ r: 6, strokeWidth: 0 }}
@@ -134,7 +134,7 @@ const WeeklyVolumeChart = () => {
             type="monotone" 
             dataKey="totalVolume" 
             stroke="#eab308" // text-yellow-500 (gold)
-            name="Total Volume"
+            name="Total"
             strokeWidth={2.5}
             dot={false}
             activeDot={{ r: 6, strokeWidth: 0 }}

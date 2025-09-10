@@ -11,9 +11,9 @@ export default function VolumeProgressCard() {
             <LineChart className="h-5 w-5 text-foreground/70" />
           </div>
           <div className="space-y-1">
-            <CardTitle className="text-2xl">Volume Progress</CardTitle>
+            <CardTitle className="text-2xl">Strength</CardTitle>
             <p className="text-muted-foreground">
-              Track your total workout volume by week
+              See your workout volume by week
             </p>
           </div>
         </div>
