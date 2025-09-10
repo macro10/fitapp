@@ -85,8 +85,9 @@ const WeeklyVolumeChart = () => {
           <YAxis 
             stroke="#888888"
             tick={{ fill: '#888888' }}
-            width={60}
+            width={35}  // Reduced from 60
             tickFormatter={(value) => `${Math.round(value / 1000)}k`}
+            dx={-10}   // Move the axis labels left
           />
           <Tooltip 
             contentStyle={{ 
