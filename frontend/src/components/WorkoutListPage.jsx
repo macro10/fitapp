@@ -21,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { CACHE_KEYS, CACHE_DURATION } from '../constants/cache';
 
 // First, let's add a helper function to calculate volume
 const calculateExerciseVolume = (performedExercise) => {
@@ -272,10 +273,6 @@ function WorkoutSkeleton() {
   );
 }
 
-// Add these constants at the top of the file
-const CACHE_KEY = 'workouts_cache';
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
-
 export default function WorkoutListPage() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -284,6 +281,25 @@ export default function WorkoutListPage() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Add this function to clear the cache
+  const clearWorkoutsCache = () => {
+    localStorage.removeItem(CACHE_KEYS.WORKOUTS);
+    localStorage.removeItem(CACHE_KEYS.WORKOUTS_TIMESTAMP);
+  };
+
+  useEffect(() => {
+    // Listen for storage events to detect cache invalidation from other components
+    const handleStorageChange = (e) => {
+      if (e.key === CACHE_KEYS.WORKOUTS && e.newValue === null) {
+        // Cache was cleared, fetch fresh data
+        fetchWorkouts();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   useEffect(() => {
     // Check for any in-progress workout data
@@ -310,22 +326,24 @@ export default function WorkoutListPage() {
   }, [user, navigate]);
 
   const getCachedWorkouts = () => {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (!cached) return null;
+    const cached = localStorage.getItem(CACHE_KEYS.WORKOUTS);
+    const timestamp = localStorage.getItem(CACHE_KEYS.WORKOUTS_TIMESTAMP);
+    
+    if (!cached || !timestamp) return null;
 
     try {
-      const { data, timestamp } = JSON.parse(cached);
-      const isExpired = Date.now() - timestamp > CACHE_DURATION;
+      const data = JSON.parse(cached);
+      const isExpired = Date.now() - Number(timestamp) > CACHE_DURATION;
       
       if (isExpired) {
-        localStorage.removeItem(CACHE_KEY);
+        clearWorkoutsCache();
         return null;
       }
       
       return data;
     } catch (err) {
       console.error('Error parsing cached workouts:', err);
-      localStorage.removeItem(CACHE_KEY);
+      clearWorkoutsCache();
       return null;
     }
   };
@@ -338,16 +356,13 @@ export default function WorkoutListPage() {
       setError(null);
       
       const data = await getWorkouts();
-      // Sort workouts by date in descending order (most recent first)
       const sortedWorkouts = [...(data || [])].sort((a, b) => 
         new Date(b.date) - new Date(a.date)
       );
       
-      // Update cache
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        data: sortedWorkouts,
-        timestamp: Date.now()
-      }));
+      // Update cache with separate timestamp
+      localStorage.setItem(CACHE_KEYS.WORKOUTS, JSON.stringify(sortedWorkouts));
+      localStorage.setItem(CACHE_KEYS.WORKOUTS_TIMESTAMP, Date.now().toString());
       
       setWorkouts(sortedWorkouts);
     } catch (err) {
@@ -370,10 +385,8 @@ export default function WorkoutListPage() {
       setWorkouts(prevWorkouts => {
         const newWorkouts = prevWorkouts.filter(w => w.id !== workoutId);
         // Update cache with new workout list
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-          data: newWorkouts,
-          timestamp: Date.now()
-        }));
+        localStorage.setItem(CACHE_KEYS.WORKOUTS, JSON.stringify(newWorkouts));
+        localStorage.setItem(CACHE_KEYS.WORKOUTS_TIMESTAMP, Date.now().toString());
         return newWorkouts;
       });
       
@@ -391,10 +404,8 @@ export default function WorkoutListPage() {
       // Restore original state on error
       setWorkouts(originalWorkouts);
       // Update cache with original workouts
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        data: originalWorkouts,
-        timestamp: Date.now()
-      }));
+      localStorage.setItem(CACHE_KEYS.WORKOUTS, JSON.stringify(originalWorkouts));
+      localStorage.setItem(CACHE_KEYS.WORKOUTS_TIMESTAMP, Date.now().toString());
       
       toast({
         title: "Error",

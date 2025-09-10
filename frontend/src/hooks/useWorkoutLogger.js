@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createWorkoutWithExercises, getExercises } from "../api";
 import { useNavigate } from "react-router-dom";
+import { CACHE_KEYS } from '../constants/cache';
 
 export const WORKOUT_STORAGE_KEY = 'inProgressWorkout';
 export const CURRENT_EXERCISE_STORAGE_KEY = 'inProgressExercise';
@@ -148,9 +149,16 @@ export const useWorkoutLogger = () => {
         workoutState.exercises,
         workoutState.name
       );
+      
+      // Clear all workout-related storage
       localStorage.removeItem(WORKOUT_STORAGE_KEY);
       localStorage.removeItem(CURRENT_EXERCISE_STORAGE_KEY);
-      localStorage.removeItem(REST_TIMER_KEY); // Add this line
+      localStorage.removeItem(REST_TIMER_KEY);
+      
+      // Clear the workouts cache to force a fresh fetch
+      localStorage.removeItem(CACHE_KEYS.WORKOUTS);
+      localStorage.removeItem(CACHE_KEYS.WORKOUTS_TIMESTAMP);
+      
       navigate("/");
     } catch (err) {
       setError("Failed to save workout. Please try again.");
