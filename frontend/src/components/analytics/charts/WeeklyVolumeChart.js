@@ -112,7 +112,7 @@ const WeeklyVolumeChart = () => {
               return item.dataKey === "totalVolume" ? -1 : 1;
             }}
           />
-          <Legend 
+          {/* <Legend 
             verticalAlign="top"
             height={36}
             iconType="circle"
@@ -120,7 +120,7 @@ const WeeklyVolumeChart = () => {
             wrapperStyle={{
               paddingBottom: '20px'
             }}
-          />
+          /> */}
           <Line 
             type="monotone" 
             dataKey="avgVolumePerWorkout"
