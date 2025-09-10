@@ -5,7 +5,7 @@ import { getWorkouts, deleteWorkout } from "../api";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X } from "lucide-react";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, Trash2Icon, ChevronDown, X } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
@@ -272,6 +272,10 @@ function WorkoutSkeleton() {
   );
 }
 
+// Add these constants at the top of the file
+const CACHE_KEY = 'workouts_cache';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 export default function WorkoutListPage() {
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -284,33 +288,77 @@ export default function WorkoutListPage() {
   useEffect(() => {
     // Check for any in-progress workout data
     const hasInProgressWorkout = localStorage.getItem(WORKOUT_STORAGE_KEY) || 
-                                localStorage.getItem(CURRENT_EXERCISE_STORAGE_KEY);
+                              localStorage.getItem(CURRENT_EXERCISE_STORAGE_KEY);
     
     if (hasInProgressWorkout) {
-      // If there's an in-progress workout or exercise, redirect to the logger
       navigate("/log");
       return;
     }
 
-    // Otherwise proceed with fetching workouts
-    fetchWorkouts();
+    // Try to get cached data first
+    const cachedData = getCachedWorkouts();
+    if (cachedData) {
+      setWorkouts(cachedData);
+      setLoading(false);
+      
+      // Fetch fresh data in the background
+      fetchWorkouts(true);
+    } else {
+      // If no cache, fetch as normal
+      fetchWorkouts();
+    }
   }, [user, navigate]);
 
-  const fetchWorkouts = async () => {
+  const getCachedWorkouts = () => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+
     try {
-      setLoading(true);
+      const { data, timestamp } = JSON.parse(cached);
+      const isExpired = Date.now() - timestamp > CACHE_DURATION;
+      
+      if (isExpired) {
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+      
+      return data;
+    } catch (err) {
+      console.error('Error parsing cached workouts:', err);
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+  };
+
+  const fetchWorkouts = async (isBackgroundFetch = false) => {
+    try {
+      if (!isBackgroundFetch) {
+        setLoading(true);
+      }
       setError(null);
+      
       const data = await getWorkouts();
       // Sort workouts by date in descending order (most recent first)
       const sortedWorkouts = [...(data || [])].sort((a, b) => 
         new Date(b.date) - new Date(a.date)
       );
+      
+      // Update cache
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        data: sortedWorkouts,
+        timestamp: Date.now()
+      }));
+      
       setWorkouts(sortedWorkouts);
     } catch (err) {
       console.error('Error fetching workouts:', err);
-      setError('Failed to load workouts. Please try again.');
+      if (!isBackgroundFetch) {
+        setError('Failed to load workouts. Please try again.');
+      }
     } finally {
-      setLoading(false);
+      if (!isBackgroundFetch) {
+        setLoading(false);
+      }
     }
   };
 
@@ -319,13 +367,21 @@ export default function WorkoutListPage() {
     
     try {
       // Optimistically update UI
-      setWorkouts(prevWorkouts => prevWorkouts.filter(w => w.id !== workoutId));
+      setWorkouts(prevWorkouts => {
+        const newWorkouts = prevWorkouts.filter(w => w.id !== workoutId);
+        // Update cache with new workout list
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          data: newWorkouts,
+          timestamp: Date.now()
+        }));
+        return newWorkouts;
+      });
       
       // Show success toast immediately
       toast({
         title: "Workout deleted",
         description: "Your workout has been successfully deleted.",
-        variant: "success", // Using our new success variant
+        variant: "success",
         duration: 2000,
       });
       
@@ -334,6 +390,11 @@ export default function WorkoutListPage() {
     } catch (err) {
       // Restore original state on error
       setWorkouts(originalWorkouts);
+      // Update cache with original workouts
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        data: originalWorkouts,
+        timestamp: Date.now()
+      }));
       
       toast({
         title: "Error",
