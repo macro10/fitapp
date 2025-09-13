@@ -12,7 +12,7 @@ import { STEPS } from '../../constants/workout';
 import { useWorkoutLogger } from '../../hooks/useWorkoutLogger';
 import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from "../../App"; // Make sure we import useAuth
 import useExerciseHistory from '../../hooks/useExerciseHistory';
 
@@ -34,11 +34,13 @@ import { Skeleton } from "../ui/skeleton";
 import {
   DumbbellIcon,
   X,
+  Plus,
 } from "lucide-react";
 
 // Main component with organized sections
 export default function WorkoutLoggerPage() {
   const navigate = useNavigate();
+  const location = useLocation(); // Move this to component level
   const { user } = useAuth(); // Get auth state
   const [loading, setLoading] = useState(true);
   // Custom hooks
@@ -115,6 +117,15 @@ export default function WorkoutLoggerPage() {
     loadExercises();
   }, [user, navigate]);
 
+  // Add this effect to handle the returned exercise
+  useEffect(() => {
+    if (location.state?.selectedExercise) {
+      handleExerciseSelect(location.state.selectedExercise);
+      // Clear the state to prevent re-handling
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, handleExerciseSelect, navigate]);
+
   const handleExerciseComplete = () => {
     const exerciseData = {
       exercise: currentExercise.id, // Make sure we're using the ID
@@ -183,10 +194,16 @@ export default function WorkoutLoggerPage() {
                     exercises={exercises}
                     loading={loading}
                   />
-                  <ExerciseSelector
-                    exercises={exercises}
-                    onSelect={handleExerciseSelect}
-                  />
+                  <Button 
+                    className="flex items-center justify-between w-full p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                    onClick={() => navigate('/workout/exercise-selector')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <DumbbellIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <span className="text-muted-foreground">Add exercise...</span>
+                    </div>
+                    <Plus className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  </Button>
                   {workoutExercises.length > 0 && (
                     <Button
                       className="w-full"
