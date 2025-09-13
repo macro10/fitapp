@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ExerciseSelector } from "./ExerciseSelector";
 import { ExerciseSelectionFlow } from './ExerciseSelectionFlow';
 import { ReviewStep } from "./ReviewStep";
 import { StepIndicator } from "./StepIndicator";
@@ -12,10 +11,10 @@ import { STEPS } from '../../constants/workout';
 import { useWorkoutLogger } from '../../hooks/useWorkoutLogger';
 import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from "../../App";
 import useExerciseHistory from '../../hooks/useExerciseHistory';
-import { ExerciseProvider } from '../../contexts/ExerciseContext';
+import { ExerciseProvider, useExerciseContext } from '../../contexts/ExerciseContext';
 
 // UI Component imports
 import {
@@ -28,11 +27,14 @@ import {
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Input } from "../ui/input";
-import { X } from "lucide-react";
+import { X, Plus, DumbbellIcon } from "lucide-react";
 
 export default function WorkoutLoggerPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+  // Add exercise context
+  const { exercises, loading } = useExerciseContext();
   
   const {
     workoutExercises,
@@ -85,6 +87,15 @@ export default function WorkoutLoggerPage() {
     resetExerciseState();
   };
 
+  // Add effect to handle exercise selection
+  useEffect(() => {
+    if (location.state?.selectedExercise) {
+      handleExerciseSelect(location.state.selectedExercise);
+      // Clear the state to prevent re-handling
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, handleExerciseSelect, navigate]);
+
   return (
     <div className="min-h-screen pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)]">
       <div className="container mx-auto p-4">
@@ -135,11 +146,32 @@ export default function WorkoutLoggerPage() {
               )}
 
               {step === STEPS.SELECT_EXERCISE && (
-                <ExerciseSelectionFlow
-                  onExerciseSelect={handleExerciseSelect}
-                  workoutExercises={workoutExercises}
-                  onFinishWorkout={handleFinishWorkout}
-                />
+                <div className="space-y-4">
+                  <CompletedExercises
+                    workoutExercises={workoutExercises}
+                    exercises={exercises}
+                    loading={loading}
+                  />
+                  <Button 
+                    className="flex items-center justify-between w-full p-4 rounded-lg border hover:bg-accent/50 transition-colors"
+                    onClick={() => navigate('/workout/exercise-selector')}
+                  >
+                    <div className="flex items-center gap-2">
+                      <DumbbellIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                      <span className="text-muted-foreground">Add exercise...</span>
+                    </div>
+                    <Plus className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                  </Button>
+                  {workoutExercises.length > 0 && (
+                    <Button
+                      className="w-full"
+                      onClick={handleFinishWorkout}
+                      disabled={loading || !exercises?.length}
+                    >
+                      Finish Workout
+                    </Button>
+                  )}
+                </div>
               )}
 
               {step === STEPS.LOG_SETS && (

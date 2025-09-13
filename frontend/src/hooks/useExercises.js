@@ -20,9 +20,10 @@ export function useExercises() {
     }
   };
 
+  // Only load exercises once when the hook is first used
   useEffect(() => {
     loadExercises();
-  }, []);
+  }, []); // Empty dependency array
 
   return {
     exercises,

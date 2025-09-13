@@ -2,7 +2,8 @@ import {
   BrowserRouter as Router, 
   Routes, 
   Route, 
-  Navigate
+  Navigate,
+  useNavigate
 } from "react-router-dom";
 import { useState, useEffect, createContext, useContext } from "react";
 import WorkoutListPage from "./components/WorkoutListPage";
@@ -11,6 +12,7 @@ import AuthPage from "./components/AuthPage";
 import Layout from "./components/Layout";
 import AnalyticsPage from "./components/analytics/AnalyticsPage";
 import { ExerciseProvider } from './contexts/ExerciseContext';
+import ExerciseSelectorPage from './components/workoutLogger/ExerciseSelectorPage';
 
 const AuthContext = createContext();
 
@@ -37,6 +39,7 @@ function App() {
             </Route>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/log" element={<WorkoutLoggerPage />} />
+            <Route path="/workout/exercise-selector" element={<ExerciseSelectorPage />} />
           </Routes>
         </Router>
       </ExerciseProvider>
