@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../App";
+import { useAuth } from "../contexts/AuthContext";
 import { getWorkouts, deleteWorkout } from "../api";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -277,7 +277,7 @@ export default function WorkoutListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(null);
-  const { user, setUser } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -347,7 +347,7 @@ export default function WorkoutListPage() {
   };
 
   const handleLogout = () => {
-    setUser(null);
+    logout();
     navigate("/auth");
   };
 

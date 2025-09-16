@@ -13,7 +13,7 @@ import { useWorkoutLogger } from '../../hooks/useWorkoutLogger';
 import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../../App"; // Make sure we import useAuth
+import { useAuth } from "../../contexts/AuthContext"; // updated import
 import useExerciseHistory from '../../hooks/useExerciseHistory';
 
 // UI Component imports
