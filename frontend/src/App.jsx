@@ -3,7 +3,8 @@ import {
   Routes, 
   Route, 
   Navigate,
-  useNavigate
+  useNavigate,
+  Outlet
 } from "react-router-dom";
 import { useState, useEffect, createContext, useContext } from "react";
 import WorkoutListPage from "./components/WorkoutListPage";
@@ -12,38 +13,33 @@ import AuthPage from "./components/AuthPage";
 import Layout from "./components/Layout";
 import AnalyticsPage from "./components/analytics/AnalyticsPage";
 import { ExerciseProvider } from './contexts/ExerciseContext';
+import { AuthProvider } from './contexts/AuthContext';
 import ExerciseSelectorPage from './components/workoutLogger/ExerciseSelectorPage';
 
-const AuthContext = createContext();
-
-export function useAuth() {
-  return useContext(AuthContext);
-}
-
 function App() {
-  const [user, setUser] = useState(() => localStorage.getItem("token") || null);
-
-  useEffect(() => {
-    if (user) localStorage.setItem("token", user);
-    else localStorage.removeItem("token");
-  }, [user]);
-
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
-      <ExerciseProvider>
-        <Router>
-          <Routes>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Auth route outside of ExerciseProvider */}
+          <Route path="/auth" element={<AuthPage />} />
+          
+          {/* Protected routes wrapped in ExerciseProvider */}
+          <Route element={
+            <ExerciseProvider>
+              <Outlet />
+            </ExerciseProvider>
+          }>
             <Route path="/" element={<Layout />}>
               <Route index element={<WorkoutListPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />
             </Route>
-            <Route path="/auth" element={<AuthPage />} />
             <Route path="/log" element={<WorkoutLoggerPage />} />
             <Route path="/workout/exercise-selector" element={<ExerciseSelectorPage />} />
-          </Routes>
-        </Router>
-      </ExerciseProvider>
-    </AuthContext.Provider>
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

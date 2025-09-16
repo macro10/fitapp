@@ -12,7 +12,7 @@ import { useWorkoutLogger } from '../../hooks/useWorkoutLogger';
 import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from "../../App";
+import { useAuth } from "../../contexts/AuthContext";
 import useExerciseHistory from '../../hooks/useExerciseHistory';
 import { ExerciseProvider, useExerciseContext } from '../../contexts/ExerciseContext';
 

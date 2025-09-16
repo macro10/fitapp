@@ -1,22 +1,34 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExerciseContext } from '../../contexts/ExerciseContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { Command, CommandEmpty, CommandGroup, CommandItem } from "../ui/command";
 import { DumbbellIcon, ArrowLeft } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { useState } from 'react';
 
 export default function ExerciseSelectorPage() {
   const navigate = useNavigate();
-  const { exercises, loading } = useExerciseContext();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const { exercises, loading } = useExerciseContext();
 
-  const filteredExercises = exercises.filter(exercise => 
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+    }
+  }, [user, navigate]);
+
+  // If not authenticated, show nothing while redirecting
+  if (!user) {
+    return null;
+  }
+
+  const filteredExercises = exercises?.filter(exercise => 
     exercise.name.toLowerCase().includes(search.toLowerCase())
-  );
+  ) || [];
 
   const handleSelect = (exercise) => {
-    // Navigate to /log instead of /workout/logger
     navigate('/log', { 
       state: { selectedExercise: exercise }
     });

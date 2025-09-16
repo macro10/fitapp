@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getExercises } from '../api';
 
-export function useExercises() {
+export function useExercises(user) {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,15 +20,19 @@ export function useExercises() {
     }
   };
 
-  // Only load exercises once when the hook is first used
   useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     loadExercises();
-  }, []); // Empty dependency array
+  }, [user]); // Depend on user
 
   return {
     exercises,
     loading,
     error,
-    refreshExercises: loadExercises
+    refreshExercises: () => user && loadExercises()
   };
 }

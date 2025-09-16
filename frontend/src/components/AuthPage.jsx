@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../App";
+import { useAuth } from "../contexts/AuthContext";
 import api from "../apiClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card"
