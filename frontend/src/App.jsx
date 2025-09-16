@@ -10,6 +10,7 @@ import AuthPage from "./components/AuthPage";
 import Layout from "./components/Layout";
 import AnalyticsPage from "./components/analytics/AnalyticsPage";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { WorkoutProvider } from "./contexts/WorkoutContext";
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
@@ -22,32 +23,34 @@ function RequireAuth({ children }) {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <RequireAuth>
-                <Layout />
-              </RequireAuth>
-            }
-          >
-            <Route index element={<WorkoutListPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-          </Route>
+      <WorkoutProvider>
+        <Router>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <RequireAuth>
+                  <Layout />
+                </RequireAuth>
+              }
+            >
+              <Route index element={<WorkoutListPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+            </Route>
 
-          <Route path="/auth" element={<AuthPage />} />
-          
-          <Route
-            path="/log"
-            element={
-              <RequireAuth>
-                <WorkoutLoggerPage />
-              </RequireAuth>
-            }
-          />
-        </Routes>
-      </Router>
+            <Route path="/auth" element={<AuthPage />} />
+            
+            <Route
+              path="/log"
+              element={
+                <RequireAuth>
+                  <WorkoutLoggerPage />
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </Router>
+      </WorkoutProvider>
     </AuthProvider>
   );
 }
