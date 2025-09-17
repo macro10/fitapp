@@ -11,6 +11,10 @@ function makeCacheKey(user) {
   return `WORKOUTS_CACHE_v1_${suffix}`;
 }
 
+const sortByDateDesc = (arr) => {
+  return [...arr].sort((a, b) => new Date(b.date) - new Date(a.date));
+};
+
 export function WorkoutProvider({ children }) {
   const { user } = useAuth();
   const cacheKey = makeCacheKey(user);
@@ -19,6 +23,7 @@ export function WorkoutProvider({ children }) {
   const [error, setError] = useState(null);
   const lastFetchedRef = useRef(null);
   const inFlightRef = useRef(null);
+  const pendingDeleteIds = useRef(new Set()); // barrier for optimistic deletes
 
   const readCache = useCallback(() => {
     try {
@@ -45,13 +50,19 @@ export function WorkoutProvider({ children }) {
 
   const isFresh = useCallback((ts) => Date.now() - ts < TTL_MS, []);
 
+  const applyPendingDeletes = useCallback((list) => {
+    if (!pendingDeleteIds.current.size) return list;
+    return list.filter(w => !pendingDeleteIds.current.has(w.id));
+  }, []);
+
   const fetchWorkouts = useCallback(async () => {
     const data = await apiGetWorkouts();
-    const list = Array.isArray(data) ? data : [];
-    setWorkouts(list);
+    const list = sortByDateDesc(Array.isArray(data) ? data : []);
+    const masked = applyPendingDeletes(list);
+    setWorkouts(masked);
     lastFetchedRef.current = Date.now();
-    writeCache(list);
-  }, [writeCache]);
+    writeCache(masked);
+  }, [applyPendingDeletes, writeCache]);
 
   const doFetch = useCallback(async (showLoading) => {
     if (inFlightRef.current) return inFlightRef.current;
@@ -68,44 +79,58 @@ export function WorkoutProvider({ children }) {
     return p;
   }, [fetchWorkouts]);
 
-  // Public API: load with cache + background revalidation (deduped)
+  // Explicit load: no background revalidate when cache is fresh
   const loadWorkouts = useCallback(async ({ force = false } = {}) => {
     setError(null);
 
     if (!force) {
       const cached = readCache();
       if (cached?.data) {
-        setWorkouts(cached.data);
+        const sorted = sortByDateDesc(cached.data);
+        const masked = applyPendingDeletes(sorted);
+        setWorkouts(masked);
         lastFetchedRef.current = cached.ts;
 
         if (isFresh(cached.ts)) {
-          // background refresh without loading state, deduped
-          void doFetch(false);
+          // Explicit model: skip background refresh when fresh
           return;
         }
       }
     }
-
-    // stale or no cache: foreground fetch, deduped
     await doFetch(true);
-  }, [readCache, isFresh, doFetch]);
+  }, [readCache, isFresh, doFetch, applyPendingDeletes]);
 
-  // Public API: delete with optimistic update (updates cache)
+  // Delete with barrier + explicit post-success sync
   const deleteWorkout = useCallback(async (workoutId) => {
     const prev = workouts;
+    pendingDeleteIds.current.add(workoutId);
+
     const next = prev.filter(w => w.id !== workoutId);
     setWorkouts(next);
     writeCache(next);
+
     try {
       await apiDeleteWorkout(workoutId);
+      pendingDeleteIds.current.delete(workoutId);
+      // Single foreground sync to confirm server state
+      await doFetch(false);
     } catch (e) {
+      // rollback
+      pendingDeleteIds.current.delete(workoutId);
       setWorkouts(prev);
       writeCache(prev);
       throw e;
     }
+  }, [workouts, writeCache, doFetch]);
+
+  // Upsert newly-created workout (keeps sort) — unaffected by delete barrier
+  const upsertWorkout = useCallback((workout) => {
+    const merged = sortByDateDesc([workout, ...workouts.filter(w => w.id !== workout.id)]);
+    setWorkouts(merged);
+    writeCache(merged);
   }, [workouts, writeCache]);
 
-  // Clear state on logout
+  // Reset on logout
   useEffect(() => {
     if (!user) {
       setWorkouts([]);
@@ -113,9 +138,17 @@ export function WorkoutProvider({ children }) {
       setLoading(false);
       lastFetchedRef.current = null;
       inFlightRef.current = null;
+      pendingDeleteIds.current.clear();
       clearCache();
     }
   }, [user, clearCache]);
+
+  // Prefetch once after login (explicit: may show spinner on first mount)
+  useEffect(() => {
+    if (user) {
+      loadWorkouts().catch(() => {});
+    }
+  }, [user, loadWorkouts]);
 
   const value = useMemo(() => ({
     workouts,
@@ -125,8 +158,9 @@ export function WorkoutProvider({ children }) {
     loadWorkouts,
     refresh: () => loadWorkouts({ force: true }),
     deleteWorkout,
+    upsertWorkout,
     setWorkouts,
-  }), [workouts, loading, error, loadWorkouts, deleteWorkout]);
+  }), [workouts, loading, error, loadWorkouts, deleteWorkout, upsertWorkout]);
 
   return (
     <WorkoutContext.Provider value={value}>

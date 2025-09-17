@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { createWorkoutWithExercises, getExercises } from "../api";
+import { createWorkoutWithExercises } from "../api";
 import { useNavigate } from "react-router-dom";
+import { useExercises } from "../contexts/ExerciseContext";
+import { useWorkouts } from "../contexts/WorkoutContext";
 
 export const WORKOUT_STORAGE_KEY = 'inProgressWorkout';
 export const CURRENT_EXERCISE_STORAGE_KEY = 'inProgressExercise';
@@ -83,26 +85,11 @@ export const useWorkoutLogger = () => {
     };
   });
 
-  const [exerciseMap, setExerciseMap] = useState({});
+  const { exerciseMap } = useExercises();
+  const { upsertWorkout } = useWorkouts();
+
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  // Effect to update exercise map when available
-  useEffect(() => {
-    const loadExerciseMap = async () => {
-      try {
-        const exercises = await getExercises();
-        const map = exercises.reduce((acc, exercise) => {
-          acc[exercise.id] = exercise;
-          return acc;
-        }, {});
-        setExerciseMap(map);
-      } catch (err) {
-        console.error('Failed to load exercises:', err);
-      }
-    };
-    loadExerciseMap();
-  }, []);
 
   // Effect to update workout name when exercises change
   useEffect(() => {
@@ -143,11 +130,13 @@ export const useWorkoutLogger = () => {
 
   const handleFinishWorkout = async () => {
     try {
-      await createWorkoutWithExercises(
+      const created = await createWorkoutWithExercises(
         new Date().toISOString(),
         workoutState.exercises,
         workoutState.name
       );
+      // Optimistically upsert new workout into context (sorted, cached)
+      upsertWorkout(created);
       localStorage.removeItem(WORKOUT_STORAGE_KEY);
       localStorage.removeItem(CURRENT_EXERCISE_STORAGE_KEY);
       localStorage.removeItem(REST_TIMER_KEY); // Add this line

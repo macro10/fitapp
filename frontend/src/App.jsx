@@ -11,6 +11,7 @@ import Layout from "./components/Layout";
 import AnalyticsPage from "./components/analytics/AnalyticsPage";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { WorkoutProvider } from "./contexts/WorkoutContext";
+import { ExerciseProvider } from "./contexts/ExerciseContext";
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
@@ -24,32 +25,34 @@ function App() {
   return (
     <AuthProvider>
       <WorkoutProvider>
-        <Router>
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <RequireAuth>
-                  <Layout />
-                </RequireAuth>
-              }
-            >
-              <Route index element={<WorkoutListPage />} />
-              <Route path="analytics" element={<AnalyticsPage />} />
-            </Route>
+        <ExerciseProvider>
+          <Router>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <RequireAuth>
+                    <Layout />
+                  </RequireAuth>
+                }
+              >
+                <Route index element={<WorkoutListPage />} />
+                <Route path="analytics" element={<AnalyticsPage />} />
+              </Route>
 
-            <Route path="/auth" element={<AuthPage />} />
-            
-            <Route
-              path="/log"
-              element={
-                <RequireAuth>
-                  <WorkoutLoggerPage />
-                </RequireAuth>
-              }
-            />
-          </Routes>
-        </Router>
+              <Route path="/auth" element={<AuthPage />} />
+              
+              <Route
+                path="/log"
+                element={
+                  <RequireAuth>
+                    <WorkoutLoggerPage />
+                  </RequireAuth>
+                }
+              />
+            </Routes>
+          </Router>
+        </ExerciseProvider>
       </WorkoutProvider>
     </AuthProvider>
   );

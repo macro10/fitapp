@@ -5,7 +5,6 @@ import { StepIndicator } from "./StepIndicator";
 import { SetLogger } from "./SetLogger";
 import { CompletedExercises } from "./CompletedExercises";
 import { CancelWorkoutDialog } from "./CancelWorkoutDialog";
-import { getExercises } from "../../api";
 import { STEPS } from '../../constants/workout';
 
 // Import custom hooks
@@ -13,7 +12,8 @@ import { useWorkoutLogger } from '../../hooks/useWorkoutLogger';
 import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../../contexts/AuthContext"; // updated import
+import { useAuth } from "../../contexts/AuthContext";
+import { useExercises } from "../../contexts/ExerciseContext";
 import useExerciseHistory from '../../hooks/useExerciseHistory';
 
 // UI Component imports
@@ -27,21 +27,25 @@ import {
 
 import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
-import { Input } from "../ui/input"; // Add this import if not already present
+import { Input } from "../ui/input";
 import { Skeleton } from "../ui/skeleton";
 
-// Icon imports
 import {
   DumbbellIcon,
   X,
 } from "lucide-react";
 
-// Main component with organized sections
 export default function WorkoutLoggerPage() {
   const navigate = useNavigate();
-  const { user } = useAuth(); // Get auth state
+  const { user } = useAuth();
+  const {
+    exercises,
+    loading: exercisesLoading,
+    loadExercises,
+  } = useExercises();
+
   const [loading, setLoading] = useState(true);
-  // Custom hooks
+
   const {
     workoutExercises,
     workoutName,
@@ -67,12 +71,11 @@ export default function WorkoutLoggerPage() {
     (workoutName !== "Untitled Workout");
 
   const handleCancelConfirm = () => {
-    clearWorkout(); // Clear workout data from localStorage
-    resetExerciseState(); // Reset current exercise state
-    navigate("/"); // Navigate back to list
+    clearWorkout();
+    resetExerciseState();
+    navigate("/");
   };
 
-  // Update the useCancelWorkout hook usage to always clear state
   const {
     showCancelDialog,
     setShowCancelDialog,
@@ -81,43 +84,24 @@ export default function WorkoutLoggerPage() {
 
   const { getExerciseDefaults } = useExerciseHistory();
 
-  // Local state
-  const [exercises, setExercises] = useState([]);
-
-  // Effects
-  // Check auth and load exercises
   useEffect(() => {
     if (!user) {
       navigate("/auth");
       return;
     }
+    // Load exercises from context (cache + revalidate)
+    loadExercises().catch(() => {});
+  }, [user, navigate, loadExercises]);
 
-    const loadExercises = async () => {
-      try {
-        setLoading(true);
-        const data = await getExercises();
-        console.log("Loaded exercises:", data); // Add this line
-        setExercises(data);
-      } catch (err) {
-        console.error("Failed to load exercises:", err);
-        // If we get a 401, redirect to auth
-        if (err.response?.status === 401) {
-          navigate("/auth");
-        }
-      } finally {
-        // Add a small delay before setting loading to false to prevent flicker
-        setTimeout(() => {
-          setLoading(false);
-        }, 100);
-      }
-    };
-
-    loadExercises();
-  }, [user, navigate]);
+  useEffect(() => {
+    // local spinner to smooth UI on first mount
+    const t = setTimeout(() => setLoading(false), 100);
+    return () => clearTimeout(t);
+  }, []);
 
   const handleExerciseComplete = () => {
     const exerciseData = {
-      exercise: currentExercise.id, // Make sure we're using the ID
+      exercise: currentExercise.id,
       sets: sets.length,
       reps_per_set: sets.map((s) => s.reps),
       weights_per_set: sets.map((s) => s.weight),
@@ -139,7 +123,7 @@ export default function WorkoutLoggerPage() {
                     value={workoutName}
                     onChange={(e) => setWorkoutName(e.target.value)}
                     className="font-bold text-2xl h-12 border rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
-                    style={{ fontSize: '24px' }}  // Adding explicit font size
+                    style={{ fontSize: '24px' }}
                     placeholder="Untitled Workout"
                   />
                 </div>
@@ -181,7 +165,7 @@ export default function WorkoutLoggerPage() {
                   <CompletedExercises
                     workoutExercises={workoutExercises}
                     exercises={exercises}
-                    loading={loading}
+                    loading={loading || exercisesLoading}
                   />
                   <ExerciseSelector
                     exercises={exercises}
@@ -191,7 +175,7 @@ export default function WorkoutLoggerPage() {
                     <Button
                       className="w-full"
                       onClick={handleFinishWorkout}
-                      disabled={loading || !exercises?.length}
+                      disabled={loading || exercisesLoading || !exercises?.length}
                     >
                       Finish Workout
                     </Button>
@@ -214,16 +198,10 @@ export default function WorkoutLoggerPage() {
                     }}
                     {...(() => {
                       const defaults = getExerciseDefaults(currentExercise.id);
-                      
-                      // If we have a previous set in this workout, compare it with the historical max
                       if (sets.length > 0) {
                         const lastSet = sets[sets.length - 1];
                         const lastWeight = lastSet.weight;
                         const historyWeight = parseInt(defaults.defaultWeight, 10);
-                        
-                        // Use the last set's values if:
-                        // 1. There's no history (defaults are 10/45)
-                        // 2. OR the last set's weight is greater than the historical max
                         if (defaults.defaultWeight === "45" || lastWeight >= historyWeight) {
                           return {
                             defaultReps: lastSet.reps.toString(),
@@ -231,7 +209,6 @@ export default function WorkoutLoggerPage() {
                           };
                         }
                       }
-                      
                       return defaults;
                     })()}
                   />
@@ -252,7 +229,7 @@ export default function WorkoutLoggerPage() {
           <CancelWorkoutDialog
             open={showCancelDialog}
             onOpenChange={setShowCancelDialog}
-            onConfirm={handleCancelConfirm} // Use the new handler
+            onConfirm={handleCancelConfirm}
           />
         </div>
       </div>
