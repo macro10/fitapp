@@ -6,9 +6,24 @@ const TTL_MS = 2 * 60 * 1000; // 2 minutes
 
 const WorkoutContext = createContext(null);
 
-function makeCacheKey(user) {
-  const suffix = user ? (typeof user === "string" ? user.slice(0, 16) : "authed") : "anon";
-  return `WORKOUTS_CACHE_v1_${suffix}`;
+function userCacheSuffix(token) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1] || ""));
+    return payload.user_id != null
+      ? `uid_${payload.user_id}`
+      : payload.sub != null
+      ? `sub_${payload.sub}`
+      : payload.username
+      ? `uname_${payload.username}`
+      : `tok_${token.slice(-24)}`;
+  } catch {
+    return `tok_${(token || "").slice(-24)}`;
+  }
+}
+
+function makeCacheKey(userToken) {
+  const suffix = userToken ? userCacheSuffix(userToken) : "anon";
+  return `WORKOUTS_CACHE_v2_${suffix}`; // bump to v2 to avoid stale collisions
 }
 
 const sortByDateDesc = (arr) => {
@@ -17,7 +32,7 @@ const sortByDateDesc = (arr) => {
 
 export function WorkoutProvider({ children }) {
   const { user } = useAuth();
-  const cacheKey = makeCacheKey(user);
+  const cacheKey = makeCacheKey(user?.token);
   const [workouts, setWorkouts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -149,6 +164,18 @@ export function WorkoutProvider({ children }) {
       loadWorkouts().catch(() => {});
     }
   }, [user, loadWorkouts]);
+
+  // Add a one-time cleanup effect (remove any old v1 keys):
+  useEffect(() => {
+    try {
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("WORKOUTS_CACHE_v1_")) keysToRemove.push(k);
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    } catch {}
+  }, []);
 
   const value = useMemo(() => ({
     workouts,
