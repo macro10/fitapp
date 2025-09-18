@@ -151,7 +151,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               
               <div className="flex items-center gap-3">
                 <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
-                  {formatVolume(workout.total_volume ?? calculateTotalVolume(workout.performed_exercises || []))}
+                  {formatVolume(workout.total_volume)}
                 </div>
                 <ChevronDown 
                   className={cn(
