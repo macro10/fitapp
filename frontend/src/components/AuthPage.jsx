@@ -1,63 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../App";
-import api from "../apiClient";
+import { useAuth } from "../contexts/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import { Label } from "./ui/label"
 
-// Form field component for reuse
-function AuthField({ type = "text", value, onChange, placeholder }) {
-  return (
-    <input
-      className="border p-2 w-full rounded"
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      autoComplete={type === "password" ? "current-password" : "username"}
-    />
-  );
-}
-
-// Toggle button for switching between login/register
-function ToggleAuthModeButton({ isLogin, onClick }) {
-  return (
-    <button
-      type="button"
-      className="text-blue-500 underline w-full"
-      onClick={onClick}
-    >
-      {isLogin ? "Need an account? Register" : "Already have an account? Login"}
-    </button>
-  );
-}
-
 export default function AuthPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-  const { setUser } = useAuth();
+  const { login, register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (isLogin) => {
     setError(null);
     try {
       if (isLogin) {
-        const res = await api.post("/login/", { username, password });
-        localStorage.setItem("token", res.data.access);
-        localStorage.setItem("refresh", res.data.refresh);
-        setUser(res.data.access);
+        await login(username, password);
         navigate("/");
       } else {
-        await api.post("/register/", { username, password });
-        // Show success message or automatically log in
-        const res = await api.post("/login/", { username, password });
-        localStorage.setItem("token", res.data.access);
-        localStorage.setItem("refresh", res.data.refresh);
-        setUser(res.data.access);
+        await register(username, password);
         navigate("/");
       }
     } catch (err) {

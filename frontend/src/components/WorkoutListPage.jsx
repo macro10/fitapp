@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../App";
-import { getWorkouts, deleteWorkout } from "../api";
+import { useAuth } from "../contexts/AuthContext";
+import { useWorkouts } from "../contexts/WorkoutContext";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
@@ -22,7 +22,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 
-// First, let's add a helper function to calculate volume
+// First, let's add a helper function to calculate volume 
 const calculateExerciseVolume = (performedExercise) => {
   return performedExercise.reps_per_set.reduce((total, reps, index) => {
     const weight = performedExercise.weights_per_set[index] || 0;
@@ -151,7 +151,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               
               <div className="flex items-center gap-3">
                 <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
-                  {formatVolume(calculateTotalVolume(workout.performed_exercises))}
+                  {formatVolume(workout.total_volume)}
                 </div>
                 <ChevronDown 
                   className={cn(
@@ -273,13 +273,18 @@ function WorkoutSkeleton() {
 }
 
 export default function WorkoutListPage() {
-  const [workouts, setWorkouts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(null);
-  const { user, setUser } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const {
+    workouts,
+    loading,
+    error,
+    loadWorkouts,
+    deleteWorkout: deleteWorkoutFromContext,
+  } = useWorkouts();
 
   useEffect(() => {
     // Check for any in-progress workout data
@@ -292,68 +297,38 @@ export default function WorkoutListPage() {
       return;
     }
 
-    // Otherwise proceed with fetching workouts
-    fetchWorkouts();
-  }, [user, navigate]);
-
-  const fetchWorkouts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getWorkouts();
-      // Sort workouts by date in descending order (most recent first)
-      const sortedWorkouts = [...(data || [])].sort((a, b) => 
-        new Date(b.date) - new Date(a.date)
-      );
-      setWorkouts(sortedWorkouts);
-    } catch (err) {
-      console.error('Error fetching workouts:', err);
-      setError('Failed to load workouts. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Otherwise proceed with fetching workouts (from cache, then revalidate)
+    loadWorkouts().catch(() => {});
+  }, [user, navigate, loadWorkouts]);
 
   const handleDeleteWorkout = async (workoutId) => {
-    const originalWorkouts = workouts;
-    
     try {
-      // Optimistically update UI
-      setWorkouts(prevWorkouts => prevWorkouts.filter(w => w.id !== workoutId));
-      
-      // Show success toast immediately
+      await deleteWorkoutFromContext(workoutId);
       toast({
         title: "Workout deleted",
         description: "Your workout has been successfully deleted.",
-        variant: "success", // Using our new success variant
+        variant: "success",
         duration: 2000,
       });
-      
-      // Make API call
-      await deleteWorkout(workoutId);
     } catch (err) {
-      // Restore original state on error
-      setWorkouts(originalWorkouts);
-      
       toast({
         title: "Error",
         description: "Failed to delete workout. Please try again.",
         variant: "destructive",
         duration: 3000,
       });
-      
       console.error('Error deleting workout:', err);
     }
   };
 
   const handleLogout = () => {
-    setUser(null);
+    logout();
     navigate("/auth");
   };
 
   const renderContent = () => {
     if (loading) return <LoadingState />;
-    if (error) return <ErrorState error={error} onRetry={() => window.location.reload()} />;
+    if (error) return <ErrorState error={error} onRetry={() => loadWorkouts({ force: true })} />;
     if (workouts.length === 0) return <EmptyState onCreateWorkout={() => navigate("/log")} />;
 
     return (

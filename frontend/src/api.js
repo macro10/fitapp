@@ -12,8 +12,8 @@ export const getWorkouts = async () => {
   return response.data
 }
 
-export const createWorkout = async (date, name) => {
-  const response = await api.post(`${API_BASE}/api/workouts/`, { date, name })
+export const createWorkout = async (date, name, total_volume) => {
+  const response = await api.post(`${API_BASE}/api/workouts/`, { date, name, total_volume })
   return response.data
 }
 
@@ -35,10 +35,10 @@ export const createPerformedExercise = async (workoutId, data) => {
   return response.data
 }
 
-export const createWorkoutWithExercises = async (date, performedExercises, name) => {
+export const createWorkoutWithExercises = async (date, performedExercises, name, total_volume) => {
   try {
-    // First create the workout
-    const workout = await createWorkout(date, name)
+    // First create the workout (include precomputed volume)
+    const workout = await createWorkout(date, name, total_volume)
     console.log("Created workout:", workout)
     
     // Then create all performed exercises for this workout

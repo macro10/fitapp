@@ -85,6 +85,7 @@ class Workout(models.Model):
   user = models.ForeignKey(User, on_delete=models.CASCADE)
   date = models.DateTimeField(default=timezone.now)
   name = models.CharField(max_length=100, default="Untitled Workout")
+  total_volume = models.PositiveIntegerField(default=0)
 
   def __str__(self):
     return f"{self.user.username}'s workout on {self.date}"
