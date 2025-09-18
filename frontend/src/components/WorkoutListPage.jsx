@@ -22,7 +22,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 
-// First, let's add a helper function to calculate volume
+// First, let's add a helper function to calculate volume 
 const calculateExerciseVolume = (performedExercise) => {
   return performedExercise.reps_per_set.reduce((total, reps, index) => {
     const weight = performedExercise.weights_per_set[index] || 0;
@@ -151,7 +151,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
               
               <div className="flex items-center gap-3">
                 <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
-                  {formatVolume(calculateTotalVolume(workout.performed_exercises))}
+                  {formatVolume(workout.total_volume ?? calculateTotalVolume(workout.performed_exercises || []))}
                 </div>
                 <ChevronDown 
                   className={cn(

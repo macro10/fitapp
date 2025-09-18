@@ -8,6 +8,18 @@ export const WORKOUT_STORAGE_KEY = 'inProgressWorkout';
 export const CURRENT_EXERCISE_STORAGE_KEY = 'inProgressExercise';
 export const REST_TIMER_KEY = 'workout_rest_timer_start'; // Add this constant
 
+// Volume helpers (mirrors WorkoutListPage.jsx)
+const calculateExerciseVolume = (performedExercise) => {
+  return (performedExercise.reps_per_set || []).reduce((total, reps, index) => {
+    const weight = (performedExercise.weights_per_set || [])[index] || 0;
+    return total + (reps || 0) * weight;
+  }, 0);
+};
+
+const calculateTotalVolume = (exercises) => {
+  return (exercises || []).reduce((total, ex) => total + calculateExerciseVolume(ex), 0);
+};
+
 // Add this mapping object at the top of the file
 const MUSCLE_GROUP_MAPPING = {
   'legs': 'leg',
@@ -130,10 +142,12 @@ export const useWorkoutLogger = () => {
 
   const handleFinishWorkout = async () => {
     try {
+      const totalVolume = calculateTotalVolume(workoutState.exercises);
       const created = await createWorkoutWithExercises(
         new Date().toISOString(),
         workoutState.exercises,
-        workoutState.name
+        workoutState.name,
+        totalVolume
       );
       // Optimistically upsert new workout into context (sorted, cached)
       upsertWorkout(created);

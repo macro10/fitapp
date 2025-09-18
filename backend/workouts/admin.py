@@ -10,7 +10,7 @@ class ExerciseAdmin(admin.ModelAdmin):
 
 @admin.register(Workout)
 class WorkoutAdmin(admin.ModelAdmin):
-    list_display = ('user', 'date', 'name')
+    list_display = ('user', 'date', 'name', 'total_volume')
     list_filter = ('user', 'date')
     search_fields = ('name',)
 
