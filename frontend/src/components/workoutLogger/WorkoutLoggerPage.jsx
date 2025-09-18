@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ExerciseSelector } from "./ExerciseSelector";
 import { ReviewStep } from "./ReviewStep";
 import { StepIndicator } from "./StepIndicator";
 import { SetLogger } from "./SetLogger";
