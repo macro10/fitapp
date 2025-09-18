@@ -11,7 +11,7 @@ import { STEPS } from '../../constants/workout';
 import { useWorkoutLogger } from '../../hooks/useWorkoutLogger';
 import { useExerciseLogger } from '../../hooks/useExerciseLogger';
 import { useCancelWorkout } from '../../hooks/useCancelWorkout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from "../../contexts/AuthContext";
 import { useExercises } from "../../contexts/ExerciseContext";
 import useExerciseHistory from '../../hooks/useExerciseHistory';
@@ -37,6 +37,7 @@ import {
 
 export default function WorkoutLoggerPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const {
     exercises,
@@ -98,6 +99,13 @@ export default function WorkoutLoggerPage() {
     const t = setTimeout(() => setLoading(false), 100);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (location.state?.selectedExercise) {
+      handleExerciseSelect(location.state.selectedExercise);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, handleExerciseSelect, navigate]);
 
   const handleExerciseComplete = () => {
     const exerciseData = {
@@ -167,10 +175,12 @@ export default function WorkoutLoggerPage() {
                     exercises={exercises}
                     loading={loading || exercisesLoading}
                   />
-                  <ExerciseSelector
-                    exercises={exercises}
-                    onSelect={handleExerciseSelect}
-                  />
+                  <Button
+                    className="w-full"
+                    onClick={() => navigate('/workout/exercise-selector')}
+                  >
+                    Add exercise
+                  </Button>
                   {workoutExercises.length > 0 && (
                     <Button
                       className="w-full"
