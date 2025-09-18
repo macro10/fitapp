@@ -329,7 +329,7 @@ export default function WorkoutListPage() {
   const renderContent = () => {
     if (loading) return <LoadingState />;
     if (error) return <ErrorState error={error} onRetry={() => loadWorkouts({ force: true })} />;
-    if (workouts.length === 0) return <EmptyState onCreateWorkout={() => navigate("/log")} />;
+    if (workouts.length === 0) return <EmptyState onCreateWorkout={() => navigate("/workout/exercise-selector")} />;
 
     return (
       <div className="space-y-4">

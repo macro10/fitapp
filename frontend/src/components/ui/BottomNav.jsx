@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "../../lib/utils";
 import { HomeIcon, BarChart2Icon, PlusIcon } from "lucide-react";
 import { Button } from "./button";
+import { WORKOUT_STORAGE_KEY, CURRENT_EXERCISE_STORAGE_KEY } from "../../hooks/useWorkoutLogger";
 
 export function BottomNav() {
   const location = useLocation();
@@ -40,7 +41,10 @@ export function BottomNav() {
           <div className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 top-0">
             <Button
               className="h-14 w-14 rounded-full shadow-lg"
-              onClick={() => navigate("/log")}
+              onClick={() => {
+                const hasInProgress = localStorage.getItem(WORKOUT_STORAGE_KEY) || localStorage.getItem(CURRENT_EXERCISE_STORAGE_KEY);
+                navigate(hasInProgress ? "/log" : "/workout/exercise-selector");
+              }}
               aria-label="Create new workout"
             >
               <PlusIcon className="h-7 w-7" />
