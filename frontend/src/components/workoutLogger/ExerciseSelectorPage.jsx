@@ -47,7 +47,7 @@ export default function ExerciseSelectorPage() {
   const label = (g) => g ? g.charAt(0).toUpperCase() + g.slice(1) : "";
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] px-4">
       <div className="max-w-2xl mx-auto">
         {/* Centered header with back button */}
         <div className="relative flex items-center justify-center mb-4">
@@ -67,7 +67,7 @@ export default function ExerciseSelectorPage() {
                   key={g}
                   size="default"
                   variant={active ? "default" : "outline"}
-                  className="rounded-xl px-3 h-9"
+                  className="rounded-xl px-2 h-9"
                   onClick={() => toggleGroup(g)}
                 >
                   {label(g)}
