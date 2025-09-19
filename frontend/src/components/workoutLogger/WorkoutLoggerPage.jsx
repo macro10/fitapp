@@ -32,6 +32,7 @@ import { Skeleton } from "../ui/skeleton";
 import {
   DumbbellIcon,
   X,
+  Plus,
 } from "lucide-react";
 
 export default function WorkoutLoggerPage() {
@@ -174,12 +175,14 @@ export default function WorkoutLoggerPage() {
                     exercises={exercises}
                     loading={loading || exercisesLoading}
                   />
-                  <Button
-                    className="w-full"
+                  <button
+                    type="button"
                     onClick={() => navigate('/workout/exercise-selector')}
+                    className="w-full flex items-center justify-center p-6 rounded-lg border bg-muted/5 hover:bg-accent/50 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    aria-label="Add exercise"
                   >
-                    Add exercise
-                  </Button>
+                    <Plus className="h-6 w-6 text-muted-foreground" />
+                  </button>
                   {workoutExercises.length > 0 && (
                     <Button
                       className="w-full"
