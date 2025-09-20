@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Command, CommandEmpty, CommandGroup, CommandItem } from "../ui/command";
 import CustomExerciseModal from "./CustomExerciseModal";
+import { createCustomExercise } from "../../api";
 
 import { Search, ArrowLeft } from "lucide-react";
 
@@ -194,9 +195,16 @@ const [customOpen, setCustomOpen] = useState(false);
         <CustomExerciseModal
           open={customOpen}
           onClose={() => setCustomOpen(false)}
-          onCreate={(newExercise) => {
-            setExercises((prev) => [newExercise, ...prev]);
-            setCustomOpen(false);
+          onCreate={async (newExerciseDraft) => {
+            try {
+              const saved = await createCustomExercise({
+                name: newExerciseDraft.name || newExerciseDraft?.name,
+                muscle_group: newExerciseDraft.muscle_group || newExerciseDraft?.muscle_group,
+              });
+              setExercises(prev => [saved, ...prev]);
+            } finally {
+              setCustomOpen(false);
+            }
           }}
         />
       </div>

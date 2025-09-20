@@ -17,6 +17,14 @@ export const createWorkout = async (date, name, total_volume) => {
   return response.data
 }
 
+export const createCustomExercise = async ({ name, muscle_group }) => {
+  const response = await api.post(`${API_BASE}/api/exercises/`, {
+    name,
+    muscle_group
+  });
+  return response.data;
+};
+
 export const createPerformedExercise = async (workoutId, data) => {
   console.log("Creating performed exercise with:", {
     workout: workoutId,

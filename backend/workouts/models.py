@@ -63,6 +63,8 @@ class Exercise(models.Model):
     # Required fields (maintaining existing ones)
     name = models.CharField(max_length=100)
     muscle_group = models.CharField(max_length=20, choices=MUSCLE_GROUPS, default='core')
+    is_custom = models.BooleanField(default=False)
+    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE, related_name='custom_exercises')
 
     # New fields from free-exercise-db
     force = models.CharField(max_length=10, choices=FORCE_TYPES, null=True, blank=True)

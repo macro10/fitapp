@@ -44,7 +44,7 @@ export default function CustomExerciseModal({ open, onClose, onCreate }) {
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Bulgarian Split Squat"
+              placeholder="e.g., Romanian Deadlift"
             />
           </div>
 
