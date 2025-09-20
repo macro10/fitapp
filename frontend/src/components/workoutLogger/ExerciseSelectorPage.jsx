@@ -4,15 +4,18 @@ import { useExercises } from "../../contexts/ExerciseContext";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Command, CommandEmpty, CommandGroup, CommandItem } from "../ui/command";
+import CustomExerciseModal from "./CustomExerciseModal";
+
 import { Search, ArrowLeft } from "lucide-react";
 
 export default function ExerciseSelectorPage() {
   const navigate = useNavigate();
-  const { exercises = [], loading, loadExercises } = useExercises();
+  const { exercises = [], loading, loadExercises, setExercises } = useExercises();
 
-  const [search, setSearch] = useState("");
-  const [activeGroups, setActiveGroups] = useState(() => new Set());
-  const [visibleCount, setVisibleCount] = useState(25);
+const [search, setSearch] = useState("");
+const [activeGroups, setActiveGroups] = useState(() => new Set());
+const [visibleCount, setVisibleCount] = useState(25);
+const [customOpen, setCustomOpen] = useState(false);
 
   // measure bars to pad/size the scroll area
   const topRef = useRef(null);
@@ -182,11 +185,20 @@ export default function ExerciseSelectorPage() {
         <div className="container mx-auto max-w-2xl px-4 py-3">
           <Button
             className="w-full h-12 rounded-full shadow-lg"
-            onClick={() => navigate("/log")}
+            onClick={() => setCustomOpen(true)}
           >
-            Done
+            Custom Add
           </Button>
         </div>
+
+        <CustomExerciseModal
+          open={customOpen}
+          onClose={() => setCustomOpen(false)}
+          onCreate={(newExercise) => {
+            setExercises((prev) => [newExercise, ...prev]);
+            setCustomOpen(false);
+          }}
+        />
       </div>
     </div>
   );
