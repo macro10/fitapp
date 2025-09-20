@@ -12,6 +12,7 @@ import AnalyticsPage from "./components/analytics/AnalyticsPage";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { WorkoutProvider } from "./contexts/WorkoutContext";
 import { ExerciseProvider } from "./contexts/ExerciseContext";
+import ExerciseSelectorPage from "./components/workoutLogger/ExerciseSelectorPage";
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
@@ -47,6 +48,14 @@ function App() {
                 element={
                   <RequireAuth>
                     <WorkoutLoggerPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/workout/exercise-selector"
+                element={
+                  <RequireAuth>
+                    <ExerciseSelectorPage />
                   </RequireAuth>
                 }
               />

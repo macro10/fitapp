@@ -40,10 +40,11 @@ class ExerciseViewSet(viewsets.ModelViewSet):
     queryset = Exercise.objects.all()
 
     def get_queryset(self):
-        return ExerciseService.get_all_exercises()
+        return ExerciseService.get_user_exercises(self.request.user)
 
     def perform_create(self, serializer):
-        ExerciseService.create_exercise(serializer.validated_data)
+        # Force custom, owned by creator
+        serializer.save(owner=self.request.user, is_custom=True)
 
 class WorkoutViewSet(viewsets.ModelViewSet):
     """

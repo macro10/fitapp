@@ -3,9 +3,8 @@ from .models import Exercise, Workout, PerformedExercise
 
 @admin.register(Exercise)
 class ExerciseAdmin(admin.ModelAdmin):
-    # Removing 'description' from list_display since we no longer have that field
-    list_display = ('name', 'muscle_group')
-    list_filter = ('muscle_group', 'level', 'category', 'equipment')  # Added new filters
+    list_display = ('name', 'muscle_group', 'is_custom', 'owner')
+    list_filter = ('muscle_group', 'level', 'category', 'equipment', 'is_custom')
     search_fields = ('name',)
 
 @admin.register(Workout)
