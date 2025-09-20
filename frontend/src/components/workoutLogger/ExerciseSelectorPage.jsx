@@ -135,19 +135,19 @@ export default function ExerciseSelectorPage() {
           </div>
 
           {/* Results */}
-          <div className="rounded-lg border">
+          <div>
             {loading ? (
               <div className="p-4 text-center text-muted-foreground">Loading exercises...</div>
             ) : (
               <Command>
                 <CommandEmpty>No exercise found.</CommandEmpty>
-                <CommandGroup>
+                <CommandGroup className="space-y-3">
                   {visible.map((exercise) => (
                     <CommandItem
                       key={exercise.id}
                       value={exercise.name}
                       onSelect={() => handleSelect(exercise)}
-                      className="cursor-pointer"
+                      className="cursor-pointer rounded-xl border p-3 mb-1 text-md font-medium hover:bg-accent/50 focus:bg-accent/50"
                     >
                       {exercise.name}
                     </CommandItem>
