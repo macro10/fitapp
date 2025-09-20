@@ -4,7 +4,7 @@ import { useExercises } from "../../contexts/ExerciseContext";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Command, CommandEmpty, CommandGroup, CommandItem } from "../ui/command";
-import { DumbbellIcon, ArrowLeft } from "lucide-react";
+import { Search, ArrowLeft } from "lucide-react";
 
 export default function ExerciseSelectorPage() {
   const navigate = useNavigate();
@@ -30,6 +30,16 @@ export default function ExerciseSelectorPage() {
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  useEffect(() => {
+    const el = topRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      setTopH(el.offsetHeight);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   // Reset pagination when filters/search change
@@ -90,7 +100,7 @@ export default function ExerciseSelectorPage() {
             <Button variant="ghost" size="icon" onClick={() => navigate("/log")} className="absolute left-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-2xl font-bold">Select Exercise</h1>
+            <h1 className="text-xl font-bold">Select Exercise</h1>
           </div>
 
           <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -101,7 +111,7 @@ export default function ExerciseSelectorPage() {
                   key={g}
                   size="default"
                   variant={active ? "default" : "outline"}
-                  className="rounded-xl px-2 h-9"
+                  className="rounded-xl px-2 h-8"
                   onClick={() => toggleGroup(g)}
                 >
                   {label(g)}
@@ -115,7 +125,7 @@ export default function ExerciseSelectorPage() {
       {/* Scrollable content (search + list) */}
       <div
         className="container mx-auto max-w-2xl px-4"
-        style={{ paddingTop: topH + 30, paddingBottom: bottomH + 15 }}
+        style={{ paddingTop: topH, paddingBottom: bottomH }}
       >
         <div
           className="overflow-y-auto"
@@ -124,7 +134,7 @@ export default function ExerciseSelectorPage() {
         >
           {/* Search */}
           <div className="mt-6 flex items-center gap-2 p-4 mb-4 rounded-lg border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <DumbbellIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
             <Input
               type="text"
               className="border-none bg-transparent"
@@ -169,14 +179,14 @@ export default function ExerciseSelectorPage() {
         ref={bottomRef}
         className="fixed left-0 right-0 bottom-0 z-20 bg-background pb-[env(safe-area-inset-bottom,0px)] border-t"
       >
-        <div className="container mx-auto max-w-2xl px-4 py-3">
+        {/* <div className="container mx-auto max-w-2xl px-4 py-3">
           <Button
             className="w-full h-12 rounded-full shadow-lg"
             onClick={() => navigate("/log")}
           >
             Done
           </Button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
