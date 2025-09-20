@@ -101,6 +101,7 @@ export const useWorkoutLogger = () => {
   const { upsertWorkout } = useWorkouts();
 
   const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
   // Effect to update workout name when exercises change
@@ -142,6 +143,7 @@ export const useWorkoutLogger = () => {
 
   const handleFinishWorkout = async () => {
     try {
+      setSaving(true);
       const totalVolume = calculateTotalVolume(workoutState.exercises);
       const created = await createWorkoutWithExercises(
         new Date().toISOString(),
@@ -153,11 +155,13 @@ export const useWorkoutLogger = () => {
       upsertWorkout(created);
       localStorage.removeItem(WORKOUT_STORAGE_KEY);
       localStorage.removeItem(CURRENT_EXERCISE_STORAGE_KEY);
-      localStorage.removeItem(REST_TIMER_KEY); // Add this line
+      localStorage.removeItem(REST_TIMER_KEY);
       navigate("/");
     } catch (err) {
       setError("Failed to save workout. Please try again.");
       console.error(err);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -179,6 +183,7 @@ export const useWorkoutLogger = () => {
     error,
     addExerciseToWorkout,
     handleFinishWorkout,
-    clearWorkout
+    clearWorkout,
+    isSaving: saving,
   };
 };

@@ -54,7 +54,8 @@ export default function WorkoutLoggerPage() {
     error,
     addExerciseToWorkout,
     handleFinishWorkout,
-    clearWorkout
+    clearWorkout,
+    isSaving,
   } = useWorkoutLogger();
 
   const {
@@ -187,9 +188,9 @@ export default function WorkoutLoggerPage() {
                     <Button
                       className="w-full"
                       onClick={handleFinishWorkout}
-                      disabled={loading || exercisesLoading || !exercises?.length}
+                      disabled={loading || exercisesLoading || isSaving || !exercises?.length}
                     >
-                      Finish Workout
+                      {isSaving ? "Saving..." : "Finish Workout"}
                     </Button>
                   )}
                 </div>
