@@ -179,14 +179,14 @@ export default function ExerciseSelectorPage() {
         ref={bottomRef}
         className="fixed left-0 right-0 bottom-0 z-20 bg-background pb-[env(safe-area-inset-bottom,0px)] border-t"
       >
-        {/* <div className="container mx-auto max-w-2xl px-4 py-3">
+        <div className="container mx-auto max-w-2xl px-4 py-3">
           <Button
             className="w-full h-12 rounded-full shadow-lg"
             onClick={() => navigate("/log")}
           >
             Done
           </Button>
-        </div> */}
+        </div>
       </div>
     </div>
   );
