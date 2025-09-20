@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../ui/select";
 
 const GROUPS = ['chest','back','shoulders','arms','legs','core'];
 
@@ -50,27 +51,22 @@ export default function CustomExerciseModal({ open, onClose, onCreate }) {
 
           <div className="space-y-2">
             <label className="text-sm text-muted-foreground">Muscle group</label>
-            <div className="flex flex-wrap gap-2">
-              {GROUPS.map(g => {
-                const active = group === g;
-                return (
-                  <Button
-                    key={g}
-                    size="sm"
-                    variant={active ? "default" : "outline"}
-                    className="rounded-md h-8 px-3"
-                    onClick={() => setGroup(g)}
-                  >
+            <Select value={group ?? ""} onValueChange={(v) => setGroup(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select muscle group" />
+              </SelectTrigger>
+              <SelectContent>
+                {GROUPS.map(g => (
+                  <SelectItem key={g} value={g}>
                     {g.charAt(0).toUpperCase() + g.slice(1)}
-                  </Button>
-                );
-              })}
-            </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
         <div className="mt-4 flex gap-2">
-          <Button variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
           <Button className="flex-1" disabled={!canSave} onClick={handleSave}>Save</Button>
         </div>
       </div>

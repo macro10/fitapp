@@ -7,7 +7,7 @@ import { Command, CommandEmpty, CommandGroup, CommandItem } from "../ui/command"
 import CustomExerciseModal from "./CustomExerciseModal";
 import { createCustomExercise } from "../../api";
 
-import { Search, ArrowLeft } from "lucide-react";
+import { Search, ArrowLeft, Pencil } from "lucide-react";
 
 export default function ExerciseSelectorPage() {
   const navigate = useNavigate();
@@ -188,6 +188,7 @@ const [customOpen, setCustomOpen] = useState(false);
             className="w-full h-12 rounded-full shadow-lg"
             onClick={() => setCustomOpen(true)}
           >
+            <Pencil className="h-5 w-5 mr-2" />
             Custom Add
           </Button>
         </div>
