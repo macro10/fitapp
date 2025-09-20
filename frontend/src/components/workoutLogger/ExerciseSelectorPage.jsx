@@ -163,7 +163,12 @@ const [customOpen, setCustomOpen] = useState(false);
                       onSelect={() => handleSelect(exercise)}
                       className="cursor-pointer rounded-xl border p-3 mb-1 text-md font-medium hover:bg-accent/50 focus:bg-accent/50"
                     >
-                      {exercise.name}
+                      <div className="flex w-full items-center justify-between">
+                        <span>{exercise.name}</span>
+                        {exercise.is_custom && (
+                          <Pencil className="h-4 w-4 text-muted-foreground opacity-70" aria-label="Custom exercise" />
+                        )}
+                      </div>
                     </CommandItem>
                   ))}
                 </CommandGroup>
