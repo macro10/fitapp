@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useWorkouts } from "../contexts/WorkoutContext";
@@ -115,8 +115,8 @@ function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
   );
 }
 
-// Modify the WorkoutItem component to use the dialog
-function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
+// Modify the WorkoutItem component to use the dialog and memoize it
+const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isExpanded = expanded === workout.id;
   
@@ -229,7 +229,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
       />
     </motion.div>
   );
-}
+});
 
 function LoadingState() {
   return (
@@ -349,7 +349,7 @@ export default function WorkoutListPage() {
     }
   }, [expanded, loadWorkoutDetail]);
 
-  const handleDeleteWorkout = async (workoutId) => {
+  const handleDeleteWorkout = useCallback(async (workoutId) => {
     try {
       await deleteWorkoutFromContext(workoutId);
       toast({
@@ -367,7 +367,7 @@ export default function WorkoutListPage() {
       });
       console.error('Error deleting workout:', err);
     }
-  };
+  }, [deleteWorkoutFromContext, toast]);
 
   const handleLogout = () => {
     logout();

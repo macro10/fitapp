@@ -58,6 +58,17 @@ export function WorkoutProvider({ children }) {
     } catch {}
   }, [cacheKey]);
 
+  // Debounced writes to avoid excessive localStorage churn during detail merges
+  const debounceRef = useRef(null);
+  const writeCacheDebounced = useCallback((data) => {
+    try {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        writeCache(data);
+      }, 250);
+    } catch {}
+  }, [writeCache]);
+
   const clearCache = useCallback(() => {
     try {
       localStorage.removeItem(cacheKey);
@@ -164,7 +175,7 @@ export function WorkoutProvider({ children }) {
         // Merge while preserving order, using functional updater to avoid races
         setWorkouts(prev => {
           const merged = prev.map(w => (w.id === workoutId ? { ...w, ...detail } : w));
-          writeCache(merged);
+          writeCacheDebounced(merged);
           return merged;
         });
       } finally {
@@ -174,7 +185,7 @@ export function WorkoutProvider({ children }) {
 
     detailInFlightRef.current.set(workoutId, p);
     return p;
-  }, [workouts, writeCache]);
+  }, [workouts, writeCacheDebounced]);
 
   // Reset on logout
   useEffect(() => {
@@ -197,15 +208,22 @@ export function WorkoutProvider({ children }) {
     }
   }, [user, loadWorkouts]);
 
-  // Automatically prefetch details in background for workouts missing them
+  // Automatically prefetch details in background for workouts missing them (with limited concurrency)
   useEffect(() => {
-    if (!workouts || !workouts.length) return;
-    const missing = workouts.filter(w => w && w.performed_exercises === undefined);
-    if (!missing.length) return;
-    missing.forEach(w => {
-      // fire-and-forget; deduplicated via detailInFlightRef
-      loadWorkoutDetail(w.id)?.catch(() => {});
-    });
+    if (!workouts?.length) return;
+    const ids = workouts.filter(w => w.performed_exercises === undefined).map(w => w.id);
+    if (!ids.length) return;
+
+    const MAX = 4; // tune per device/network
+    let idx = 0, cancelled = false;
+
+    async function run() {
+      if (cancelled) return;
+      const id = ids[idx++]; if (id == null) return;
+      try { await loadWorkoutDetail(id); } finally { if (!cancelled) run(); }
+    }
+    for (let i = 0; i < Math.min(MAX, ids.length); i++) run();
+    return () => { cancelled = true; };
   }, [workouts, loadWorkoutDetail]);
 
   // Add a one-time cleanup effect (remove any old v1 keys):
@@ -218,6 +236,13 @@ export function WorkoutProvider({ children }) {
       }
       keysToRemove.forEach(k => localStorage.removeItem(k));
     } catch {}
+  }, []);
+
+  // Cleanup any pending debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, []);
 
   const value = useMemo(() => ({
