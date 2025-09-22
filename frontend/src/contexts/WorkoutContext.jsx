@@ -161,10 +161,12 @@ export function WorkoutProvider({ children }) {
     const p = (async () => {
       try {
         const detail = await apiGetWorkoutDetail(workoutId);
-        // Merge while preserving order
-        const merged = workouts.map(w => (w.id === workoutId ? { ...w, ...detail } : w));
-        setWorkouts(merged);
-        writeCache(merged);
+        // Merge while preserving order, using functional updater to avoid races
+        setWorkouts(prev => {
+          const merged = prev.map(w => (w.id === workoutId ? { ...w, ...detail } : w));
+          writeCache(merged);
+          return merged;
+        });
       } finally {
         detailInFlightRef.current.delete(workoutId);
       }
@@ -194,6 +196,17 @@ export function WorkoutProvider({ children }) {
       loadWorkouts().catch(() => {});
     }
   }, [user, loadWorkouts]);
+
+  // Automatically prefetch details in background for workouts missing them
+  useEffect(() => {
+    if (!workouts || !workouts.length) return;
+    const missing = workouts.filter(w => w && w.performed_exercises === undefined);
+    if (!missing.length) return;
+    missing.forEach(w => {
+      // fire-and-forget; deduplicated via detailInFlightRef
+      loadWorkoutDetail(w.id)?.catch(() => {});
+    });
+  }, [workouts, loadWorkoutDetail]);
 
   // Add a one-time cleanup effect (remove any old v1 keys):
   useEffect(() => {
