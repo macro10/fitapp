@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { getWorkouts as apiGetWorkouts, deleteWorkout as apiDeleteWorkout } from "../api";
+import { getWorkoutSummaries as apiGetWorkoutSummaries, deleteWorkout as apiDeleteWorkout, getWorkoutDetail as apiGetWorkoutDetail } from "../api";
 import { useAuth } from "./AuthContext";
 
 const TTL_MS = 2 * 60 * 1000; // 2 minutes
@@ -39,6 +39,7 @@ export function WorkoutProvider({ children }) {
   const lastFetchedRef = useRef(null);
   const inFlightRef = useRef(null);
   const pendingDeleteIds = useRef(new Set()); // barrier for optimistic deletes
+  const detailInFlightRef = useRef(new Map()); // workoutId -> Promise
 
   const readCache = useCallback(() => {
     try {
@@ -71,7 +72,7 @@ export function WorkoutProvider({ children }) {
   }, []);
 
   const fetchWorkouts = useCallback(async () => {
-    const data = await apiGetWorkouts();
+    const data = await apiGetWorkoutSummaries();
     const list = sortByDateDesc(Array.isArray(data) ? data : []);
     const masked = applyPendingDeletes(list);
     setWorkouts(masked);
@@ -145,6 +146,34 @@ export function WorkoutProvider({ children }) {
     writeCache(merged);
   }, [workouts, writeCache]);
 
+  // Load a single workout's full detail and merge into state/cache (deduped)
+  const loadWorkoutDetail = useCallback(async (workoutId) => {
+    if (!workoutId) return;
+    // If already have details, skip
+    const existing = workouts.find(w => w.id === workoutId);
+    if (existing && Array.isArray(existing.performed_exercises)) return;
+
+    // Deduplicate in-flight requests
+    if (detailInFlightRef.current.has(workoutId)) {
+      return detailInFlightRef.current.get(workoutId);
+    }
+
+    const p = (async () => {
+      try {
+        const detail = await apiGetWorkoutDetail(workoutId);
+        // Merge while preserving order
+        const merged = workouts.map(w => (w.id === workoutId ? { ...w, ...detail } : w));
+        setWorkouts(merged);
+        writeCache(merged);
+      } finally {
+        detailInFlightRef.current.delete(workoutId);
+      }
+    })();
+
+    detailInFlightRef.current.set(workoutId, p);
+    return p;
+  }, [workouts, writeCache]);
+
   // Reset on logout
   useEffect(() => {
     if (!user) {
@@ -154,6 +183,7 @@ export function WorkoutProvider({ children }) {
       lastFetchedRef.current = null;
       inFlightRef.current = null;
       pendingDeleteIds.current.clear();
+      detailInFlightRef.current.clear();
       clearCache();
     }
   }, [user, clearCache]);
@@ -187,7 +217,8 @@ export function WorkoutProvider({ children }) {
     deleteWorkout,
     upsertWorkout,
     setWorkouts,
-  }), [workouts, loading, error, loadWorkouts, deleteWorkout, upsertWorkout]);
+    loadWorkoutDetail,
+  }), [workouts, loading, error, loadWorkouts, deleteWorkout, upsertWorkout, loadWorkoutDetail]);
 
   return (
     <WorkoutContext.Provider value={value}>

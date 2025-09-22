@@ -284,6 +284,7 @@ export default function WorkoutListPage() {
     error,
     loadWorkouts,
     deleteWorkout: deleteWorkoutFromContext,
+    loadWorkoutDetail, // NEW
   } = useWorkouts();
 
   useEffect(() => {
@@ -300,6 +301,13 @@ export default function WorkoutListPage() {
     // Otherwise proceed with fetching workouts (from cache, then revalidate)
     loadWorkouts().catch(() => {});
   }, [user, navigate, loadWorkouts]);
+
+  // Fetch details when a workout is expanded (deduped and cached in context)
+  useEffect(() => {
+    if (expanded) {
+      loadWorkoutDetail(expanded).catch(() => {});
+    }
+  }, [expanded, loadWorkoutDetail]);
 
   const handleDeleteWorkout = async (workoutId) => {
     try {

@@ -12,6 +12,16 @@ export const getWorkouts = async () => {
   return response.data
 }
 
+export const getWorkoutSummaries = async () => {
+  const response = await api.get(`${API_BASE}/api/workouts/?summary=1`)
+  return response.data
+}
+
+export const getWorkoutDetail = async (workoutId) => {
+  const response = await api.get(`${API_BASE}/api/workouts/${workoutId}/`)
+  return response.data
+}
+
 export const createWorkout = async (date, name, total_volume) => {
   const response = await api.post(`${API_BASE}/api/workouts/`, { date, name, total_volume })
   return response.data

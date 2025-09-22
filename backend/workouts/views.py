@@ -6,7 +6,8 @@ from .serializers import (
     ExerciseSerializer, 
     WorkoutSerializer, 
     PerformedExerciseSerializer, 
-    UserRegistrationSerializer
+    UserRegistrationSerializer,
+    WorkoutSummarySerializer
 )
 from django.contrib.auth.models import User
 from .services.workout_service import WorkoutService
@@ -73,6 +74,14 @@ class WorkoutViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return WorkoutService.get_user_workouts(self.request.user)
 
+    def get_serializer_class(self):
+        # Use summary serializer only for list when ?summary=1
+        if self.action == 'list':
+            summary_flag = self.request.query_params.get('summary')
+            if summary_flag in ('1', 'true', 'True'):
+                return WorkoutSummarySerializer
+        return WorkoutSerializer
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -114,4 +123,3 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
-    
