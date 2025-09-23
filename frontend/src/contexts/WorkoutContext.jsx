@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { getWorkouts as apiGetWorkouts, deleteWorkout as apiDeleteWorkout } from "../api";
+import { getWorkoutSummaries as apiGetWorkoutSummaries, deleteWorkout as apiDeleteWorkout, getWorkoutDetail as apiGetWorkoutDetail } from "../api";
 import { useAuth } from "./AuthContext";
 
 const TTL_MS = 2 * 60 * 1000; // 2 minutes
@@ -39,6 +39,7 @@ export function WorkoutProvider({ children }) {
   const lastFetchedRef = useRef(null);
   const inFlightRef = useRef(null);
   const pendingDeleteIds = useRef(new Set()); // barrier for optimistic deletes
+  const detailInFlightRef = useRef(new Map()); // workoutId -> Promise
 
   const readCache = useCallback(() => {
     try {
@@ -57,6 +58,17 @@ export function WorkoutProvider({ children }) {
     } catch {}
   }, [cacheKey]);
 
+  // Debounced writes to avoid excessive localStorage churn during detail merges
+  const debounceRef = useRef(null);
+  const writeCacheDebounced = useCallback((data) => {
+    try {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        writeCache(data);
+      }, 250);
+    } catch {}
+  }, [writeCache]);
+
   const clearCache = useCallback(() => {
     try {
       localStorage.removeItem(cacheKey);
@@ -71,7 +83,7 @@ export function WorkoutProvider({ children }) {
   }, []);
 
   const fetchWorkouts = useCallback(async () => {
-    const data = await apiGetWorkouts();
+    const data = await apiGetWorkoutSummaries();
     const list = sortByDateDesc(Array.isArray(data) ? data : []);
     const masked = applyPendingDeletes(list);
     setWorkouts(masked);
@@ -145,6 +157,36 @@ export function WorkoutProvider({ children }) {
     writeCache(merged);
   }, [workouts, writeCache]);
 
+  // Load a single workout's full detail and merge into state/cache (deduped)
+  const loadWorkoutDetail = useCallback(async (workoutId) => {
+    if (!workoutId) return;
+    // If already have details, skip
+    const existing = workouts.find(w => w.id === workoutId);
+    if (existing && Array.isArray(existing.performed_exercises)) return;
+
+    // Deduplicate in-flight requests
+    if (detailInFlightRef.current.has(workoutId)) {
+      return detailInFlightRef.current.get(workoutId);
+    }
+
+    const p = (async () => {
+      try {
+        const detail = await apiGetWorkoutDetail(workoutId);
+        // Merge while preserving order, using functional updater to avoid races
+        setWorkouts(prev => {
+          const merged = prev.map(w => (w.id === workoutId ? { ...w, ...detail } : w));
+          writeCacheDebounced(merged);
+          return merged;
+        });
+      } finally {
+        detailInFlightRef.current.delete(workoutId);
+      }
+    })();
+
+    detailInFlightRef.current.set(workoutId, p);
+    return p;
+  }, [workouts, writeCacheDebounced]);
+
   // Reset on logout
   useEffect(() => {
     if (!user) {
@@ -154,6 +196,7 @@ export function WorkoutProvider({ children }) {
       lastFetchedRef.current = null;
       inFlightRef.current = null;
       pendingDeleteIds.current.clear();
+      detailInFlightRef.current.clear();
       clearCache();
     }
   }, [user, clearCache]);
@@ -164,6 +207,24 @@ export function WorkoutProvider({ children }) {
       loadWorkouts().catch(() => {});
     }
   }, [user, loadWorkouts]);
+
+  // Automatically prefetch details in background for workouts missing them (with limited concurrency)
+  useEffect(() => {
+    if (!workouts?.length) return;
+    const ids = workouts.filter(w => w.performed_exercises === undefined).map(w => w.id);
+    if (!ids.length) return;
+
+    const MAX = 4; // tune per device/network
+    let idx = 0, cancelled = false;
+
+    async function run() {
+      if (cancelled) return;
+      const id = ids[idx++]; if (id == null) return;
+      try { await loadWorkoutDetail(id); } finally { if (!cancelled) run(); }
+    }
+    for (let i = 0; i < Math.min(MAX, ids.length); i++) run();
+    return () => { cancelled = true; };
+  }, [workouts, loadWorkoutDetail]);
 
   // Add a one-time cleanup effect (remove any old v1 keys):
   useEffect(() => {
@@ -177,6 +238,13 @@ export function WorkoutProvider({ children }) {
     } catch {}
   }, []);
 
+  // Cleanup any pending debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
   const value = useMemo(() => ({
     workouts,
     loading,
@@ -187,7 +255,8 @@ export function WorkoutProvider({ children }) {
     deleteWorkout,
     upsertWorkout,
     setWorkouts,
-  }), [workouts, loading, error, loadWorkouts, deleteWorkout, upsertWorkout]);
+    loadWorkoutDetail,
+  }), [workouts, loading, error, loadWorkouts, deleteWorkout, upsertWorkout, loadWorkoutDetail]);
 
   return (
     <WorkoutContext.Provider value={value}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useWorkouts } from "../contexts/WorkoutContext";
@@ -115,8 +115,8 @@ function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
   );
 }
 
-// Modify the WorkoutItem component to use the dialog
-function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
+// Modify the WorkoutItem component to use the dialog and memoize it
+const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isExpanded = expanded === workout.id;
   
@@ -175,40 +175,48 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
             </Button>
           </div>
         </CardHeader>
-        {isExpanded && workout.performed_exercises && (
+        {isExpanded && (
           <CardContent
             id={`workout-details-${workout.id}`}
             role="region"
             aria-labelledby={`workout-title-${workout.id}`}
           >
             <Separator className="my-2" />
-            <ul className="space-y-2">
-              {workout.performed_exercises.map((pe, index) => (
-                <li key={pe.id}>
-                  <div className="py-3">
-                    <div className="flex items-center gap-2.5 mb-2">
-                      <div className="bg-muted/10 p-1.5 rounded-md">
-                        <DumbbellIcon className="h-4 w-4 text-foreground/70" />
+            {workout.performed_exercises === undefined ? (
+              <WorkoutDetailsSkeleton />
+            ) : workout.performed_exercises.length === 0 ? (
+              <div className="text-sm text-muted-foreground py-3">
+                No exercises logged.
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {workout.performed_exercises.map((pe, index) => (
+                  <li key={pe.id}>
+                    <div className="py-3">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <div className="bg-muted/10 p-1.5 rounded-md">
+                          <DumbbellIcon className="h-4 w-4 text-foreground/70" />
+                        </div>
+                        <div className="font-semibold text-base">{pe.exercise?.name}</div>
                       </div>
-                      <div className="font-semibold text-base">{pe.exercise?.name}</div>
+                      <div className="pl-9 flex flex-wrap gap-3 text-sm">
+                        {Array.from({ length: pe.sets }, (_, i) => (
+                          <span key={i} className="inline-flex items-center bg-muted/5 px-2.5 py-1 rounded-md">
+                            <span className="font-medium">{pe.reps_per_set[i]}</span>
+                            <span className="text-muted-foreground mx-1">×</span>
+                            <span className="font-medium">{pe.weights_per_set[i]}</span>
+                            <span className="text-muted-foreground text-xs ml-0.5">lb</span>
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div className="pl-9 flex flex-wrap gap-3 text-sm">
-                      {Array.from({ length: pe.sets }, (_, i) => (
-                        <span key={i} className="inline-flex items-center bg-muted/5 px-2.5 py-1 rounded-md">
-                          <span className="font-medium">{pe.reps_per_set[i]}</span>
-                          <span className="text-muted-foreground mx-1">×</span>
-                          <span className="font-medium">{pe.weights_per_set[i]}</span>
-                          <span className="text-muted-foreground text-xs ml-0.5">lb</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  {index < workout.performed_exercises.length - 1 && (
-                    <Separator className="bg-muted/90" />
-                  )}
-                </li>
-              ))}
-            </ul>
+                    {index < workout.performed_exercises.length - 1 && (
+                      <Separator className="bg-muted/90" />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         )}
       </Card>
@@ -221,7 +229,7 @@ function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
       />
     </motion.div>
   );
-}
+});
 
 function LoadingState() {
   return (
@@ -272,6 +280,38 @@ function WorkoutSkeleton() {
   );
 }
 
+function WorkoutDetailsSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <ul className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <li key={i}>
+            <div className="py-3">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="bg-muted/10 p-1.5 rounded-md">
+                  <div className="h-4 w-4 bg-muted rounded" />
+                </div>
+                <div className="h-4 w-32 bg-muted rounded" />
+              </div>
+              <div className="pl-9 flex flex-wrap gap-3">
+                {[1, 2, 3].map((j) => (
+                  <span key={j} className="inline-flex items-center bg-muted/5 px-2.5 py-1 rounded-md">
+                    <span className="h-3 w-6 bg-muted rounded" />
+                    <span className="text-muted-foreground mx-1">×</span>
+                    <span className="h-3 w-6 bg-muted rounded" />
+                    <span className="text-muted-foreground text-xs ml-0.5">lb</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            {i < 3 && <Separator className="bg-muted/90" />}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function WorkoutListPage() {
   const [expanded, setExpanded] = useState(null);
   const { user, logout } = useAuth();
@@ -284,6 +324,7 @@ export default function WorkoutListPage() {
     error,
     loadWorkouts,
     deleteWorkout: deleteWorkoutFromContext,
+    loadWorkoutDetail, // NEW
   } = useWorkouts();
 
   useEffect(() => {
@@ -301,7 +342,14 @@ export default function WorkoutListPage() {
     loadWorkouts().catch(() => {});
   }, [user, navigate, loadWorkouts]);
 
-  const handleDeleteWorkout = async (workoutId) => {
+  // Fetch details when a workout is expanded (deduped and cached in context)
+  useEffect(() => {
+    if (expanded) {
+      loadWorkoutDetail(expanded).catch(() => {});
+    }
+  }, [expanded, loadWorkoutDetail]);
+
+  const handleDeleteWorkout = useCallback(async (workoutId) => {
     try {
       await deleteWorkoutFromContext(workoutId);
       toast({
@@ -319,7 +367,7 @@ export default function WorkoutListPage() {
       });
       console.error('Error deleting workout:', err);
     }
-  };
+  }, [deleteWorkoutFromContext, toast]);
 
   const handleLogout = () => {
     logout();

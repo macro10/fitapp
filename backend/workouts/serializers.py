@@ -39,6 +39,16 @@ class WorkoutSerializer(serializers.ModelSerializer):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
 
+class WorkoutSummarySerializer(serializers.ModelSerializer):
+    """
+    Lightweight serializer for list views when summary=1 is requested.
+    Excludes performed_exercises for faster payloads.
+    """
+    class Meta:
+        model = Workout
+        fields = ('id', 'date', 'name', 'total_volume')
+        read_only_fields = ('id', 'date', 'name', 'total_volume')
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     Serializer for registering a new user.
