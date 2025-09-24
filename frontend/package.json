@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
     "@hookform/resolvers": "^5.1.1",
     "@ncdai/react-wheel-picker": "^1.0.14",
     "@radix-ui/react-alert-dialog": "^1.1.14",
