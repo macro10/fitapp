@@ -5,7 +5,9 @@ import { useWorkouts } from "../contexts/WorkoutContext";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
+import { Switch } from "./ui/switch";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X, Settings } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
@@ -310,6 +312,15 @@ export default function WorkoutListPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isDark, setIsDark] = useState(() => {
+    try {
+      const saved = localStorage.getItem('theme');
+      return saved ? saved === 'dark' : document.documentElement.classList.contains('dark');
+    } catch {
+      return document.documentElement.classList.contains('dark');
+    }
+  });
+
 
   const {
     workouts,
@@ -366,6 +377,11 @@ export default function WorkoutListPage() {
     logout();
     navigate("/auth");
   };
+  const toggleDarkMode = (checked) => {
+    setIsDark(checked);
+    document.documentElement.classList.toggle('dark', checked);
+    try { localStorage.setItem('theme', checked ? 'dark' : 'light'); } catch {}
+  };
 
   const renderContent = () => {
     if (loading) return <LoadingState />;
@@ -397,14 +413,29 @@ export default function WorkoutListPage() {
             <h1 className="text-3xl font-bold">FitApp</h1>
             <p className="text-muted-foreground">Track your workouts</p>
           </div>
-          <Button 
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            aria-label="Logout"
-          >
-            <LogOutIcon className="h-5 w-5" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open settings">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-64 p-3">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-2 py-1.5 rounded-md">
+                  <div className="text-sm">Dark mode</div>
+                  <Switch checked={isDark} onCheckedChange={toggleDarkMode} aria-label="Toggle dark mode" />
+                </div>
+                <Button
+                  variant="ghostDestructive"
+                  className="w-full justify-start"
+                  onClick={handleLogout}
+                >
+                  <LogOutIcon className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {renderContent()}
