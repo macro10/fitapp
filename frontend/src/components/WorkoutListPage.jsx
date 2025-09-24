@@ -188,16 +188,16 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
               <ul className="space-y-2">
                 {workout.performed_exercises.map((pe, index) => (
                   <li key={pe.id}>
-                    <div className="py-3">
+                    <div className="p-4 rounded-lg border bg-card/70 shadow-sm hover:shadow-md transition-all">
                       <div className="flex items-center gap-2.5 mb-2">
-                        <div className="bg-muted/10 p-1.5 rounded-md">
+                        <div className="bg-muted/20 p-1.5 rounded-md">
                           <DumbbellIcon className="h-4 w-4 text-foreground/70" />
                         </div>
                         <div className="font-semibold text-base">{pe.exercise?.name}</div>
                       </div>
                       <div className="pl-9 flex flex-wrap gap-3 text-sm">
                         {Array.from({ length: pe.sets }, (_, i) => (
-                          <span key={i} className="inline-flex items-center bg-muted/5 px-2.5 py-1 rounded-md">
+                          <span key={i} className="inline-flex items-center bg-muted/10 px-2.5 py-1 rounded-md">
                             <span className="font-medium">{pe.reps_per_set[i]}</span>
                             <span className="text-muted-foreground mx-1">×</span>
                             <span className="font-medium">{pe.weights_per_set[i]}</span>
@@ -206,9 +206,6 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                         ))}
                       </div>
                     </div>
-                    {index < workout.performed_exercises.length - 1 && (
-                      <Separator className="bg-muted/90" />
-                    )}
                   </li>
                 ))}
               </ul>
