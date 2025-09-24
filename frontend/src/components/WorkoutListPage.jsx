@@ -141,7 +141,12 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
             >
               <div className="flex items-center gap-3 flex-1">
                 <div className="bg-muted/10 p-2 rounded-md">
-                  <CalendarIcon className="h-5 w-5 text-foreground/70" />
+                  <ChevronDown 
+                    className={cn(
+                      "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                      isExpanded && "transform rotate-180"
+                    )}
+                  />
                 </div>
                 <div className="space-y-1">
                   <CardTitle className="text-lg font-semibold">{workout.name || 'Untitled Workout'}</CardTitle>
@@ -153,12 +158,6 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                 <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
                   {formatVolume(workout.total_volume)}
                 </div>
-                <ChevronDown 
-                  className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                    isExpanded && "transform rotate-180"
-                  )}
-                />
               </div>
             </button>
             <Button
