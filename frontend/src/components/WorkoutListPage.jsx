@@ -155,7 +155,7 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
+                <div className="bg-accent px-3 py-1 rounded-full text-sm font-medium text-accent-foreground">
                   {formatVolume(workout.total_volume)}
                 </div>
               </div>
