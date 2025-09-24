@@ -11,14 +11,7 @@ const formatVolume = (volume) => {
   return `${volume}`;
 };
 
-const getRankingColor = (index) => {
-  switch (index) {
-    case 0: return "text-yellow-500"; // Gold
-    case 1: return "text-gray-400";   // Silver
-    case 2: return "text-amber-800";  // Darker bronze (changed from amber-700)
-    default: return "text-zinc-900";  // Same as volume pills
-  }
-};
+const getRankingColor = () => "text-foreground";
 
 export default function TopWorkoutsCard() {
   const [topWorkouts, setTopWorkouts] = useState([]);
@@ -86,7 +79,7 @@ export default function TopWorkoutsCard() {
                         </p>
                       </div>
                     </div>
-                    <div className="bg-foreground px-3 py-1 rounded-full text-sm font-medium text-background">
+                    <div className="bg-accent px-3 py-1 rounded-full text-sm font-medium text-accent-foreground">
                       {formatVolume(workout.total_volume)}
                     </div>
                   </div>

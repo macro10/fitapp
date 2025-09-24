@@ -5,6 +5,12 @@ import { subMonths } from 'date-fns';
 import { getWeeklyVolumeAnalytics } from '../../../api';
 import { format, startOfISOWeek } from 'date-fns';
 
+const getAccentColor = () => {
+  if (typeof window === 'undefined') return '#22c55e'; // fallback
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  return raw ? `hsl(${raw})` : '#22c55e';
+};
+
 const WeeklyVolumeChart = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,13 +103,14 @@ const WeeklyVolumeChart = () => {
               color: '#ffffff',
               padding: '12px'
             }}
-            formatter={(value, name, props) => {
-              // Color the values to match their lines
-              const color = name === "Total Volume" ? "#f97316" : "#0d9488";
+            formatter={(value, name) => {
+              const accent = getAccentColor();
+              const isTotal = name === "Total" || name === "Total Volume";
+              const color = isTotal ? accent : "#94a3b8";
               return [
                 `${(value / 1000).toFixed(1)}k`,
                 name,
-                { color }  // This will color the value text
+                { color }
               ];
             }}
             labelFormatter={(label) => formatWeekLabel(label)}
@@ -134,11 +141,11 @@ const WeeklyVolumeChart = () => {
           <Line 
             type="monotone" 
             dataKey="totalVolume" 
-            stroke="#eab308" // text-yellow-500 (gold)
+            stroke={getAccentColor()}
             name="Total"
             strokeWidth={2.5}
             dot={false}
-            activeDot={{ r: 6, strokeWidth: 0 }}
+            activeDot={{ r: 6, strokeWidth: 0, fill: getAccentColor() }}
           />
         </LineChart>
       </ResponsiveContainer>
