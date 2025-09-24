@@ -137,7 +137,7 @@ export default function WorkoutLoggerPage() {
                   />
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="ghostDestructive"
                   size="icon"
                   onClick={handleCancelWorkout}
                   title="Cancel Workout"

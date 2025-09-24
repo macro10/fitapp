@@ -161,13 +161,10 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
               </div>
             </button>
             <Button
-              variant="ghost"
+              variant="ghostDestructive"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-destructive ml-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                setDeleteDialogOpen(true);
-              }}
+              className="h-9 w-9 ml-2"
+              onClick={(e) => { e.stopPropagation(); setDeleteDialogOpen(true); }}
               aria-label="Delete workout"
             >
               <Trash2Icon className="h-5 w-5" />
