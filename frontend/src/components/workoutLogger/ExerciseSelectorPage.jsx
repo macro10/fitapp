@@ -101,7 +101,7 @@ const [customOpen, setCustomOpen] = useState(false);
       >
         <div className="container mx-auto max-w-2xl px-4 py-3">
           <div className="relative flex items-center justify-center mb-2">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/log")} className="absolute left-0">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="absolute left-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-xl font-bold">Select Exercise</h1>

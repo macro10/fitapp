@@ -17,23 +17,29 @@ const WeeklyVolumeChart = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchData = async () => {
       try {
         const startDate = subMonths(new Date(), 6).toISOString();
         const endDate = new Date().toISOString();
-        
-        const response = await getWeeklyVolumeAnalytics(startDate, endDate);
+
+        const response = await getWeeklyVolumeAnalytics(startDate, endDate, { signal: controller.signal });
         setData(response.weekly_volumes || []);
         setError(null);
       } catch (error) {
-        console.error('Error fetching analytics:', error);
-        setError('Failed to load workout data');
+        // Ignore aborts; handle real errors
+        if (error.code !== 'ERR_CANCELED' && error.name !== 'CanceledError' && error.name !== 'AbortError') {
+          console.error('Error fetching analytics:', error);
+          setError('Failed to load workout data');
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
+    return () => controller.abort();
   }, []);
 
   const formatWeekLabel = (weekStr) => {

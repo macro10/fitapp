@@ -19,18 +19,23 @@ export default function TopWorkoutsCard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchTopWorkouts = async () => {
       try {
-        const data = await getTopWorkouts();
+        const data = await getTopWorkouts(5, { signal: controller.signal });
         setTopWorkouts(data.top_workouts);
       } catch (err) {
-        setError("Failed to load top workouts");
+        if (err.code !== 'ERR_CANCELED' && err.name !== 'CanceledError' && err.name !== 'AbortError') {
+          setError("Failed to load top workouts");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchTopWorkouts();
+    return () => controller.abort();
   }, []);
 
   return (

@@ -86,14 +86,15 @@ export const updateWorkout = async (workoutId, data) => {
   return response.data;
 };
 
-export const getWeeklyVolumeAnalytics = async (startDate, endDate) => {
+export const getWeeklyVolumeAnalytics = async (startDate, endDate, config = {}) => {
   const response = await api.get(
-    `analytics/weekly-volume/?start_date=${startDate}&end_date=${endDate}`
+    `analytics/weekly-volume/?start_date=${startDate}&end_date=${endDate}`,
+    config
   );
   return response.data;
 };
 
-export const getTopWorkouts = async (limit = 5) => {
-  const response = await api.get(`analytics/top-workouts/?limit=${limit}`);
+export const getTopWorkouts = async (limit = 5, config = {}) => {
+  const response = await api.get(`analytics/top-workouts/?limit=${limit}`, config);
   return response.data;
 };
