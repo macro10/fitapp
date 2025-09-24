@@ -86,7 +86,7 @@ export default function TopWorkoutsCard() {
                         </p>
                       </div>
                     </div>
-                    <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
+                    <div className="bg-foreground px-3 py-1 rounded-full text-sm font-medium text-background">
                       {formatVolume(workout.total_volume)}
                     </div>
                   </div>

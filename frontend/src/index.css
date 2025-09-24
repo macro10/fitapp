@@ -14,11 +14,11 @@
     --popover-foreground: 222.2 84% 4.9%;
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 158 58% 96%;          /* very light teal tint */
-    --secondary-foreground: 158 55% 22%;
+    --secondary: 142 46% 96%;          /* very light teal tint */
+    --secondary-foreground: 142 50% 22%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 158 64% 45%;              /* emerald 500-ish */
+    --accent: 158 64% 45%;          /* your original emerald */
     --accent-foreground: 0 0% 100%;     /* white on accent */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -28,27 +28,35 @@
     --radius: 0.5rem;
   }
  
-  /* Dark mode */
+  /* Dark mode - use toast green for accent */
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 220 18% 9%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+
+    --card: 220 18% 12%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+
+    --popover: 220 18% 12%;
     --popover-foreground: 210 40% 98%;
+
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 158 28% 18%;           /* subtle tinted surface */
+
+    --secondary: 142 28% 18%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 217.2 32.6% 17.5%;
+
+    --muted: 220 14% 20%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 158 64% 48%;              /* slightly brighter for contrast */
+
+    --accent: 142 70% 48%;          /* Tailwind green-500-ish */
     --accent-foreground: 0 0% 100%;
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+
+    --border: 220 14% 18%;
+    --input: 220 14% 18%;
+    --ring: 220 10% 70%;
   }
 }
  
