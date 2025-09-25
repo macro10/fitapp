@@ -44,7 +44,12 @@ const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
           Add Sets
           
         </Button>
-        <Button variant="outline" onClick={onConfirm}>
+        <Button
+          variant="outline"
+          onClick={onConfirm}
+          disabled={sets.length === 0}
+          title={sets.length === 0 ? "Add at least one set" : undefined}
+        >
           <SaveIcon className="h-4 w-4 mr-2" />
           Complete Exercise
         </Button>
