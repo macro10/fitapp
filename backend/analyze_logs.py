@@ -2,7 +2,7 @@
 import re
 from datetime import datetime, timedelta
 from collections import defaultdict, Counter
-import sys
+import os
 
 def analyze_logs(log_file_path):
     """Analyze Django logs for performance and error patterns"""
@@ -87,5 +87,9 @@ def analyze_logs(log_file_path):
             print(f"{req['endpoint']} - {req['processing_time']:.2f}s - User {req['user_id']}")
 
 if __name__ == "__main__":
-    log_file = "/app/logs/django.log"  # Adjust path as needed
+    # Use relative path for local development, absolute path for container
+    if os.path.exists("logs/django.log"):
+        log_file = "logs/django.log"  # Local development
+    else:
+        log_file = "/app/logs/django.log"  # Docker container
     analyze_logs(log_file)
