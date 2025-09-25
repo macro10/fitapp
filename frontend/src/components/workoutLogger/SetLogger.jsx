@@ -86,7 +86,7 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
       </div>
       <div className="flex gap-2">
         <Button 
-          className="flex-1"
+          className="flex-1 h-12 rounded-xl"
           onClick={handleNext}
           disabled={!reps || !weight || isLoading}
         >
@@ -102,7 +102,7 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
             </>
           )}
         </Button>
-        <Button variant="outline" onClick={onBack}>
+        <Button variant="outline" className="h-12 rounded-xl" onClick={onBack}>
           Done
         </Button>
       </div>

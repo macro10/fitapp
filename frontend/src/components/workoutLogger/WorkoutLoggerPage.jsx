@@ -188,7 +188,7 @@ export default function WorkoutLoggerPage() {
                   </button>
                   {workoutExercises.length > 0 && (
                     <Button
-                      className="w-full"
+                      className="w-full h-12 rounded-xl"
                       onClick={handleFinishWorkout}
                       disabled={loading || exercisesLoading || isSaving || !exercises?.length}
                     >

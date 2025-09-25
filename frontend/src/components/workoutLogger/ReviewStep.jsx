@@ -37,7 +37,7 @@ const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
 
       <div className="flex gap-2">
         <Button 
-          className="flex-1"
+          className="flex-1 h-12 rounded-xl"
           onClick={onBack}
         >
           <ChevronLeft className="h-4 w-4 ml-2" />
@@ -46,6 +46,7 @@ const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
         </Button>
         <Button
           variant="outline"
+          className="h-12 rounded-xl"
           onClick={onConfirm}
           disabled={sets.length === 0}
           title={sets.length === 0 ? "Add at least one set" : undefined}
