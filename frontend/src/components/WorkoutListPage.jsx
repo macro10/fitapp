@@ -89,27 +89,29 @@ const getRelativeTimeString = (dateStr) => {
 
 // Replace the existing DeleteWorkoutDialog with this version
 function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
+  const displayName = (workoutName || "Untitled Workout").trim();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-md">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <X className="h-5 w-5 text-destructive" />
-            Delete Workout?
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground">
-            Are you sure you want to delete "{workoutName || 'Untitled Workout'}"? This action cannot be undone.
+        <AlertDialogHeader className="text-center space-y-2">
+          <div className="mx-auto h-10 w-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+            <Trash2Icon className="h-5 w-5" />
+          </div>
+          <AlertDialogTitle>Delete “{displayName}”?</AlertDialogTitle>
+          <AlertDialogDescription className="max-w-[32ch] mx-auto">
+            This action can’t be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2">
-          <AlertDialogCancel className="flex-1">
+        <AlertDialogFooter className="gap-3">
+          <AlertDialogCancel autoFocus className="flex-1 h-12 rounded-xl">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction 
-            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="flex-1 h-12 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={onConfirm}
           >
-            Delete Workout
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
