@@ -1,10 +1,9 @@
 // frontend/src/components/workoutLogger/SetLogger.jsx
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { Plus, Loader2, Timer } from "lucide-react"; // Add Loader2 and Timer import
+import { Plus, Loader2 } from "lucide-react";
 import { WheelPicker, WheelPickerWrapper } from "../../components/ui/wheel-picker";
 import { RestTimer } from "./RestTimer";
-import { getWorkouts } from '../../api';
 
 // Helper function to create arrays of options
 const createOptions = (length, add = 0, step = 1) => 
@@ -21,7 +20,6 @@ const repOptions = createOptions(30, 1); // 1-30 reps
 const weightOptions = createOptions(101, 0, 5); // 0-500 in steps of 5
 
 export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", defaultWeight = "45" }) => {
-  console.log('SetLogger props:', { defaultReps, defaultWeight }); // Debug log
   const [reps, setReps] = useState(defaultReps);
   const [weight, setWeight] = useState(defaultWeight);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,17 +33,12 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
   const handleNext = async () => {
     if (reps && weight) {
       setIsLoading(true);
-      // Add a small delay for visual feedback
       await new Promise(resolve => setTimeout(resolve, 200));
-      
       onComplete({ 
         reps: Number(reps), 
         weight: Number(weight) 
       });
-      
-      // Reset the rest timer by updating the start time in localStorage
       localStorage.setItem("workout_rest_timer_start", Date.now().toString());
-      
       setIsLoading(false);
     }
   };
@@ -58,7 +51,7 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
         </h2>
         <RestTimer />
       </div>
-      {/* Change this div to use flex and gap instead of space-y */}
+
       <div className="flex gap-4">
         <div className="flex-1">
           <label className="text-sm text-muted-foreground block mb-2">
@@ -116,5 +109,3 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
     </div>
   );
 };
-
-

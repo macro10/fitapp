@@ -45,6 +45,10 @@ export const useExerciseLogger = () => {
     setSets(prevSets => [...prevSets, setData]);
   };
 
+  const removeSetAtIndex = (index) => {
+    setSets(prev => prev.filter((_, i) => i !== index));
+  };
+
   const resetExerciseState = () => {
     setCurrentExercise(null);
     setSets([]);
@@ -65,6 +69,7 @@ export const useExerciseLogger = () => {
     step,
     handleExerciseSelect,
     handleSetComplete,
+    removeSetAtIndex,
     resetExerciseState,
     setStep,
     getHeaderTitle

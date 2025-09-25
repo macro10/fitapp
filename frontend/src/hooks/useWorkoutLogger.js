@@ -141,6 +141,13 @@ export const useWorkoutLogger = () => {
     }));
   };
 
+  const removeExerciseAtIndex = (index) => {
+    setWorkoutState(prev => ({
+      ...prev,
+      exercises: prev.exercises.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleFinishWorkout = async () => {
     try {
       setSaving(true);
@@ -182,6 +189,7 @@ export const useWorkoutLogger = () => {
     setWorkoutName,
     error,
     addExerciseToWorkout,
+    removeExerciseAtIndex,
     handleFinishWorkout,
     clearWorkout,
     isSaving: saving,
