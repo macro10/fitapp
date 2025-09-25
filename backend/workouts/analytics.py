@@ -1,10 +1,13 @@
 # backend/workouts/analytics.py
 
+import logging
 from datetime import datetime, timedelta
 from django.db.models import F, Sum
 from django.db.models.functions import ExtractWeek, ExtractYear
 from django.utils import timezone
 from .models import Workout, PerformedExercise
+
+logger = logging.getLogger('workouts')
 
 def calculate_volume_per_set(performed_exercise):
     """Calculate total volume for a performed exercise"""
@@ -16,6 +19,14 @@ def calculate_volume_per_set(performed_exercise):
 
 def get_weekly_volume_data(user, start_date=None, end_date=None):
     """Get weekly workout volume data for a user"""
+    start_time = datetime.now()
+    
+    logger.debug(f"Fetching weekly volume data for user {user.id}", extra={
+        'user_id': user.id,
+        'start_date': start_date,
+        'end_date': end_date
+    })
+    
     # Default to last 6 months if no dates provided
     if not end_date:
         end_date = timezone.now()
@@ -27,6 +38,16 @@ def get_weekly_volume_data(user, start_date=None, end_date=None):
         user=user,
         date__range=(start_date, end_date)
     ).prefetch_related('performed_exercises')
+
+    workout_count = workouts.count()
+    processing_time = (datetime.now() - start_time).total_seconds()
+    
+    logger.info(f"Weekly volume query completed", extra={
+        'user_id': user.id,
+        'workout_count': workout_count,
+        'date_range_days': (end_date - start_date).days,
+        'processing_time_seconds': processing_time
+    })
 
     # Initialize weekly volume dictionary
     weekly_volumes = {}

@@ -50,18 +50,58 @@ REST_FRAMEWORK['DEFAULT_PERMISSION_CLASSES'] = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
         'file': {
-            'level': 'ERROR',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'formatter': 'verbose',
         },
+        'rotating_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'formatter': 'verbose',
+            'maxBytes': 10 * 1024 * 1024,  # 10MB
+            'backupCount': 5,
+        },
+    },
+    'root': {
+        'level': 'INFO',
+        'handlers': ['console', 'rotating_file'],
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
+            'handlers': ['console', 'rotating_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'workouts': {  # Your app-specific logs
+            'handlers': ['console', 'rotating_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'rotating_file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'django.db.backends': {  # Database query logging
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
