@@ -103,7 +103,7 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
           )}
         </Button>
         <Button variant="outline" className="h-12 rounded-xl" onClick={onBack}>
-          Done
+          {setNumber === 1 ? "Cancel" : "Done"}
         </Button>
       </div>
     </div>
