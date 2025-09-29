@@ -27,11 +27,11 @@ export const CancelWorkoutDialog = ({
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter className="gap-2">
-        <AlertDialogCancel className="flex-1">
+        <AlertDialogCancel className="flex-1 h-12 rounded-xl">
           Continue Workout
         </AlertDialogCancel>
         <AlertDialogAction 
-          className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          className="flex-1 h-12 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
           onClick={onConfirm}
         >
           Cancel Workout

@@ -53,6 +53,7 @@ export default function WorkoutLoggerPage() {
     setWorkoutName,
     error,
     addExerciseToWorkout,
+    removeExerciseAtIndex,
     handleFinishWorkout,
     clearWorkout,
     isSaving,
@@ -64,6 +65,7 @@ export default function WorkoutLoggerPage() {
     step,
     handleExerciseSelect,
     handleSetComplete,
+    removeSetAtIndex,
     resetExerciseState,
     setStep
   } = useExerciseLogger();
@@ -128,16 +130,15 @@ export default function WorkoutLoggerPage() {
             <CardHeader>
               <div className="flex justify-between items-center gap-3">
                 <div className="flex items-center gap-2 flex-grow">
-                  <Input
+                <Input
                     value={workoutName}
                     onChange={(e) => setWorkoutName(e.target.value)}
                     className="font-bold text-2xl h-12 border rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
-                    style={{ fontSize: '24px' }}
                     placeholder="Untitled Workout"
-                  />
+                />
                 </div>
                 <Button
-                  variant="ghost"
+                  variant="ghostDestructive"
                   size="icon"
                   onClick={handleCancelWorkout}
                   title="Cancel Workout"
@@ -175,6 +176,7 @@ export default function WorkoutLoggerPage() {
                     workoutExercises={workoutExercises}
                     exercises={exercises}
                     loading={loading || exercisesLoading}
+                    onRemove={removeExerciseAtIndex}
                   />
                   <button
                     type="button"
@@ -186,7 +188,7 @@ export default function WorkoutLoggerPage() {
                   </button>
                   {workoutExercises.length > 0 && (
                     <Button
-                      className="w-full"
+                      className="w-full h-12 rounded-xl"
                       onClick={handleFinishWorkout}
                       disabled={loading || exercisesLoading || isSaving || !exercises?.length}
                     >
@@ -234,6 +236,7 @@ export default function WorkoutLoggerPage() {
                   sets={sets}
                   onConfirm={handleExerciseComplete}
                   onBack={() => setStep(STEPS.LOG_SETS)}
+                  onRemoveSet={removeSetAtIndex}
                 />
               )}
             </CardContent>

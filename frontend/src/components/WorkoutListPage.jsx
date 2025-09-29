@@ -5,7 +5,9 @@ import { useWorkouts } from "../contexts/WorkoutContext";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
+import { Switch } from "./ui/switch";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X, Settings } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
 import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
@@ -87,27 +89,29 @@ const getRelativeTimeString = (dateStr) => {
 
 // Replace the existing DeleteWorkoutDialog with this version
 function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
+  const displayName = (workoutName || "Untitled Workout").trim();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-md">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <X className="h-5 w-5 text-destructive" />
-            Delete Workout?
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground">
-            Are you sure you want to delete "{workoutName || 'Untitled Workout'}"? This action cannot be undone.
+        <AlertDialogHeader className="text-center space-y-2">
+          <div className="mx-auto h-10 w-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+            <Trash2Icon className="h-5 w-5" />
+          </div>
+          <AlertDialogTitle>Delete “{displayName}”?</AlertDialogTitle>
+          <AlertDialogDescription className="max-w-[32ch] mx-auto">
+            This action can’t be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2">
-          <AlertDialogCancel className="flex-1">
+        <AlertDialogFooter className="gap-3">
+          <AlertDialogCancel autoFocus className="flex-1 h-12 rounded-xl">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction 
-            className="flex-1 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="flex-1 h-12 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             onClick={onConfirm}
           >
-            Delete Workout
+            Delete
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -141,7 +145,12 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
             >
               <div className="flex items-center gap-3 flex-1">
                 <div className="bg-muted/10 p-2 rounded-md">
-                  <CalendarIcon className="h-5 w-5 text-foreground/70" />
+                  <ChevronDown 
+                    className={cn(
+                      "h-5 w-5 text-muted-foreground transition-transform duration-200",
+                      isExpanded && "transform rotate-180"
+                    )}
+                  />
                 </div>
                 <div className="space-y-1">
                   <CardTitle className="text-lg font-semibold">{workout.name || 'Untitled Workout'}</CardTitle>
@@ -150,25 +159,16 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
               </div>
               
               <div className="flex items-center gap-3">
-                <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
+                <div className="bg-accent px-3 py-1 rounded-full text-sm font-medium text-accent-foreground">
                   {formatVolume(workout.total_volume)}
                 </div>
-                <ChevronDown 
-                  className={cn(
-                    "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                    isExpanded && "transform rotate-180"
-                  )}
-                />
               </div>
             </button>
             <Button
-              variant="ghost"
+              variant="ghostDestructive"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-destructive ml-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                setDeleteDialogOpen(true);
-              }}
+              className="h-9 w-9 ml-2"
+              onClick={(e) => { e.stopPropagation(); setDeleteDialogOpen(true); }}
               aria-label="Delete workout"
             >
               <Trash2Icon className="h-5 w-5" />
@@ -192,16 +192,16 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
               <ul className="space-y-2">
                 {workout.performed_exercises.map((pe, index) => (
                   <li key={pe.id}>
-                    <div className="py-3">
+                    <div className="p-4 rounded-lg border bg-card/70 shadow-sm hover:shadow-md transition-all">
                       <div className="flex items-center gap-2.5 mb-2">
-                        <div className="bg-muted/10 p-1.5 rounded-md">
+                        <div className="bg-muted/20 p-1.5 rounded-md">
                           <DumbbellIcon className="h-4 w-4 text-foreground/70" />
                         </div>
                         <div className="font-semibold text-base">{pe.exercise?.name}</div>
                       </div>
                       <div className="pl-9 flex flex-wrap gap-3 text-sm">
                         {Array.from({ length: pe.sets }, (_, i) => (
-                          <span key={i} className="inline-flex items-center bg-muted/5 px-2.5 py-1 rounded-md">
+                          <span key={i} className="inline-flex items-center bg-muted/10 px-2.5 py-1 rounded-md">
                             <span className="font-medium">{pe.reps_per_set[i]}</span>
                             <span className="text-muted-foreground mx-1">×</span>
                             <span className="font-medium">{pe.weights_per_set[i]}</span>
@@ -210,9 +210,6 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                         ))}
                       </div>
                     </div>
-                    {index < workout.performed_exercises.length - 1 && (
-                      <Separator className="bg-muted/90" />
-                    )}
                   </li>
                 ))}
               </ul>
@@ -317,6 +314,15 @@ export default function WorkoutListPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isDark, setIsDark] = useState(() => {
+    try {
+      const saved = localStorage.getItem('theme');
+      return saved ? saved === 'dark' : document.documentElement.classList.contains('dark');
+    } catch {
+      return document.documentElement.classList.contains('dark');
+    }
+  });
+
 
   const {
     workouts,
@@ -373,6 +379,11 @@ export default function WorkoutListPage() {
     logout();
     navigate("/auth");
   };
+  const toggleDarkMode = (checked) => {
+    setIsDark(checked);
+    document.documentElement.classList.toggle('dark', checked);
+    try { localStorage.setItem('theme', checked ? 'dark' : 'light'); } catch {}
+  };
 
   const renderContent = () => {
     if (loading) return <LoadingState />;
@@ -404,14 +415,29 @@ export default function WorkoutListPage() {
             <h1 className="text-3xl font-bold">FitApp</h1>
             <p className="text-muted-foreground">Track your workouts</p>
           </div>
-          <Button 
-            variant="ghost"
-            size="icon"
-            onClick={handleLogout}
-            aria-label="Logout"
-          >
-            <LogOutIcon className="h-5 w-5" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Open settings">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="end" className="w-64 p-3">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-2 py-1.5 rounded-md">
+                  <div className="text-sm">Dark mode</div>
+                  <Switch checked={isDark} onCheckedChange={toggleDarkMode} aria-label="Toggle dark mode" />
+                </div>
+                <Button
+                  variant="ghostDestructive"
+                  className="w-full justify-start"
+                  onClick={handleLogout}
+                >
+                  <LogOutIcon className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {renderContent()}

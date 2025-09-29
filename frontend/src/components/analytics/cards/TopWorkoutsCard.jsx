@@ -11,14 +11,7 @@ const formatVolume = (volume) => {
   return `${volume}`;
 };
 
-const getRankingColor = (index) => {
-  switch (index) {
-    case 0: return "text-yellow-500"; // Gold
-    case 1: return "text-gray-400";   // Silver
-    case 2: return "text-amber-800";  // Darker bronze (changed from amber-700)
-    default: return "text-zinc-900";  // Same as volume pills
-  }
-};
+const getRankingColor = () => "text-foreground";
 
 export default function TopWorkoutsCard() {
   const [topWorkouts, setTopWorkouts] = useState([]);
@@ -26,18 +19,23 @@ export default function TopWorkoutsCard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchTopWorkouts = async () => {
       try {
-        const data = await getTopWorkouts();
+        const data = await getTopWorkouts(5, { signal: controller.signal });
         setTopWorkouts(data.top_workouts);
       } catch (err) {
-        setError("Failed to load top workouts");
+        if (err.code !== 'ERR_CANCELED' && err.name !== 'CanceledError' && err.name !== 'AbortError') {
+          setError("Failed to load top workouts");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchTopWorkouts();
+    return () => controller.abort();
   }, []);
 
   return (
@@ -86,7 +84,7 @@ export default function TopWorkoutsCard() {
                         </p>
                       </div>
                     </div>
-                    <div className="bg-zinc-900 px-3 py-1 rounded-full text-sm font-medium text-white">
+                    <div className="bg-accent px-3 py-1 rounded-full text-sm font-medium text-accent-foreground">
                       {formatVolume(workout.total_volume)}
                     </div>
                   </div>

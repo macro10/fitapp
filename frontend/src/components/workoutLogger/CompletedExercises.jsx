@@ -1,9 +1,9 @@
 // frontend/src/components/workoutLogger/CompletedExercises.jsx
-import { DumbbellIcon } from "lucide-react";
+import { DumbbellIcon, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 
-export const CompletedExercises = ({ workoutExercises, exercises, loading = false }) => {
+export const CompletedExercises = ({ workoutExercises, exercises, loading = false, onRemove }) => {
   // Only create the exercise map if exercises array exists and has items
   const exerciseMap = exercises?.reduce((map, exercise) => {
     map[exercise.id] = exercise;
@@ -31,9 +31,21 @@ export const CompletedExercises = ({ workoutExercises, exercises, loading = fals
                 </span>
               )}
             </div>
-            <span className="text-sm text-muted-foreground">
-              {exercise.sets} {exercise.sets === 1 ? 'set' : 'sets'}
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">
+                {exercise.sets} {exercise.sets === 1 ? 'set' : 'sets'}
+              </span>
+              {onRemove && (
+                <Button
+                  variant="ghostDestructive"
+                  size="icon"
+                  aria-label={`Remove ${exerciseMap[exercise.exercise]?.name || 'exercise'}`}
+                  onClick={() => onRemove(index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         ))}
       </div>
