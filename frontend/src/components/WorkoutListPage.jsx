@@ -32,11 +32,6 @@ const calculateExerciseVolume = (performedExercise) => {
   }, 0);
 };
 
-const calculateTotalVolume = (exercises) => {
-  return exercises.reduce((total, exercise) => {
-    return total + calculateExerciseVolume(exercise);
-  }, 0);
-};
 
 // Add this helper function for formatting the volume
 const formatVolume = (volume) => {
@@ -87,6 +82,19 @@ const getRelativeTimeString = (dateStr) => {
   return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 };
 
+// Group identical (reps, weight) pairs into counts
+const groupSets = (reps, weights, sets) => {
+  const map = new Map();
+  for (let i = 0; i < sets; i++) {
+    const r = reps[i];
+    const w = weights[i] ?? 0;
+    const key = `${r}-${w}`;
+    if (!map.has(key)) map.set(key, { reps: r, weight: w, count: 0 });
+    map.get(key).count++;
+  }
+  return Array.from(map.values());
+};
+
 // Replace the existing DeleteWorkoutDialog with this version
 function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
   const displayName = (workoutName || "Untitled Workout").trim();
@@ -123,6 +131,7 @@ function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
 const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isExpanded = expanded === workout.id;
+  const [expandedExercises, setExpandedExercises] = useState({});
   
   return (
     <motion.div
@@ -154,7 +163,7 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                 </div>
                 <div className="space-y-1">
                   <CardTitle className="text-lg font-semibold">{workout.name || 'Untitled Workout'}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{getRelativeTimeString(workout.date)}</p>
+                  <p className="text-sm text-foreground/70">{getRelativeTimeString(workout.date)}</p>
                 </div>
               </div>
               
@@ -199,15 +208,37 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                         </div>
                         <div className="font-semibold text-base">{pe.exercise?.name}</div>
                       </div>
-                      <div className="pl-9 flex flex-wrap gap-3 text-sm">
-                        {Array.from({ length: pe.sets }, (_, i) => (
-                          <span key={i} className="inline-flex items-center bg-muted/10 px-2.5 py-1 rounded-md">
-                            <span className="font-medium">{pe.reps_per_set[i]}</span>
-                            <span className="text-muted-foreground mx-1">×</span>
-                            <span className="font-medium">{pe.weights_per_set[i]}</span>
-                            <span className="text-muted-foreground text-xs ml-0.5">lb</span>
-                          </span>
-                        ))}
+                      <div className="pl-9">
+                        <button
+                          type="button"
+                          className="flex flex-wrap gap-3 text-sm cursor-pointer"
+                          onClick={() =>
+                            setExpandedExercises((prev) => ({ ...prev, [pe.id]: !prev[pe.id] }))
+                          }
+                          aria-expanded={!!expandedExercises[pe.id]}
+                          title={expandedExercises[pe.id] ? 'Collapse sets' : 'Expand sets'}
+                        >
+                          {expandedExercises[pe.id]
+                            ? Array.from({ length: pe.sets }, (_, i) => (
+                                <span key={i} className="inline-flex items-center bg-muted/10 px-2.5 py-1 rounded-md">
+                                  <span className="font-medium">{pe.reps_per_set[i]}</span>
+                                  <span className="text-foreground/80 mx-1">×</span>
+                                  <span className="font-medium">{pe.weights_per_set[i]}</span>
+                                  <span className="text-foreground/90 text-xs ml-0.5">lb</span>
+                                </span>
+                              ))
+                            : groupSets(pe.reps_per_set, pe.weights_per_set, pe.sets).map((s, i) => (
+                                <span key={`${s.reps}-${s.weight}-${i}`} className="inline-flex items-center bg-muted/10 px-2.5 py-1 rounded-md">
+                                  <span className="font-medium">{s.reps}</span>
+                                  <span className="text-foreground/80 mx-1">×</span>
+                                  <span className="font-medium">{s.weight}</span>
+                                  <span className="text-foreground/90 text-xs ml-0.5">lb</span>
+                                  {s.count > 1 && (
+                                    <span className="text-foreground/80 text-xs ml-2">×{s.count}</span>
+                                  )}
+                                </span>
+                              ))}
+                        </button>
                       </div>
                     </div>
                   </li>
