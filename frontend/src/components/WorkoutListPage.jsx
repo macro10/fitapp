@@ -9,7 +9,6 @@ import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { Switch } from "./ui/switch";
 import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X, Settings } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
-import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 import { WORKOUT_STORAGE_KEY, CURRENT_EXERCISE_STORAGE_KEY } from '../hooks/useWorkoutLogger';
@@ -481,7 +480,6 @@ export default function WorkoutListPage() {
         {renderContent()}
 
       </div>
-      <Toaster />
     </>
   );
 }

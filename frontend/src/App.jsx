@@ -13,6 +13,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { WorkoutProvider } from "./contexts/WorkoutContext";
 import { ExerciseProvider } from "./contexts/ExerciseContext";
 import ExerciseSelectorPage from "./components/workoutLogger/ExerciseSelectorPage";
+import { Toaster } from "./components/ui/toaster";
 
 function RequireAuth({ children }) {
   const { isAuthenticated } = useAuth();
@@ -61,6 +62,7 @@ function App() {
               />
             </Routes>
           </Router>
+          <Toaster />
         </ExerciseProvider>
       </WorkoutProvider>
     </AuthProvider>

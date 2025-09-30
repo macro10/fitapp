@@ -28,7 +28,6 @@ import { Button } from "../ui/button";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Input } from "../ui/input";
 import { Skeleton } from "../ui/skeleton";
-import { Toaster } from "../ui/toaster";
 
 import {
   DumbbellIcon,
@@ -248,7 +247,6 @@ export default function WorkoutLoggerPage() {
             onOpenChange={setShowCancelDialog}
             onConfirm={handleCancelConfirm}
           />
-          <Toaster />
         </div>
       </div>
     </div>
