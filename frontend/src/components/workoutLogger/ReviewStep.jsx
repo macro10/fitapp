@@ -2,8 +2,21 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { ChevronLeft, SaveIcon, X } from "lucide-react";
 import { SwipeableRow } from "../ui/swipeable-row";
+import { useToast } from "../../hooks/use-toast";
 
 const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
+  const { toast } = useToast();
+
+  const handleRemoveSet = (i) => {
+    onRemoveSet?.(i);
+    toast({
+      title: "Set deleted",
+      description: "Removed from exercise.",
+      variant: "success",
+      duration: 1800,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -15,7 +28,7 @@ const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
         {sets.map((set, index) => (
           <SwipeableRow
             key={index}
-            onDelete={() => onRemoveSet?.(index)}
+            onDelete={() => handleRemoveSet(index)}
             actionLabel="Delete"
           >
             <Card>
@@ -29,7 +42,7 @@ const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
                         variant="ghostDestructive"
                         size="icon"
                         aria-label={`Delete set ${index + 1}`}
-                        onClick={() => onRemoveSet(index)}
+                        onClick={() => handleRemoveSet(index)}
                         className="hidden sm:inline-flex"
                       >
                         <X className="h-4 w-4" />

@@ -3,6 +3,7 @@ import { DumbbellIcon, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import { SwipeableRow } from "../ui/swipeable-row";
+import { useToast } from "../../hooks/use-toast";
 
 export const CompletedExercises = ({ workoutExercises, exercises, loading = false, onRemove }) => {
   // Only create the exercise map if exercises array exists and has items
@@ -10,6 +11,18 @@ export const CompletedExercises = ({ workoutExercises, exercises, loading = fals
     map[exercise.id] = exercise;
     return map;
   }, {}) || {};
+
+  const { toast } = useToast();
+
+  const handleRemoveExercise = (i) => {
+    onRemove?.(i);
+    toast({
+      title: "Exercise deleted",
+      description: "Removed from workout.",
+      variant: "success",
+      duration: 1800,
+    });
+  };
 
   if (!workoutExercises.length) return null;
 
@@ -20,7 +33,7 @@ export const CompletedExercises = ({ workoutExercises, exercises, loading = fals
         {workoutExercises.map((exercise, index) => (
           <SwipeableRow
             key={index}
-            onDelete={() => onRemove?.(index)}
+            onDelete={() => handleRemoveExercise(index)}
           >
             <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
               <div className="flex items-center gap-2">
@@ -42,7 +55,7 @@ export const CompletedExercises = ({ workoutExercises, exercises, loading = fals
                     variant="ghostDestructive"
                     size="icon"
                     aria-label={`Remove ${exerciseMap[exercise.exercise]?.name || 'exercise'}`}
-                    onClick={() => onRemove(index)}
+                    onClick={() => handleRemoveExercise(index)}
                     className="hidden sm:inline-flex"
                   >
                     <X className="h-4 w-4" />
