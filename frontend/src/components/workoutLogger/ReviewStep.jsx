@@ -1,6 +1,7 @@
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { ChevronLeft, SaveIcon, X } from "lucide-react";
+import { SwipeableRow } from "../ui/swipeable-row";
 
 const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
   return (
@@ -12,26 +13,33 @@ const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
       
       <div className="space-y-2">
         {sets.map((set, index) => (
-          <Card key={index}>
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center">
-                <span>Set {index + 1}</span>
-                <div className="flex items-center gap-3">
-                  <span>{set.reps} reps @ {set.weight} lbs</span>
-                  {onRemoveSet && (
-                    <Button
-                      variant="ghostDestructive"
-                      size="icon"
-                      aria-label={`Delete set ${index + 1}`}
-                      onClick={() => onRemoveSet(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
+          <SwipeableRow
+            key={index}
+            onDelete={() => onRemoveSet?.(index)}
+            actionLabel="Delete"
+          >
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center">
+                  <span>Set {index + 1}</span>
+                  <div className="flex items-center gap-3">
+                    <span>{set.reps} reps @ {set.weight} lbs</span>
+                    {onRemoveSet && (
+                      <Button
+                        variant="ghostDestructive"
+                        size="icon"
+                        aria-label={`Delete set ${index + 1}`}
+                        onClick={() => onRemoveSet(index)}
+                        className="hidden sm:inline-flex"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </SwipeableRow>
         ))}
       </div>
 
