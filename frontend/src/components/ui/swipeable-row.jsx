@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
+import { Trash2Icon } from "lucide-react";
 
-const ACTION_WIDTH = 96; // px
+const ACTION_WIDTH = 82; // px
 
 export function SwipeableRow({
   children,
@@ -28,7 +29,7 @@ export function SwipeableRow({
       <div className="absolute inset-y-0 right-0 flex items-stretch pr-2 sm:hidden">
         <button
           type="button"
-          className="my-2 h-[calc(100%-1rem)] w-20 rounded-lg bg-destructive text-destructive-foreground font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:opacity-90"
+          className="my-2 h-[calc(100%-1rem)] w-16 rounded-lg bg-destructive text-destructive-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:opacity-90 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
             setOpen(false);
@@ -36,7 +37,7 @@ export function SwipeableRow({
           }}
           aria-label={actionLabel}
         >
-          {actionLabel}
+          <Trash2Icon className="h-5 w-5" />
         </button>
       </div>
 
