@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 
@@ -13,6 +13,7 @@ export function SwipeableRow({
   fullSwipeThreshold = ACTION_WIDTH * 1.5,
 }) {
   const [open, setOpen] = useState(false);
+  const isDraggingRef = useRef(false);
 
   return (
     <div
@@ -44,25 +45,35 @@ export function SwipeableRow({
         drag="x"
         dragConstraints={{ left: -ACTION_WIDTH, right: 0 }}
         dragElastic={0.04}
+        dragMomentum={false}
+        onDragStart={() => {
+          isDraggingRef.current = true;
+        }}
         onDragEnd={(_, info) => {
           const x = info.offset.x;
+
           if (x <= -fullSwipeThreshold) {
             setOpen(false);
             onDelete?.();
-            return;
-          }
-          if (x <= -ACTION_WIDTH / 2) {
+          } else if (x <= -ACTION_WIDTH / 2) {
             setOpen(true);
           } else {
             setOpen(false);
           }
+
+          // Keep the drag flag true just long enough to swallow the synthetic click
+          setTimeout(() => {
+            isDraggingRef.current = false;
+          }, 150);
+        }}
+        onClickCapture={(e) => {
+          if (isDraggingRef.current) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
         }}
         animate={{ x: open ? -ACTION_WIDTH : 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 35 }}
-        onPointerDownCapture={() => {
-          // tapping the row while open should not re-close before click lands
-          // let onClick above handle close
-        }}
         className="relative bg-card"
       >
         {children}
