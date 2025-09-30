@@ -57,6 +57,7 @@ export function SwipeableRow({
         dragConstraints={{ left: -ACTION_WIDTH, right: 0 }}
         dragElastic={0.04}
         dragMomentum={false}
+        dragSnapToOrigin
         onDragStart={() => {
           if (!isMobile) return;
           isDraggingRef.current = true;
@@ -68,9 +69,8 @@ export function SwipeableRow({
           if (x <= -fullSwipeThreshold) {
             setOpen(false);
             onDelete?.();
-          } else if (x <= -ACTION_WIDTH / 2) {
-            setOpen(true);
           } else {
+            // Always snap closed after releasing drag
             setOpen(false);
           }
 
