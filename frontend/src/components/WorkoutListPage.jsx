@@ -41,6 +41,10 @@ const formatVolume = (volume) => {
   return `${volume}`;
 };
 
+// Add this helper for a time pill like the example
+const formatTimeOfDay = (dateStr) =>
+  new Date(dateStr).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
 // Add this helper function near the other helper functions at the top
 const getRelativeTimeString = (dateStr) => {
   const date = new Date(dateStr);
@@ -143,7 +147,7 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
         transition: { duration: 0.2 }
       }}
     >
-      <Card className="mb-4 hover:shadow-lg transition-shadow">
+      <Card className="mb-4 rounded-2xl border bg-card/80 hover:shadow-lg transition-shadow">
         <SwipeableRow
           onDelete={() => {
             // open your existing confirm dialog
@@ -151,34 +155,41 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
           }}
         >
           <CardHeader className="py-4">
-            <div className="flex justify-between items-center">
+            <div className="flex items-start">
               <button 
-                className="flex items-center gap-3 flex-1 text-left group" 
+                className="group flex-1 text-left"
                 onClick={() => setExpanded(isExpanded ? null : workout.id)}
                 aria-expanded={isExpanded}
                 aria-controls={`workout-details-${workout.id}`}
               >
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="bg-muted/10 p-2 rounded-md">
-                    <ChevronDown 
-                      className={cn(
-                        "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                        isExpanded && "transform rotate-180"
-                      )}
-                    />
-                  </div>
+                <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
-                    <CardTitle className="text-lg font-semibold">{workout.name || 'Untitled Workout'}</CardTitle>
-                    <p className="text-sm text-foreground/70">{getRelativeTimeString(workout.date)}</p>
+                    <CardTitle
+                      id={`workout-title-${workout.id}`}
+                      className="text-base font-semibold"
+                    >
+                      {workout.name || 'Untitled Workout'}
+                    </CardTitle>
+                    <p className="text-sm text-foreground/70">
+                      {getRelativeTimeString(workout.date)}
+                    </p>
                   </div>
+                  <span className="shrink-0 rounded-full bg-muted/10 px-2.5 py-1 text-xs text-foreground/80">
+                    {formatTimeOfDay(workout.date)}
+                  </span>
                 </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className="bg-accent px-3 py-1 rounded-full text-sm font-medium text-accent-foreground">
+
+                <div className="mt-3 flex items-center gap-2">
+                  <DumbbellIcon className="h-5 w-5 text-foreground/80" />
+                  <div className="text-2xl font-semibold">
                     {formatVolume(workout.total_volume)}
                   </div>
+                  <span className="text-sm text-muted-foreground ml-1">
+                    volume
+                  </span>
                 </div>
               </button>
+
               <Button
                 variant="ghostDestructive"
                 size="icon"
