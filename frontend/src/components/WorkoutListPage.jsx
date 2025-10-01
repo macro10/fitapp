@@ -147,13 +147,14 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
         transition: { duration: 0.2 }
       }}
     >
-      <Card className="mb-4 rounded-2xl border bg-card/80 hover:shadow-lg transition-shadow">
-        <SwipeableRow
-          onDelete={() => {
-            // open your existing confirm dialog
-            setDeleteDialogOpen(true);
-          }}
-        >
+      <SwipeableRow
+        onDelete={() => {
+          // open your existing confirm dialog
+          setDeleteDialogOpen(true);
+        }}
+        className="mb-4 rounded-2xl"
+      >
+        <Card className="rounded-2xl border bg-card hover:shadow-lg transition-shadow overflow-hidden">
           <CardHeader className="py-4">
             <div className="flex items-start">
               <button 
@@ -262,8 +263,8 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
               )}
             </CardContent>
           )}
-        </SwipeableRow>
-      </Card>
+        </Card>
+      </SwipeableRow>
       <DeleteWorkoutDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}

@@ -92,8 +92,8 @@ export function SwipeableRow({
           }
         }}
         animate={{ x: open ? -ACTION_WIDTH : 0 }}
-        transition={instant ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 35 }}
-        className="relative bg-card"
+        transition={{ type: "spring", stiffness: 400, damping: 35 }}
+        className="relative"
       >
         {children}
       </motion.div>
