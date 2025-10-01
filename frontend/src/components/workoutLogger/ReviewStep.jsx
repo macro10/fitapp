@@ -27,7 +27,7 @@ const ReviewStep = ({ exercise, sets, onConfirm, onBack, onRemoveSet }) => {
       <div className="space-y-2">
         {sets.map((set, index) => (
           <SwipeableRow
-            key={index}
+            key={set.id ?? index}
             onDelete={() => handleRemoveSet(index)}
             actionLabel="Delete"
           >

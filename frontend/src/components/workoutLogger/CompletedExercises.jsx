@@ -32,7 +32,7 @@ export const CompletedExercises = ({ workoutExercises, exercises, loading = fals
       <div className="space-y-2">
         {workoutExercises.map((exercise, index) => (
           <SwipeableRow
-            key={index}
+            key={exercise.id ?? index}
             onDelete={() => handleRemoveExercise(index)}
           >
             <div className="flex items-center justify-between p-4 rounded-lg border bg-card">

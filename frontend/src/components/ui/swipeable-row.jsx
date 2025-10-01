@@ -14,6 +14,7 @@ export function SwipeableRow({
 }) {
   const [open, setOpen] = useState(false);
   const isDraggingRef = useRef(false);
+  const [instant, setInstant] = useState(false);
 
   // Enable swipe only on mobile (Tailwind sm breakpoint < 640px)
   const [isMobile, setIsMobile] = useState(false);
@@ -37,13 +38,16 @@ export function SwipeableRow({
     >
       {/* Actions layer (behind) - hidden on >= sm */}
       <div className="absolute inset-y-0 right-0 flex items-stretch pr-2 sm:hidden">
-        <button
+      <button
           type="button"
           className="my-2 h-[calc(100%-1rem)] w-20 rounded-lg bg-destructive text-destructive-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:opacity-90 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
+            setInstant(true);
             setOpen(false);
-            onDelete?.();
+            requestAnimationFrame(() => {
+              onDelete?.();
+            });
           }}
           aria-label={actionLabel}
         >
@@ -67,8 +71,11 @@ export function SwipeableRow({
 
           const x = info.offset.x;
           if (x <= -fullSwipeThreshold) {
+            setInstant(true);
             setOpen(false);
-            onDelete?.();
+            requestAnimationFrame(() => {
+              onDelete?.();
+            });
           } else {
             // Always snap closed after releasing drag
             setOpen(false);
@@ -85,7 +92,7 @@ export function SwipeableRow({
           }
         }}
         animate={{ x: open ? -ACTION_WIDTH : 0 }}
-        transition={{ type: "spring", stiffness: 400, damping: 35 }}
+        transition={instant ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 35 }}
         className="relative bg-card"
       >
         {children}
