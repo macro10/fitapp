@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { Switch } from "./ui/switch";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X, Settings } from "lucide-react";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X, Settings, Zap, Gauge, Bolt, Activity } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
@@ -180,13 +180,11 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                 </div>
 
                 <div className="mt-3 flex items-center gap-2">
-                  <DumbbellIcon className="h-5 w-5 text-foreground/80" />
-                  <div className="text-2xl font-semibold">
+                  <Activity className="h-5 w-5 text-accent" />
+                  <div className="text-2xl font-semibold text-accent">
                     {formatVolume(workout.total_volume)}
                   </div>
-                  <span className="text-sm text-muted-foreground ml-1">
-                    volume
-                  </span>
+                  <span className="text-sm text-muted-foreground ml-1">volume</span>
                 </div>
               </button>
 
