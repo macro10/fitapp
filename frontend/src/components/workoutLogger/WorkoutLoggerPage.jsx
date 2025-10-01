@@ -133,7 +133,7 @@ export default function WorkoutLoggerPage() {
                 <Input
                     value={workoutName}
                     onChange={(e) => setWorkoutName(e.target.value)}
-                    className="font-bold text-2xl h-12 border rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
+                    className="font-bold text-2xl md:text-2xl h-12 border rounded-md focus-visible:ring-1 focus-visible:ring-offset-0"
                     placeholder="Untitled Workout"
                 />
                 </div>

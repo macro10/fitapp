@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { STEPS } from '../constants/workout';
 
 const CURRENT_EXERCISE_STORAGE_KEY = 'inProgressExercise';
+const makeId = () =>
+  (typeof crypto !== 'undefined' && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 export const useExerciseLogger = () => {
   // Initialize state from localStorage if it exists
@@ -36,13 +40,21 @@ export const useExerciseLogger = () => {
     }
   }, [currentExercise, sets, step]);
 
+  // One-time migration: add IDs to any existing sets without one
+  useEffect(() => {
+    if (Array.isArray(currentState.sets) && currentState.sets.some(s => s && s.id == null)) {
+      setSets(currentState.sets.map(s => (s && s.id == null ? { ...s, id: makeId() } : s)));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleExerciseSelect = (exercise) => {
     setCurrentExercise(exercise);
     setStep(STEPS.LOG_SETS);
   };
 
   const handleSetComplete = (setData) => {
-    setSets(prevSets => [...prevSets, setData]);
+    setSets(prevSets => [...prevSets, { ...setData, id: makeId() }]);
   };
 
   const removeSetAtIndex = (index) => {

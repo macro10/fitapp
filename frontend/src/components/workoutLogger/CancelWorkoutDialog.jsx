@@ -17,17 +17,17 @@ export const CancelWorkoutDialog = ({
 }) => (
   <AlertDialog open={open} onOpenChange={onOpenChange}>
     <AlertDialogContent className="max-w-md">
-      <AlertDialogHeader>
-        <AlertDialogTitle className="flex items-center gap-2">
-          <X className="h-5 w-5 text-destructive" />
-          Cancel Workout?
-        </AlertDialogTitle>
-        <AlertDialogDescription className="text-muted-foreground">
-          Are you sure you want to cancel this workout? All progress will be lost.
+      <AlertDialogHeader className="text-center space-y-2">
+        <div className="mx-auto h-10 w-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center">
+          <X className="h-5 w-5" />
+        </div>
+        <AlertDialogTitle>Cancel Workout?</AlertDialogTitle>
+        <AlertDialogDescription className="max-w-[32ch] mx-auto">
+          This action can’t be undone.
         </AlertDialogDescription>
       </AlertDialogHeader>
-      <AlertDialogFooter className="gap-2">
-        <AlertDialogCancel className="flex-1 h-12 rounded-xl">
+      <AlertDialogFooter className="gap-3">
+        <AlertDialogCancel autoFocus className="flex-1 h-12 rounded-xl">
           Continue Workout
         </AlertDialogCancel>
         <AlertDialogAction 

@@ -7,12 +7,12 @@ import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
 import { Popover, PopoverTrigger, PopoverContent } from "./ui/popover";
 import { Switch } from "./ui/switch";
-import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X, Settings } from "lucide-react";
+import { CalendarIcon, DumbbellIcon, LogOutIcon, PlusIcon, Trash2Icon, ChevronDown, X, Settings, Zap, Gauge, Bolt, Activity } from "lucide-react";
 import { useToast } from "../hooks/use-toast"
-import { Toaster } from "./ui/toaster"
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../lib/utils";
 import { WORKOUT_STORAGE_KEY, CURRENT_EXERCISE_STORAGE_KEY } from '../hooks/useWorkoutLogger';
+import { SwipeableRow } from "./ui/swipeable-row";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,11 +32,6 @@ const calculateExerciseVolume = (performedExercise) => {
   }, 0);
 };
 
-const calculateTotalVolume = (exercises) => {
-  return exercises.reduce((total, exercise) => {
-    return total + calculateExerciseVolume(exercise);
-  }, 0);
-};
 
 // Add this helper function for formatting the volume
 const formatVolume = (volume) => {
@@ -45,6 +40,10 @@ const formatVolume = (volume) => {
   }
   return `${volume}`;
 };
+
+// Add this helper for a time pill like the example
+const formatTimeOfDay = (dateStr) =>
+  new Date(dateStr).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
 // Add this helper function near the other helper functions at the top
 const getRelativeTimeString = (dateStr) => {
@@ -87,6 +86,19 @@ const getRelativeTimeString = (dateStr) => {
   return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 };
 
+// Group identical (reps, weight) pairs into counts
+const groupSets = (reps, weights, sets) => {
+  const map = new Map();
+  for (let i = 0; i < sets; i++) {
+    const r = reps[i];
+    const w = weights[i] ?? 0;
+    const key = `${r}-${w}`;
+    if (!map.has(key)) map.set(key, { reps: r, weight: w, count: 0 });
+    map.get(key).count++;
+  }
+  return Array.from(map.values());
+};
+
 // Replace the existing DeleteWorkoutDialog with this version
 function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
   const displayName = (workoutName || "Untitled Workout").trim();
@@ -123,6 +135,7 @@ function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
 const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isExpanded = expanded === workout.id;
+  const [expandedExercises, setExpandedExercises] = useState({});
   
   return (
     <motion.div
@@ -134,90 +147,124 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
         transition: { duration: 0.2 }
       }}
     >
-      <Card className="mb-4 hover:shadow-lg transition-shadow">
-        <CardHeader className="py-4">
-          <div className="flex justify-between items-center">
-            <button 
-              className="flex items-center gap-3 flex-1 text-left group" 
-              onClick={() => setExpanded(isExpanded ? null : workout.id)}
-              aria-expanded={isExpanded}
-              aria-controls={`workout-details-${workout.id}`}
+      <SwipeableRow
+        onDelete={() => {
+          // open your existing confirm dialog
+          setDeleteDialogOpen(true);
+        }}
+        className="mb-4 rounded-2xl"
+      >
+        <Card className="rounded-2xl border bg-card hover:shadow-lg transition-shadow overflow-hidden">
+          <CardHeader className="py-4">
+            <div className="flex items-start">
+              <button 
+                className="group flex-1 text-left"
+                onClick={() => setExpanded(isExpanded ? null : workout.id)}
+                aria-expanded={isExpanded}
+                aria-controls={`workout-details-${workout.id}`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <CardTitle
+                      id={`workout-title-${workout.id}`}
+                      className="text-base font-semibold"
+                    >
+                      {workout.name || 'Untitled Workout'}
+                    </CardTitle>
+                    <p className="text-sm text-foreground/70">
+                      {getRelativeTimeString(workout.date)}
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-muted/10 px-2.5 py-1 text-xs text-foreground/80">
+                    {formatTimeOfDay(workout.date)}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-accent" />
+                  <div className="text-2xl font-semibold text-accent">
+                    {formatVolume(workout.total_volume)}
+                  </div>
+                  <span className="text-sm text-muted-foreground ml-1">volume</span>
+                </div>
+              </button>
+
+              <Button
+                variant="ghostDestructive"
+                size="icon"
+                className="h-9 w-9 ml-2 hidden sm:inline-flex"
+                onClick={(e) => { e.stopPropagation(); setDeleteDialogOpen(true); }}
+                aria-label="Delete workout"
+              >
+                <Trash2Icon className="h-5 w-5" />
+              </Button>
+            </div>
+          </CardHeader>
+          {isExpanded && (
+            <CardContent
+              id={`workout-details-${workout.id}`}
+              role="region"
+              aria-labelledby={`workout-title-${workout.id}`}
             >
-              <div className="flex items-center gap-3 flex-1">
-                <div className="bg-muted/10 p-2 rounded-md">
-                  <ChevronDown 
-                    className={cn(
-                      "h-5 w-5 text-muted-foreground transition-transform duration-200",
-                      isExpanded && "transform rotate-180"
-                    )}
-                  />
+              <Separator className="my-2" />
+              {workout.performed_exercises === undefined ? (
+                <WorkoutDetailsSkeleton />
+              ) : workout.performed_exercises.length === 0 ? (
+                <div className="text-sm text-muted-foreground py-3">
+                  No exercises logged.
                 </div>
-                <div className="space-y-1">
-                  <CardTitle className="text-lg font-semibold">{workout.name || 'Untitled Workout'}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{getRelativeTimeString(workout.date)}</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
-                <div className="bg-accent px-3 py-1 rounded-full text-sm font-medium text-accent-foreground">
-                  {formatVolume(workout.total_volume)}
-                </div>
-              </div>
-            </button>
-            <Button
-              variant="ghostDestructive"
-              size="icon"
-              className="h-9 w-9 ml-2"
-              onClick={(e) => { e.stopPropagation(); setDeleteDialogOpen(true); }}
-              aria-label="Delete workout"
-            >
-              <Trash2Icon className="h-5 w-5" />
-            </Button>
-          </div>
-        </CardHeader>
-        {isExpanded && (
-          <CardContent
-            id={`workout-details-${workout.id}`}
-            role="region"
-            aria-labelledby={`workout-title-${workout.id}`}
-          >
-            <Separator className="my-2" />
-            {workout.performed_exercises === undefined ? (
-              <WorkoutDetailsSkeleton />
-            ) : workout.performed_exercises.length === 0 ? (
-              <div className="text-sm text-muted-foreground py-3">
-                No exercises logged.
-              </div>
-            ) : (
-              <ul className="space-y-2">
-                {workout.performed_exercises.map((pe, index) => (
-                  <li key={pe.id}>
-                    <div className="p-4 rounded-lg border bg-card/70 shadow-sm hover:shadow-md transition-all">
-                      <div className="flex items-center gap-2.5 mb-2">
-                        <div className="bg-muted/20 p-1.5 rounded-md">
-                          <DumbbellIcon className="h-4 w-4 text-foreground/70" />
+              ) : (
+                <ul className="space-y-2">
+                  {workout.performed_exercises.map((pe, index) => (
+                    <li key={pe.id}>
+                      <div className="p-4 rounded-lg border bg-card/70 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex items-center gap-2.5 mb-2">
+                          <div className="bg-muted/20 p-1.5 rounded-md">
+                            <DumbbellIcon className="h-4 w-4 text-foreground/70" />
+                          </div>
+                          <div className="font-semibold text-base">{pe.exercise?.name}</div>
                         </div>
-                        <div className="font-semibold text-base">{pe.exercise?.name}</div>
+                        <div className="pl-9">
+                          <button
+                            type="button"
+                            className="flex flex-wrap gap-3 text-sm cursor-pointer"
+                            onClick={() =>
+                              setExpandedExercises((prev) => ({ ...prev, [pe.id]: !prev[pe.id] }))
+                            }
+                            aria-expanded={!!expandedExercises[pe.id]}
+                            title={expandedExercises[pe.id] ? 'Collapse sets' : 'Expand sets'}
+                          >
+                            {expandedExercises[pe.id]
+                              ? Array.from({ length: pe.sets }, (_, i) => (
+                                  <span key={i} className="inline-flex items-center bg-muted/10 px-2.5 py-1 rounded-md">
+                                    <span className="font-medium">{pe.reps_per_set[i]}</span>
+                                    <span className="text-foreground/80 mx-1">×</span>
+                                    <span className="font-medium">{pe.weights_per_set[i]}</span>
+                                    <span className="text-foreground/90 text-xs ml-0.5">lb</span>
+                                  </span>
+                                ))
+                              : groupSets(pe.reps_per_set, pe.weights_per_set, pe.sets).map((s, i) => (
+                                  <span key={`${s.reps}-${s.weight}-${i}`} className="inline-flex items-center bg-muted/10 px-2.5 py-1 rounded-md">
+                                    <span className="font-medium">{s.reps}</span>
+                                    <span className="text-foreground/80 mx-1">×</span>
+                                    <span className="font-medium">{s.weight}</span>
+                                    <span className="text-foreground/90 text-xs ml-0.5">lb</span>
+                                    {s.count > 1 && (
+                                      <span className="text-foreground/80 text-xs ml-2">×{s.count}</span>
+                                    )}
+                                  </span>
+                                ))}
+                          </button>
+                        </div>
                       </div>
-                      <div className="pl-9 flex flex-wrap gap-3 text-sm">
-                        {Array.from({ length: pe.sets }, (_, i) => (
-                          <span key={i} className="inline-flex items-center bg-muted/10 px-2.5 py-1 rounded-md">
-                            <span className="font-medium">{pe.reps_per_set[i]}</span>
-                            <span className="text-muted-foreground mx-1">×</span>
-                            <span className="font-medium">{pe.weights_per_set[i]}</span>
-                            <span className="text-muted-foreground text-xs ml-0.5">lb</span>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        )}
-      </Card>
-      
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          )}
+        </Card>
+      </SwipeableRow>
       <DeleteWorkoutDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -443,7 +490,6 @@ export default function WorkoutListPage() {
         {renderContent()}
 
       </div>
-      <Toaster />
     </>
   );
 }

@@ -97,6 +97,11 @@ export const useWorkoutLogger = () => {
     };
   });
 
+  const makeId = () =>
+    (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
   const { exerciseMap } = useExercises();
   const { upsertWorkout } = useWorkouts();
 
@@ -120,6 +125,18 @@ export const useWorkoutLogger = () => {
     localStorage.setItem(WORKOUT_STORAGE_KEY, JSON.stringify(workoutState));
   }, [workoutState]);
 
+  // One-time migration: add IDs to any existing exercises without one
+  useEffect(() => {
+    setWorkoutState(prev => {
+      if (!Array.isArray(prev.exercises) || !prev.exercises.some(e => e && e.id == null)) return prev;
+      return {
+        ...prev,
+        exercises: prev.exercises.map(e => (e && e.id == null ? { ...e, id: makeId() } : e)),
+      };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const setWorkoutName = (name) => {
     setWorkoutState(prev => ({
       ...prev,
@@ -130,6 +147,7 @@ export const useWorkoutLogger = () => {
 
   const addExerciseToWorkout = (exerciseData) => {
     const formattedExercise = {
+      id: makeId(),
       exercise: exerciseData.exercise,
       sets: exerciseData.sets,
       reps_per_set: exerciseData.reps_per_set,
