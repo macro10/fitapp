@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { Command, CommandEmpty, CommandGroup, CommandItem } from "../ui/command";
 import CustomExerciseModal from "./CustomExerciseModal";
 import { createCustomExercise } from "../../api";
+import useExerciseRecency from "../../hooks/useExerciseRecency";
 
 import { Search, ArrowLeft, Pencil } from "lucide-react";
 
@@ -77,13 +78,24 @@ const [customOpen, setCustomOpen] = useState(false);
     });
   }, [search, exercises, activeGroups]);
 
-  const visible = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
+  const { lastCompletedMap } = useExerciseRecency();
+  const orderedFiltered = useMemo(() => {
+    const collator = new Intl.Collator(undefined, { sensitivity: "base" });
+    return [...filtered].sort((a, b) => {
+      const at = lastCompletedMap[a.id] || 0;
+      const bt = lastCompletedMap[b.id] || 0;
+      if (bt !== at) return bt - at; // most recent first
+      return collator.compare(a.name, b.name);
+    });
+  }, [filtered, lastCompletedMap]);
+
+  const visible = orderedFiltered.slice(0, visibleCount);
+  const hasMore = visibleCount < orderedFiltered.length;
 
   const onScrollLoadMore = (e) => {
     const el = e.currentTarget;
     const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 100;
-    if (nearBottom && hasMore) setVisibleCount(c => Math.min(c + 25, filtered.length));
+    if (nearBottom && hasMore) setVisibleCount(c => Math.min(c + 25, orderedFiltered.length));
   };
 
   const handleSelect = (exercise) => {
