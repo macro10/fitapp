@@ -3,14 +3,32 @@ import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
 import { Separator } from "../../ui/separator";
 import { getTopWorkouts } from "../../../api";
 import { format } from "date-fns";
-import { TrophyIcon, Activity } from "lucide-react";
+import { TrophyIcon } from "lucide-react";
 
 const formatVolume = (volume) => (volume >= 1000 ? `${(volume / 1000).toFixed(1)}k` : `${volume}`);
 const formatTimeOfDay = (dateStr) =>
   new Date(dateStr).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
+function AnalyticsItemSkeleton() {
+  return (
+    <div className="py-5 animate-pulse">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-10 h-5 bg-muted/30 rounded" />
+          <div className="space-y-2 w-full">
+            <div className="h-4 w-40 bg-muted/30 rounded" />
+            <div className="h-3 w-56 bg-muted/20 rounded" />
+          </div>
+        </div>
+        <div className="h-5 w-12 bg-muted/20 rounded-full" />
+      </div>
+      <div className="h-6 w-24 bg-muted/30 rounded ml-[3.25rem]" />
+    </div>
+  );
+}
+
 export default function TopWorkoutsCard() {
-  const [allTopWorkouts, setAllTopWorkouts] = useState([]);
+  const [data, setData] = useState(null); // null => not resolved yet
   const [visibleCount, setVisibleCount] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,12 +39,20 @@ export default function TopWorkoutsCard() {
     const controller = new AbortController();
     const fetchTopWorkouts = async () => {
       try {
-        // Request a generous chunk up-front; we paginate client-side
-        const data = await getTopWorkouts(100, { signal: controller.signal });
-        setAllTopWorkouts(data.top_workouts || []);
-      } catch (err) {
-        if (err.code !== "ERR_CANCELED" && err.name !== "CanceledError" && err.name !== "AbortError") {
+        const res = await getTopWorkouts(100, { signal: controller.signal });
+        const list = res?.top_workouts ?? res?.results ?? res?.items ?? res ?? [];
+        setData(Array.isArray(list) ? list : []);
+      } catch (e) {
+        const isAbort =
+          e?.name === "AbortError" ||
+          e?.name === "CanceledError" ||
+          e?.code === "ERR_CANCELED" ||
+          String(e?.message || "").toLowerCase().includes("abort");
+
+        if (!isAbort) {
           setError("Failed to load top workouts");
+          // Only resolve to [] on real errors; keep null on abort so skeleton remains
+          setData([]);
         }
       } finally {
         setLoading(false);
@@ -36,14 +62,14 @@ export default function TopWorkoutsCard() {
     return () => controller.abort();
   }, []);
 
-  const hasMore = visibleCount < allTopWorkouts.length;
-  const visible = useMemo(() => allTopWorkouts.slice(0, visibleCount), [allTopWorkouts, visibleCount]);
+  const hasMore = visibleCount < data?.length || false; // Use data.length
+  const visible = useMemo(() => data?.slice(0, visibleCount), [data, visibleCount]);
 
   const onScroll = (e) => {
     const el = e.currentTarget;
     const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 120;
     if (nearBottom && hasMore) {
-      setVisibleCount((c) => Math.min(c + 10, allTopWorkouts.length));
+      setVisibleCount((c) => Math.min(c + 10, data?.length || 0)); // Use data.length
     }
   };
 
@@ -62,20 +88,18 @@ export default function TopWorkoutsCard() {
       </CardHeader>
 
       <CardContent>
-        {error ? (
-          <div className="text-destructive text-center py-4">{error}</div>
-        ) : loading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse py-4">
-                <div className="flex justify-between items-center">
-                  <div className="w-1/3 h-6 bg-muted rounded" />
-                  <div className="w-16 h-6 bg-muted rounded" />
-                </div>
+        {data === null ? (
+          <div role="status" aria-label="Loading top workouts">
+            {[1,2,3,4,5].map((i) => (
+              <div key={i}>
+                <AnalyticsItemSkeleton />
+                {i < 5 && <Separator className="ml-[3.25rem]" />}
               </div>
             ))}
           </div>
-        ) : allTopWorkouts.length === 0 ? (
+        ) : error ? (
+          <div className="text-destructive text-center py-4">{error}</div>
+        ) : data.length === 0 ? (
           <div className="text-muted-foreground text-center py-8">No top workouts yet.</div>
         ) : (
           <div
