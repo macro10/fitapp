@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, memo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useWorkouts } from "../contexts/WorkoutContext";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
@@ -360,6 +360,7 @@ export default function WorkoutListPage() {
   const [expanded, setExpanded] = useState(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isDark, setIsDark] = useState(() => {
     try {
@@ -394,6 +395,29 @@ export default function WorkoutListPage() {
     // Otherwise proceed with fetching workouts (from cache, then revalidate)
     loadWorkouts().catch(() => {});
   }, [user, navigate, loadWorkouts]);
+
+  useEffect(() => {
+    // Expect hash like #go=workout&wid=123
+    const hash = window.location.hash || "";
+    if (!hash.includes("go=workout")) return;
+    const m = hash.match(/wid=(\d+)/);
+    const targetId = m ? Number(m[1]) : null;
+    if (!targetId) return;
+
+    // wait until workouts are loaded and contain the id
+    const exists = workouts.some(w => w.id === targetId);
+    if (!exists) return;
+
+    setExpanded(targetId);
+    // load details (already handled by your expanded effect)
+    // smooth scroll to the title
+    setTimeout(() => {
+      document.getElementById(`workout-title-${targetId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
+
+    // clear hash so back button feels normal
+    navigate(location.pathname + location.search, { replace: true });
+  }, [workouts]);
 
   // Fetch details when a workout is expanded (deduped and cached in context)
   useEffect(() => {

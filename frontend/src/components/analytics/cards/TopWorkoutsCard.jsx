@@ -111,36 +111,40 @@ export default function TopWorkoutsCard() {
           >
             {visible.map((workout, index) => (
               <div key={workout.id} role="listitem">
-                <div className="py-5">
-                  {/* Header row: rank + name/date on left, time pill on right */}
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-10 text-right text-lg font-semibold text-foreground/70 shrink-0">
-                        #{index + 1}
+                <button
+                  type="button"
+                  className="w-full text-left"
+                  onClick={() => {
+                    window.location.href = `/#go=workout&wid=${workout.id}`; // minimal, robust across screens
+                  }}
+                >
+                  <div className="py-5">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="w-10 text-right text-lg font-semibold text-foreground/70 shrink-0">
+                          #{index + 1}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-base font-semibold truncate">{workout.name}</h4>
+                          <p className="text-sm text-foreground/70 truncate">
+                            {format(new Date(workout.date), "MMM d, yyyy")} • {workout.exercise_count} exercises
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="text-base font-semibold truncate">{workout.name}</h4>
-                        <p className="text-sm text-foreground/70 truncate">
-                          {format(new Date(workout.date), "MMM d, yyyy")} • {workout.exercise_count} exercises
-                        </p>
-                      </div>
+                      <span className="shrink-0 rounded-full bg-muted/10 px-2 py-0.5 text-[11px] text-foreground/80">
+                        {formatTimeOfDay(workout.date)}
+                      </span>
                     </div>
-                    <span className="shrink-0 rounded-full bg-muted/10 px-2 py-0.5 text-[11px] text-foreground/80">
-                      {formatTimeOfDay(workout.date)}
-                    </span>
+                    <div className="flex items-baseline gap-1 pl-[3.25rem] mt-1">
+                      <span className="text-2xl leading-none font-semibold tracking-tight tabular-nums">
+                        {formatVolume(workout.total_volume)}
+                      </span>
+                      <span className="text-[10px] leading-none text-muted-foreground tracking-wider uppercase translate-y-[1px]">
+                        vol
+                      </span>
+                    </div>
                   </div>
-
-                  {/* Volume row */}
-                  <div className="flex items-baseline gap-1 pl-[3.25rem] mt-1">
-                    <span className="text-2xl leading-none font-semibold tracking-tight tabular-nums">
-                      {formatVolume(workout.total_volume)}
-                    </span>
-                    <span className="text-[10px] leading-none text-muted-foreground tracking-wider uppercase translate-y-[1px]">
-                      vol
-                    </span>
-                  </div>
-                </div>
-
+                </button>
                 {index < visible.length - 1 && <Separator className="ml-[3.25rem]" />}
               </div>
             ))}
