@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
+import { Separator } from "../../ui/separator";
 import { getTopWorkouts } from "../../../api";
 import { format } from "date-fns";
-import { TrophyIcon } from "lucide-react";
+import { TrophyIcon, Activity } from "lucide-react";
 
 const formatVolume = (volume) => {
   if (volume >= 1000) {
@@ -11,7 +12,8 @@ const formatVolume = (volume) => {
   return `${volume}`;
 };
 
-const getRankingColor = () => "text-foreground";
+const formatTimeOfDay = (dateStr) =>
+  new Date(dateStr).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
 export default function TopWorkoutsCard() {
   const [topWorkouts, setTopWorkouts] = useState([]);
@@ -39,7 +41,7 @@ export default function TopWorkoutsCard() {
   }, []);
 
   return (
-    <Card>
+    <Card className="rounded-2xl border bg-card">
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="bg-muted/10 p-2 rounded-md">
@@ -57,39 +59,49 @@ export default function TopWorkoutsCard() {
         ) : loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse mb-4">
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <div className="w-1/3 h-6 bg-muted rounded" />
-                    <div className="w-8 h-8 bg-muted rounded" />
-                  </div>
-                </CardHeader>
-              </Card>
+              <div key={i} className="animate-pulse py-4">
+                <div className="flex justify-between items-center">
+                  <div className="w-1/3 h-6 bg-muted rounded" />
+                  <div className="w-16 h-6 bg-muted rounded" />
+                </div>
+              </div>
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div>
             {topWorkouts.map((workout, index) => (
-              <Card key={workout.id} className="mb-4 hover:shadow-lg transition-shadow">
-                <CardHeader className="py-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <div className={`text-lg font-bold ${getRankingColor(index)}`}>
+              <div key={workout.id}>
+                <div className="py-4">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="text-2xl font-bold text-foreground/60">
                         #{index + 1}
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-lg font-semibold">{workout.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {format(new Date(workout.date), "MMM d, yyyy")} • {workout.exercise_count} exercises
+                        <h4 className="text-base font-semibold">
+                          {workout.name}
+                        </h4>
+                        <p className="text-sm text-foreground/70">
+                          {format(new Date(workout.date), "MMM d, yyyy")}
                         </p>
                       </div>
                     </div>
-                    <div className="bg-accent px-3 py-1 rounded-full text-sm font-medium text-accent-foreground">
+                    <span className="shrink-0 rounded-full bg-muted/10 px-2.5 py-1 text-xs text-foreground/80">
+                      {formatTimeOfDay(workout.date)}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-accent" />
+                    <div className="text-2xl font-semibold text-accent">
                       {formatVolume(workout.total_volume)}
                     </div>
+                    <span className="text-sm text-muted-foreground ml-1">volume</span>
                   </div>
-                </CardHeader>
-              </Card>
+                </div>
+                
+                {index < topWorkouts.length - 1 && <Separator />}
+              </div>
             ))}
           </div>
         )}
