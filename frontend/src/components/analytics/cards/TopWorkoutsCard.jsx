@@ -107,9 +107,13 @@ export default function TopWorkoutsCard() {
                   </div>
 
                   {/* Volume row */}
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-semibold tabular-nums">{formatVolume(workout.total_volume)}</span>
-                    <span className="text-xs text-muted-foreground tracking-wide uppercase">vol</span>
+                  <div className="flex items-baseline gap-1 pl-[3.25rem] mt-1">
+                    <span className="text-2xl leading-none font-semibold tracking-tight tabular-nums">
+                      {formatVolume(workout.total_volume)}
+                    </span>
+                    <span className="text-[10px] leading-none text-muted-foreground tracking-wider uppercase translate-y-[1px]">
+                      vol
+                    </span>
                   </div>
                 </div>
 
