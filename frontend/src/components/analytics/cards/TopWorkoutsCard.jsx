@@ -87,7 +87,7 @@ export default function TopWorkoutsCard() {
           >
             {visible.map((workout, index) => (
               <div key={workout.id} role="listitem">
-                <div className="py-4">
+                <div className="py-5">
                   {/* Header row: rank + name/date on left, time pill on right */}
                   <div className="flex items-center justify-between gap-3 mb-2">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -101,7 +101,7 @@ export default function TopWorkoutsCard() {
                         </p>
                       </div>
                     </div>
-                    <span className="shrink-0 rounded-full bg-muted/10 px-2.5 py-1 text-xs text-foreground/80">
+                    <span className="shrink-0 rounded-full bg-muted/10 px-2 py-0.5 text-[11px] text-foreground/80">
                       {formatTimeOfDay(workout.date)}
                     </span>
                   </div>
@@ -117,7 +117,7 @@ export default function TopWorkoutsCard() {
                   </div>
                 </div>
 
-                {index < visible.length - 1 && <Separator />}
+                {index < visible.length - 1 && <Separator className="ml-[3.25rem]" />}
               </div>
             ))}
 
