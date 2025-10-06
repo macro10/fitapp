@@ -409,10 +409,14 @@ export default function WorkoutListPage() {
     if (!exists) return;
 
     setExpanded(targetId);
-    // load details (already handled by your expanded effect)
-    // smooth scroll to the title
+    // smooth scroll to the title with an offset so it's not cut off
     setTimeout(() => {
-      document.getElementById(`workout-title-${targetId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const el = document.getElementById(`workout-title-${targetId}`);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const targetTop = window.scrollY + rect.top - 80; // 80px offset
+        window.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
+      }
     }, 50);
 
     // clear hash so back button feels normal
