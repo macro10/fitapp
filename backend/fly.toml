@@ -10,7 +10,7 @@ console_command = '/code/manage.py shell'
 [build]
 
 [deploy]
-  release_command = 'python manage.py migrate --noinput'
+  release_command = 'bash -lc "export DATABASE_URL=${MIGRATIONS_DATABASE_URL:-$DATABASE_URL}; python manage.py migrate --noinput"'
 
 [env]
   PORT = '8000'
