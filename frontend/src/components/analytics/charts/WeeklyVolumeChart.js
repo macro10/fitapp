@@ -119,7 +119,6 @@ const WeeklyVolumeChart = () => {
             minTickGap={28}
             height={24}
             tickMargin={10}
-            padding={{ left: 12, right: 12 }}
           />
 
           <YAxis
