@@ -86,9 +86,20 @@ export function WorkoutProvider({ children }) {
     const data = await apiGetWorkoutSummaries();
     const list = sortByDateDesc(Array.isArray(data) ? data : []);
     const masked = applyPendingDeletes(list);
-    setWorkouts(masked);
-    lastFetchedRef.current = Date.now();
-    writeCache(masked);
+
+    // Preserve existing details (performed_exercises) for unchanged workouts
+    setWorkouts(prev => {
+      const prevById = new Map(prev.map(w => [w.id, w]));
+      const merged = masked.map(w => {
+        const prevW = prevById.get(w.id);
+        return prevW && Array.isArray(prevW.performed_exercises)
+          ? { ...w, performed_exercises: prevW.performed_exercises }
+          : w;
+      });
+      lastFetchedRef.current = Date.now();
+      writeCache(merged);
+      return merged;
+    });
   }, [applyPendingDeletes, writeCache]);
 
   const doFetch = useCallback(async (showLoading) => {

@@ -47,7 +47,7 @@ export function SwipeableRow({
       >
         <button
           type="button"
-          className="h-full w-20 rounded-none bg-destructive text-destructive-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:opacity-90 flex items-center justify-center"
+          className="h-full w-20 rounded-xl bg-destructive text-destructive-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:opacity-90 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
             setInstant(true);

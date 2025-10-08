@@ -206,7 +206,7 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                 </div>
 
                 <div className="mt-3 flex items-center gap-2">
-                  <StatPill icon={Activity} value={formatVolume(workout.total_volume)} label="volume" />
+                  <StatPill icon={Activity} value={formatVolume(workout.total_volume)} label="vol" />
                   {exLoaded && (
                     <>
                       <StatPill value={exerciseCount} label="ex" />
