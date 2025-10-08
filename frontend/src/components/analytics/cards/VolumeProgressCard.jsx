@@ -101,14 +101,14 @@ export default function VolumeProgressCard() {
           </div>
 
           {/* Row 2 in Col 2: number aligned with title; pills flush right */}
-          <div className="col-start-2 flex items-baseline justify-between gap-3 pr-4">
+          <div className="col-start-2 flex items-baseline justify-between gap-2 sm:gap-3 pr-4">
             <div className="text-4xl md:text-5xl font-semibold leading-tight tabular-nums tracking-tight">
               {loading ? "—" : stats.latest.toLocaleString()}
             </div>
 
             <div className="flex items-center gap-3">
               {/* Workouts label + accent-tinted pill */}
-              <span className="text-sm text-muted-foreground">Workouts</span>
+              <span className="hidden sm:inline text-sm text-muted-foreground">Workouts</span>
               <div
                 className={`${pillBase} bg-emerald-500/15 text-emerald-300 ring-emerald-400/25`}
                 title="Workouts completed this week"
@@ -118,7 +118,7 @@ export default function VolumeProgressCard() {
               </div>
 
               {/* Avg label + conditional colored pill */}
-              <span className="text-sm text-muted-foreground">Average</span>
+              <span className="hidden sm:inline text-sm text-muted-foreground">Average</span>
               <div
                 className={`${pillBase} ${avgPillClass}`}
                 title={
