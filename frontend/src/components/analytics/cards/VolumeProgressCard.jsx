@@ -69,7 +69,7 @@ export default function VolumeProgressCard() {
           </div>
 
           {/* Row 2 in Col 2: number aligned with title; pills flush right */}
-          <div className="col-start-2 flex items-baseline justify-between gap-3">
+          <div className="col-start-2 flex items-baseline justify-between gap-3 pr-4">
             <div className="text-4xl md:text-5xl font-semibold leading-tight tabular-nums tracking-tight">
               {loading ? "—" : stats.latest.toLocaleString()}
             </div>
