@@ -14,27 +14,26 @@ function AnalyticsItemSkeleton() {
     <div className="py-5 animate-pulse">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-10 h-5 bg-muted/30 rounded" />
+          <div className="w-12 h-6 bg-muted/30 rounded-md" />
           <div className="space-y-2 w-full">
             <div className="h-4 w-40 bg-muted/30 rounded" />
             <div className="h-3 w-56 bg-muted/20 rounded" />
           </div>
         </div>
-        <div className="h-5 w-12 bg-muted/20 rounded-full" />
+        <div className="h-6 w-20 bg-muted/20 rounded-full" />
       </div>
-      <div className="h-6 w-24 bg-muted/30 rounded ml-[3.25rem]" />
+      <div className="h-6 w-24 bg-muted/30 rounded ml-[3.75rem]" />
     </div>
   );
 }
 
 export default function TopWorkoutsCard() {
-  const [data, setData] = useState(null); // null => not resolved yet
+  const [data, setData] = useState(null);
   const [visibleCount, setVisibleCount] = useState(10);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const scrollRef = useRef(null);
 
-  // Load a bigger batch once; reveal progressively on scroll
   useEffect(() => {
     const controller = new AbortController();
     const fetchTopWorkouts = async () => {
@@ -48,10 +47,8 @@ export default function TopWorkoutsCard() {
           e?.name === "CanceledError" ||
           e?.code === "ERR_CANCELED" ||
           String(e?.message || "").toLowerCase().includes("abort");
-
         if (!isAbort) {
           setError("Failed to load top workouts");
-          // Only resolve to [] on real errors; keep null on abort so skeleton remains
           setData([]);
         }
       } finally {
@@ -62,26 +59,30 @@ export default function TopWorkoutsCard() {
     return () => controller.abort();
   }, []);
 
-  const hasMore = visibleCount < data?.length || false; // Use data.length
+  const hasMore = visibleCount < (data?.length || 0);
   const visible = useMemo(() => data?.slice(0, visibleCount), [data, visibleCount]);
 
   const onScroll = (e) => {
     const el = e.currentTarget;
     const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 120;
     if (nearBottom && hasMore) {
-      setVisibleCount((c) => Math.min(c + 10, data?.length || 0)); // Use data.length
+      setVisibleCount((c) => Math.min(c + 10, data?.length || 0));
     }
   };
 
   return (
-    <Card className="rounded-2xl border bg-card">
+    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
+        aria-hidden
+      />
       <CardHeader>
         <div className="flex items-center gap-3">
           <div className="bg-muted/10 p-2 rounded-md">
             <TrophyIcon className="h-5 w-5 text-foreground/70" />
           </div>
           <div className="space-y-1">
-            <CardTitle className="text-2xl">Top Workouts</CardTitle>
+            <CardTitle className="text-2xl tracking-tight">Top Workouts</CardTitle>
             <p className="text-muted-foreground">Your strongest performances</p>
           </div>
         </div>
@@ -90,10 +91,10 @@ export default function TopWorkoutsCard() {
       <CardContent>
         {data === null ? (
           <div role="status" aria-label="Loading top workouts">
-            {[1,2,3,4,5].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <div key={i}>
                 <AnalyticsItemSkeleton />
-                {i < 5 && <Separator className="ml-[3.25rem]" />}
+                {i < 5 && <Separator className="ml-[3.75rem]" />}
               </div>
             ))}
           </div>
@@ -113,29 +114,44 @@ export default function TopWorkoutsCard() {
               <div key={workout.id} role="listitem">
                 <button
                   type="button"
-                  className="w-full text-left"
+                  className="group relative w-full text-left rounded-xl transition-all duration-200 hover:bg-muted/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
                   onClick={() => {
-                    window.location.href = `/#go=workout&wid=${workout.id}`; // minimal, robust across screens
+                    window.location.href = `/#go=workout&wid=${workout.id}`;
                   }}
+                  aria-label={`Open workout “${workout.name}”, rank #${index + 1}`}
                 >
-                  <div className="py-5">
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className="w-10 text-right text-lg font-semibold text-foreground/70 shrink-0">
-                          #{index + 1}
+                  {/* subtle left rail accent on hover/focus */}
+                  <div
+                    className="pointer-events-none absolute left-0 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-accent/50 to-transparent opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                    aria-hidden
+                  />
+                  <div className="py-5 px-2 sm:px-3 group-hover:translate-x-[1px]">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        {/* rank chip */}
+                        <div className="w-12 shrink-0">
+                          <span className="inline-flex w-full items-center justify-center rounded-md border border-border/60 bg-muted/10 px-2 py-0.5 text-[13px] font-semibold text-foreground/80 tabular-nums">
+                            #{index + 1}
+                          </span>
                         </div>
                         <div className="min-w-0">
-                          <h4 className="text-base font-semibold truncate">{workout.name}</h4>
+                          <h4 className="text-base font-semibold tracking-tight truncate">
+                            {workout.name || "Untitled Workout"}
+                          </h4>
                           <p className="text-sm text-foreground/70 truncate">
                             {format(new Date(workout.date), "MMM d, yyyy")} • {workout.exercise_count} exercises
                           </p>
                         </div>
                       </div>
-                      <span className="shrink-0 rounded-full bg-muted/10 px-2 py-0.5 text-[11px] text-foreground/80">
+
+                      {/* time pill (matches WorkoutItem) */}
+                      <span className="shrink-0 rounded-full bg-muted/20 backdrop-blur px-2.5 py-1 text-xs text-foreground/80 border border-border/50">
                         {formatTimeOfDay(workout.date)}
                       </span>
                     </div>
-                    <div className="flex items-baseline gap-1 pl-[3.25rem] mt-1">
+
+                    {/* prominent volume, aligned under text after rank */}
+                    <div className="flex items-baseline gap-1 pl-[3.75rem] mt-1">
                       <span className="text-2xl leading-none font-semibold tracking-tight tabular-nums">
                         {formatVolume(workout.total_volume)}
                       </span>
@@ -145,11 +161,10 @@ export default function TopWorkoutsCard() {
                     </div>
                   </div>
                 </button>
-                {index < visible.length - 1 && <Separator className="ml-[3.25rem]" />}
+                {index < visible.length - 1 && <Separator className="ml-[3.75rem]" />}
               </div>
             ))}
 
-            {/* Load-more indicator */}
             {hasMore && (
               <div className="py-3 text-center text-sm text-muted-foreground">Scroll to load more…</div>
             )}
