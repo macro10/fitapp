@@ -95,7 +95,7 @@ const WeeklyVolumeChart = () => {
       <ResponsiveContainer width="100%" height={320}>
         <ComposedChart
           data={data}
-          margin={{ top: 10, right: 16, left: 0, bottom: 8 }}
+          margin={{ top: 20, right: 16, left: 0, bottom: 8 }}
         >
           <defs>
             <linearGradient id="totalArea" x1="0" y1="0" x2="0" y2="1">
@@ -106,7 +106,7 @@ const WeeklyVolumeChart = () => {
 
           <CartesianGrid
             vertical={false}
-            strokeDasharray="3 3"
+            strokeDasharray="10 10"
             stroke="rgba(148, 163, 184, 0.25)"
           />
 
@@ -125,9 +125,9 @@ const WeeklyVolumeChart = () => {
             stroke="#888888"
             tick={{ fill: '#9CA3AF' }}
             width={42}
-            tickFormatter={(value) => `${Math.round(value / 1000)}k`}
+            tickFormatter={(value) => (value === 0 ? '' : `${Math.round(value / 1000)}k`)}
             tickCount={4}
-            axisLine={false}
+            axisLine={{ stroke: 'rgba(148, 163, 184, 0.45)', strokeWidth: 1.25, strokeLinecap: 'round' }}
             tickLine={false}
           />
 
