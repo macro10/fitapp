@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
 import WeeklyVolumeChart from "../charts/WeeklyVolumeChart";
-import { LineChart, Dumbbell, TrendingUp } from "lucide-react";
+import { LineChart, Dumbbell, TrendingUp, TrendingDown } from "lucide-react";
 import { subMonths } from "date-fns";
 import { getWeeklyVolumeAnalytics } from "../../../api";
 
@@ -76,6 +76,14 @@ export default function VolumeProgressCard() {
     return "bg-yellow-500/10 text-yellow-300 ring-1 ring-yellow-400/20"; // within 0–10% lower
   })();
 
+  // Choose icon based on delta (down arrow if decreased)
+  const AvgIcon = (() => {
+    const prev = stats.prevAvg;
+    if (!prev) return TrendingUp;
+    const pct = ((stats.avg - prev) / prev) * 100;
+    return pct > 0 ? TrendingUp : TrendingDown;
+  })();
+
   return (
     <Card className="pb-4">
       <CardHeader className="pb-0">
@@ -119,7 +127,7 @@ export default function VolumeProgressCard() {
                     : "Avg volume per workout this week"
                 }
               >
-                <TrendingUp className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
+                <AvgIcon className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
                 {loading ? "—" : toK(Math.round(stats.avg))}
               </div>
             </div>
