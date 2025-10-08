@@ -91,7 +91,7 @@ const WeeklyVolumeChart = () => {
   const accent = getAccentColor();
 
   return (
-    <div className="weekly-volume-chart w-full">
+    <div className="weekly-volume-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]">
       <ResponsiveContainer width="100%" height={320}>
         <ComposedChart
           data={data}

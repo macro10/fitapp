@@ -73,3 +73,14 @@
   p  { @apply text-base leading-7; }
   small { @apply text-sm text-muted-foreground; }
 }
+
+/* Remove mobile focus/tap highlight inside the weekly volume chart */
+.weekly-volume-chart:focus,
+.weekly-volume-chart :focus,
+.weekly-volume-chart :focus-visible {
+  outline: none !important;
+}
+.weekly-volume-chart,
+.weekly-volume-chart * {
+  -webkit-tap-highlight-color: transparent;
+}
