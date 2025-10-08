@@ -105,7 +105,7 @@ export default function TopWorkoutsCard() {
         ) : (
           <div
             ref={scrollRef}
-            className="max-h-[60vh] overflow-y-auto pr-1 -mr-1"
+            className="w-full max-h-[60vh] overflow-y-auto overflow-x-hidden overscroll-x-none touch-pan-y pr-1 -mr-1"
             onScroll={onScroll}
             role="list"
             aria-label="Top workouts"
@@ -152,7 +152,7 @@ export default function TopWorkoutsCard() {
 
                     {/* prominent volume, aligned under text after rank */}
                     <div className="flex items-baseline gap-1 pl-[3.75rem] mt-1">
-                      <span className="text-2xl leading-none font-semibold tracking-tight tabular-nums">
+                      <span className="text-sm leading-none font-semibold tracking-tight tabular-nums">
                         {formatVolume(workout.total_volume)}
                       </span>
                       <span className="text-[10px] leading-none text-muted-foreground tracking-wider uppercase translate-y-[1px]">
