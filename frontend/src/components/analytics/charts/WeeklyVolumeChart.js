@@ -82,29 +82,9 @@ const WeeklyVolumeChart = () => {
     return <div className="text-red-500 text-center p-4">{error}</div>;
 
   const accent = getAccentColor();
-  const latest = data?.[data.length - 1]?.totalVolume ?? 0;
-  const prev = data?.[data.length - 2]?.totalVolume ?? 0;
-  const delta = prev ? ((latest - prev) / prev) * 100 : 0;
 
   return (
     <div className="weekly-volume-chart w-full">
-      {/* Compact summary row like “Sales overview” */}
-      <div className="flex items-end justify-between mb-3">
-        <div className="text-3xl font-semibold leading-none">
-          {latest.toLocaleString()}
-        </div>
-        <div
-          className={`text-xs px-2 py-1 rounded-full ${
-            delta >= 0
-              ? 'bg-emerald-500/10 text-emerald-400'
-              : 'bg-red-500/10 text-red-400'
-          }`}
-        >
-          {delta >= 0 ? '+' : ''}
-          {delta.toFixed(1)}%
-        </div>
-      </div>
-
       <ResponsiveContainer width="100%" height={320}>
         <ComposedChart
           data={data}
