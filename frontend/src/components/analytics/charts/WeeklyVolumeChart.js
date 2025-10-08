@@ -38,7 +38,14 @@ const WeeklyVolumeChart = () => {
         const response = await getWeeklyVolumeAnalytics(startDate, endDate, {
           signal: controller.signal,
         });
-        setData(response.weekly_volumes || []);
+
+        const weekly = response.weekly_volumes || [];
+
+        // Exclude the current (in-progress) ISO week from the chart
+        const currentIsoWeek = format(new Date(), "RRRR-'W'II");
+        const filtered = weekly.filter((d) => d?.week !== currentIsoWeek);
+
+        setData(filtered);
         setError(null);
       } catch (error) {
         if (
