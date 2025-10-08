@@ -18,7 +18,7 @@ export default function VolumeProgressCard() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <WeeklyVolumeChart />
       </CardContent>
     </Card>
