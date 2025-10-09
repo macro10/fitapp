@@ -14,7 +14,7 @@ export function SwipeableRow({
 }) {
   const [open, setOpen] = useState(false);
   const isDraggingRef = useRef(false);
-  const [instant, setInstant] = useState(false);
+  // const [instant, setInstant] = useState(false);
   const [showActions, setShowActions] = useState(false); // NEW
 
   // Enable swipe only on mobile (Tailwind sm breakpoint < 640px)
@@ -50,7 +50,7 @@ export function SwipeableRow({
           className="h-full w-20 rounded-xl bg-destructive text-destructive-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:opacity-90 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
-            setInstant(true);
+            // setInstant(true);
             setOpen(false);
             setShowActions(false); // NEW
             requestAnimationFrame(() => {
@@ -80,7 +80,7 @@ export function SwipeableRow({
 
           const x = info.offset.x;
           if (x <= -fullSwipeThreshold) {
-            setInstant(true);
+            // setInstant(true);
             setOpen(false);
             setShowActions(false); // NEW
             requestAnimationFrame(() => {
