@@ -128,7 +128,7 @@ export default function VolumeProgressCard() {
                 }
               >
                 <AvgIcon className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
-                {loading ? "—" : toK(Math.round(stats.avg))}
+                {loading ? "—" : Math.round(stats.avg)}
               </div>
             </div>
           </div>
