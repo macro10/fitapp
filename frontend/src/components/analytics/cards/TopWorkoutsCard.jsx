@@ -27,6 +27,16 @@ function AnalyticsItemSkeleton() {
   );
 }
 
+function StatPill({ icon: Icon, value, label }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/10 px-2.5 py-1 text-xs text-foreground/80">
+      {Icon ? <Icon className="h-3.5 w-3.5 text-accent" /> : null}
+      <span className="font-semibold tabular-nums">{value}</span>
+      {label ? <span className="text-foreground/60">{label}</span> : null}
+    </span>
+  );
+}
+
 export default function TopWorkoutsCard() {
   const [data, setData] = useState(null);
   const [visibleCount, setVisibleCount] = useState(10);
@@ -139,7 +149,7 @@ export default function TopWorkoutsCard() {
                             {workout.name || "Untitled Workout"}
                           </h4>
                           <p className="text-sm text-foreground/70 truncate">
-                            {format(new Date(workout.date), "MMM d, yyyy")} • {workout.exercise_count} exercises
+                            {format(new Date(workout.date), "MMM d, yyyy")}
                           </p>
                         </div>
                       </div>
@@ -151,13 +161,16 @@ export default function TopWorkoutsCard() {
                     </div>
 
                     {/* prominent volume, aligned under text after rank */}
-                    <div className="flex items-baseline gap-1 pl-[3.75rem] mt-1">
-                      <span className="text-sm leading-none font-semibold tracking-tight tabular-nums">
-                        {formatVolume(workout.total_volume)}
-                      </span>
-                      <span className="text-[10px] leading-none text-muted-foreground tracking-wider uppercase translate-y-[1px]">
-                        vol
-                      </span>
+                                        {/* pills under title */}
+                                        <div className="mt-3 flex items-center gap-2 pl-[3.75rem]">
+                      <StatPill value={formatVolume(workout.total_volume)} label="vol" />
+                      <StatPill
+                        value={
+                          workout?.exercise_count ??
+                          (Array.isArray(workout?.performed_exercises) ? workout.performed_exercises.length : "—")
+                        }
+                        label="ex"
+                      />
                     </div>
                   </div>
                 </button>
