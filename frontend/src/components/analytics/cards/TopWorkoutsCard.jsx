@@ -159,10 +159,7 @@ export default function TopWorkoutsCard() {
                         {formatTimeOfDay(workout.date)}
                       </span>
                     </div>
-
-                    {/* prominent volume, aligned under text after rank */}
-                                        {/* pills under title */}
-                                        <div className="mt-3 flex items-center gap-2 pl-[3.75rem]">
+                    <div className="mt-3 flex items-center gap-2 pl-[3.75rem]">
                       <StatPill value={formatVolume(workout.total_volume)} label="vol" />
                       <StatPill
                         value={
