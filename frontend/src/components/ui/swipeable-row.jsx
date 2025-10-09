@@ -14,7 +14,8 @@ export function SwipeableRow({
 }) {
   const [open, setOpen] = useState(false);
   const isDraggingRef = useRef(false);
-  const [instant, setInstant] = useState(false);
+  // const [instant, setInstant] = useState(false);
+  const [showActions, setShowActions] = useState(false); // NEW
 
   // Enable swipe only on mobile (Tailwind sm breakpoint < 640px)
   const [isMobile, setIsMobile] = useState(false);
@@ -34,17 +35,24 @@ export function SwipeableRow({
       className={cn("relative select-none touch-pan-y overflow-hidden", className)}
       onClick={() => {
         if (open) setOpen(false);
+        setShowActions(false); // NEW
       }}
     >
-      {/* Actions layer (behind) - hidden on >= sm */}
-      <div className="absolute inset-y-0 right-0 flex items-stretch pr-2 sm:hidden">
-      <button
+      {/* Actions layer (behind) - hidden on >= sm, only visible while dragging on mobile */}
+      <div
+        className={cn(
+          "absolute inset-y-0 right-0 flex items-stretch pr-2 sm:hidden transition-opacity duration-150",
+          showActions ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+      >
+        <button
           type="button"
-          className="my-2 h-[calc(100%-1rem)] w-20 rounded-lg bg-destructive text-destructive-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:opacity-90 flex items-center justify-center"
+          className="h-full w-20 rounded-xl bg-destructive text-destructive-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 active:opacity-90 flex items-center justify-center"
           onClick={(e) => {
             e.stopPropagation();
-            setInstant(true);
+            // setInstant(true);
             setOpen(false);
+            setShowActions(false); // NEW
             requestAnimationFrame(() => {
               onDelete?.();
             });
@@ -65,20 +73,22 @@ export function SwipeableRow({
         onDragStart={() => {
           if (!isMobile) return;
           isDraggingRef.current = true;
+          setShowActions(true); // NEW
         }}
         onDragEnd={(_, info) => {
           if (!isMobile) return;
 
           const x = info.offset.x;
           if (x <= -fullSwipeThreshold) {
-            setInstant(true);
+            // setInstant(true);
             setOpen(false);
+            setShowActions(false); // NEW
             requestAnimationFrame(() => {
               onDelete?.();
             });
           } else {
-            // Always snap closed after releasing drag
             setOpen(false);
+            setShowActions(false); // NEW
           }
 
           setTimeout(() => {
@@ -93,7 +103,7 @@ export function SwipeableRow({
         }}
         animate={{ x: open ? -ACTION_WIDTH : 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 35 }}
-        className="relative"
+        className="relative w-full" // ensure full cover
       >
         {children}
       </motion.div>

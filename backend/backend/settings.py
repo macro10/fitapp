@@ -90,8 +90,12 @@ DATABASES = {
         'NAME': os.environ.get('DB_NAME', 'postgres'),
         'USER': os.environ.get('DB_USER', 'postgres'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT', '5432')
+        'HOST': os.environ.get('DB_HOST'),   # set to pooler host
+        'PORT': os.environ.get('DB_PORT', '6543'),  # 6543 for Transaction pooler
+        'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', '0')),
+        'CONN_HEALTH_CHECKS': True,
+        'DISABLE_SERVER_SIDE_CURSORS': True,
+        'OPTIONS': {'application_name': 'fitapp-prod', 'sslmode': 'require', 'connect_timeout': 5},
     },
     'old': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -169,3 +173,14 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'EXCEPTION_HANDLER': 'workouts.exceptions.handlers.custom_exception_handler',
   }
+
+import os
+if os.environ.get('DATABASE_URL'):
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.parse(
+        os.environ['DATABASE_URL'],
+        conn_max_age=int(os.environ.get('DB_CONN_MAX_AGE', '0')),
+        ssl_require=True,
+    )
+    DATABASES['default']['CONN_HEALTH_CHECKS'] = True
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True

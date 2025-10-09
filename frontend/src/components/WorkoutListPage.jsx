@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, memo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useWorkouts } from "../contexts/WorkoutContext";
 import { Card, CardHeader, CardContent, CardTitle } from "./ui/card";
@@ -131,16 +131,31 @@ function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
   );
 }
 
-// Modify the WorkoutItem component to use the dialog and memoize it
+// Add near the other helpers (top of file)
+function StatPill({ icon: Icon, value, label }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/10 px-2.5 py-1 text-xs text-foreground/80">
+      {Icon ? <Icon className="h-3.5 w-3.5 text-accent" /> : null}
+      <span className="font-semibold tabular-nums">{value}</span>
+      {label ? <span className="text-foreground/60">{label}</span> : null}
+    </span>
+  );
+}
+
+// Replace existing WorkoutItem with this version
 const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, onDelete }) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const isExpanded = expanded === workout.id;
   const [expandedExercises, setExpandedExercises] = useState({});
-  
+
+  const exLoaded = Array.isArray(workout.performed_exercises);
+  const exerciseCount = exLoaded ? workout.performed_exercises.length : null;
+  const totalSets = exLoaded ? workout.performed_exercises.reduce((s, pe) => s + (pe.sets || 0), 0) : null;
+
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ 
+      exit={{
         opacity: 0,
         height: 0,
         marginBottom: 0,
@@ -148,17 +163,17 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
       }}
     >
       <SwipeableRow
-        onDelete={() => {
-          // open your existing confirm dialog
-          setDeleteDialogOpen(true);
-        }}
+        onDelete={() => setDeleteDialogOpen(true)}
         className="mb-4 rounded-2xl"
       >
-        <Card className="rounded-2xl border bg-card hover:shadow-lg transition-shadow overflow-hidden">
+        <Card className="group relative rounded-2xl border bg-card/60 hover:bg-card transition-all hover:shadow-xl ring-1 ring-border/50 hover:ring-accent/20">
+          {/* hairline accent */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent" aria-hidden />
+
           <CardHeader className="py-4">
             <div className="flex items-start">
-              <button 
-                className="group flex-1 text-left"
+              <button
+                className="group/btn flex-1 text-left"
                 onClick={() => setExpanded(isExpanded ? null : workout.id)}
                 aria-expanded={isExpanded}
                 aria-controls={`workout-details-${workout.id}`}
@@ -167,7 +182,7 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                   <div className="space-y-1">
                     <CardTitle
                       id={`workout-title-${workout.id}`}
-                      className="text-base font-semibold"
+                      className="text-base font-semibold tracking-tight"
                     >
                       {workout.name || 'Untitled Workout'}
                     </CardTitle>
@@ -175,24 +190,36 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                       {getRelativeTimeString(workout.date)}
                     </p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-muted/10 px-2.5 py-1 text-xs text-foreground/80">
-                    {formatTimeOfDay(workout.date)}
-                  </span>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="rounded-full bg-muted/20 backdrop-blur px-2.5 py-1 text-xs text-foreground/80 border border-border/50">
+                      {formatTimeOfDay(workout.date)}
+                    </span>
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 text-foreground/60 transition-transform",
+                        isExpanded ? "rotate-180" : "rotate-0"
+                      )}
+                      aria-hidden
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-3 flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-accent" />
-                  <div className="text-2xl font-semibold text-accent">
-                    {formatVolume(workout.total_volume)}
-                  </div>
-                  <span className="text-sm text-muted-foreground ml-1">volume</span>
+                  <StatPill icon={Activity} value={formatVolume(workout.total_volume)} label="vol" />
+                  {exLoaded && (
+                    <>
+                      <StatPill value={exerciseCount} label="ex" />
+                      <StatPill value={totalSets} label="sets" />
+                    </>
+                  )}
                 </div>
               </button>
 
               <Button
                 variant="ghostDestructive"
                 size="icon"
-                className="h-9 w-9 ml-2 hidden sm:inline-flex"
+                className="hidden sm:inline-flex h-9 w-9 ml-2 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
                 onClick={(e) => { e.stopPropagation(); setDeleteDialogOpen(true); }}
                 aria-label="Delete workout"
               >
@@ -200,6 +227,7 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
               </Button>
             </div>
           </CardHeader>
+
           {isExpanded && (
             <CardContent
               id={`workout-details-${workout.id}`}
@@ -217,7 +245,7 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
                 <ul className="space-y-2">
                   {workout.performed_exercises.map((pe, index) => (
                     <li key={pe.id}>
-                      <div className="p-4 rounded-lg border bg-card/70 shadow-sm hover:shadow-md transition-all">
+                      <div className="p-4 rounded-xl border bg-card/70 shadow-sm hover:shadow-md transition-all">
                         <div className="flex items-center gap-2.5 mb-2">
                           <div className="bg-muted/20 p-1.5 rounded-md">
                             <DumbbellIcon className="h-4 w-4 text-foreground/70" />
@@ -265,6 +293,7 @@ const WorkoutItem = memo(function WorkoutItem({ workout, expanded, setExpanded, 
           )}
         </Card>
       </SwipeableRow>
+
       <DeleteWorkoutDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -360,6 +389,7 @@ export default function WorkoutListPage() {
   const [expanded, setExpanded] = useState(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isDark, setIsDark] = useState(() => {
     try {
@@ -394,6 +424,33 @@ export default function WorkoutListPage() {
     // Otherwise proceed with fetching workouts (from cache, then revalidate)
     loadWorkouts().catch(() => {});
   }, [user, navigate, loadWorkouts]);
+
+  useEffect(() => {
+    // Expect hash like #go=workout&wid=123
+    const hash = window.location.hash || "";
+    if (!hash.includes("go=workout")) return;
+    const m = hash.match(/wid=(\d+)/);
+    const targetId = m ? Number(m[1]) : null;
+    if (!targetId) return;
+
+    // wait until workouts are loaded and contain the id
+    const exists = workouts.some(w => w.id === targetId);
+    if (!exists) return;
+
+    setExpanded(targetId);
+    // smooth scroll to the title with an offset so it's not cut off
+    setTimeout(() => {
+      const el = document.getElementById(`workout-title-${targetId}`);
+      if (el) {
+        const rect = el.getBoundingClientRect();
+        const targetTop = window.scrollY + rect.top - 80; // 80px offset
+        window.scrollTo({ top: Math.max(targetTop, 0), behavior: "smooth" });
+      }
+    }, 50);
+
+    // clear hash so back button feels normal
+    navigate(location.pathname + location.search, { replace: true });
+  }, [workouts]);
 
   // Fetch details when a workout is expanded (deduped and cached in context)
   useEffect(() => {
