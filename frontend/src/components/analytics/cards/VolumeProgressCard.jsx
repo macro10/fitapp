@@ -4,6 +4,7 @@ import WeeklyVolumeChart from "../charts/WeeklyVolumeChart";
 import { LineChart, Dumbbell, TrendingUp, TrendingDown } from "lucide-react";
 import { subMonths } from "date-fns";
 import { getWeeklyVolumeAnalytics } from "../../../api";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
 
 export default function VolumeProgressCard() {
   const [loading, setLoading] = useState(true);
@@ -85,59 +86,82 @@ export default function VolumeProgressCard() {
   })();
 
   return (
-    <Card className="pb-4">
-      <CardHeader className="pb-0">
-        {/* Two-column grid: [icon] [text + metrics] */}
-        <div className="grid grid-cols-[36px_1fr] gap-x-3 gap-y-2">
-          {/* Col 1: icon */}
-          <div className="bg-muted/10 p-2 rounded-md h-9 w-9 flex items-center justify-center">
-            <LineChart className="h-5 w-5 text-foreground/70" />
-          </div>
-
-          {/* Col 2: title + subtitle */}
-          <div className="space-y-1">
-            <CardTitle className="text-2xl">Strength</CardTitle>
-            <p className="text-muted-foreground">Your workout volume by week</p>
-          </div>
-
-          {/* Row 2 in Col 2: number aligned with title; pills flush right */}
-          <div className="col-start-2 flex items-baseline justify-between gap-2 sm:gap-3 pr-4">
-            <div className="text-4xl md:text-5xl font-semibold leading-tight tabular-nums tracking-tight">
-              {loading ? "—" : stats.latest.toLocaleString()}
+    <TooltipProvider>
+      <Card className="pb-4">
+        <CardHeader className="pb-0">
+          {/* Two-column grid: [icon] [text + metrics] */}
+          <div className="grid grid-cols-[36px_1fr] gap-x-3 gap-y-2">
+            {/* Col 1: icon */}
+            <div className="bg-muted/10 p-2 rounded-md h-9 w-9 flex items-center justify-center">
+              <LineChart className="h-5 w-5 text-foreground/70" />
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* Workouts label + accent-tinted pill */}
-              <span className="hidden sm:inline text-sm text-muted-foreground">Workouts</span>
-              <div
-                className={`${pillBase} bg-emerald-500/15 text-emerald-300 ring-emerald-400/25`}
-                title="Workouts completed this week"
-              >
-                <Dumbbell className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
-                {loading ? "—" : stats.workouts}
-              </div>
+            {/* Col 2: title + subtitle */}
+            <div className="space-y-1">
+              <CardTitle className="text-2xl">Strength</CardTitle>
+              <p className="text-muted-foreground">Your workout volume by week</p>
+            </div>
 
-              {/* Avg label + conditional colored pill */}
-              <span className="hidden sm:inline text-sm text-muted-foreground">Average</span>
-              <div
-                className={`${pillBase} ${avgPillClass}`}
-                title={
-                  stats.prevAvg
-                    ? `${avgDeltaPct > 0 ? "+" : ""}${avgDeltaPct}% vs last week`
-                    : "Avg volume per workout this week"
-                }
-              >
-                <AvgIcon className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
-                {loading ? "—" : Math.round(stats.avg)}
+            {/* Row 2 in Col 2: number aligned with title; pills flush right */}
+            <div className="col-start-2 flex items-baseline justify-between gap-2 sm:gap-3 pr-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-4xl md:text-5xl font-semibold leading-tight tabular-nums tracking-tight cursor-help">
+                    {loading ? "—" : stats.latest.toLocaleString()}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Workout Volume This Week</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <div className="flex items-center gap-3">
+                {/* Workouts label + accent-tinted pill */}
+                <span className="hidden sm:inline text-sm text-muted-foreground">Workouts</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={`${pillBase} bg-emerald-500/15 text-emerald-300 ring-emerald-400/25 cursor-help`}
+                      title="Workouts completed this week"
+                    >
+                      <Dumbbell className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
+                      {loading ? "—" : stats.workouts}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Workouts Completed This Week</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                {/* Avg label + conditional colored pill */}
+                <span className="hidden sm:inline text-sm text-muted-foreground">Average</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={`${pillBase} ${avgPillClass} cursor-help`}
+                      title={
+                        stats.prevAvg
+                          ? `${avgDeltaPct > 0 ? "+" : ""}${avgDeltaPct}% vs last week`
+                          : "Avg volume per workout this week"
+                      }
+                    >
+                      <AvgIcon className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
+                      {loading ? "—" : Math.round(stats.avg)}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Average Workout Volume This Week</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
 
-      <CardContent className="pt-10">
-        <WeeklyVolumeChart />
-      </CardContent>
-    </Card>
+        <CardContent className="pt-10">
+          <WeeklyVolumeChart />
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 }
