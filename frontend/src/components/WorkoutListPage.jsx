@@ -42,47 +42,64 @@ const formatVolume = (volume) => {
 };
 
 // Add this helper for a time pill like the example
+// Add this helper for a time pill like the example
 const formatTimeOfDay = (dateStr) =>
-  new Date(dateStr).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  new Date(dateStr).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
 
 // Add this helper function near the other helper functions at the top
 const getRelativeTimeString = (dateStr) => {
   const date = new Date(dateStr);
   const now = new Date();
-  const diffTime = now - date;
-  const diffSeconds = Math.floor(diffTime / 1000);
-  const diffMinutes = Math.floor(diffTime / (1000 * 60));
-  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
-  // Just now: less than 30 seconds
+
+  const diffMs = now - date;
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+  // Compute calendar-day difference in Eastern Time
+  const ymdET = (d) => {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    }).formatToParts(d);
+    const get = (t) => Number(parts.find((p) => p.type === t).value);
+    return { y: get('year'), m: get('month'), d: get('day') };
+  };
+
+  const a = ymdET(date);
+  const b = ymdET(now);
+  const daysDiff = Math.floor(
+    (Date.UTC(b.y, b.m - 1, b.d) - Date.UTC(a.y, a.m - 1, a.d)) / 86400000
+  );
+
+  // Seconds
   if (diffSeconds < 30) return 'just now';
-  // Seconds: 30-59 seconds
   if (diffSeconds < 60) return `${diffSeconds} seconds ago`;
-  // Minutes: 1-59 minutes
-  if (diffMinutes < 60) {
-    return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`;
-  }
-  // Hours: 1-23 hours
-  if (diffHours < 24) {
+
+  // Same ET calendar day → minutes/hours
+  if (daysDiff === 0) {
+    if (diffMinutes < 60) {
+      return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
     return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
   }
-  // Days: 1-6 days
-  if (diffDays < 7) {
-    return diffDays === 1 ? 'yesterday' : `${diffDays} days ago`;
-  }
-  // Weeks: 1-4 weeks
-  if (diffDays < 30) {
-    const weeks = Math.floor(diffDays / 7);
+
+  // Crossed ET day boundary
+  if (daysDiff === 1) return 'yesterday';
+  if (daysDiff < 7) return `${daysDiff} days ago`;
+
+  // Weeks / Months / Years (approximate months/years)
+  if (daysDiff < 30) {
+    const weeks = Math.floor(daysDiff / 7);
     return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
   }
-  // Months: 1-11 months
-  if (diffDays < 365) {
-    const months = Math.floor(diffDays / 30);
+  if (daysDiff < 365) {
+    const months = Math.floor(daysDiff / 30);
     return `${months} ${months === 1 ? 'month' : 'months'} ago`;
   }
-  // Years: 1+ years
-  const years = Math.floor(diffDays / 365);
+  const years = Math.floor(daysDiff / 365);
   return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 };
 
