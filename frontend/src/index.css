@@ -84,3 +84,23 @@
 .weekly-volume-chart * {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Landscape blocker for touch devices only (prevents showing on desktop) */
+.orientation-lock { display: none; }
+
+@media screen and (orientation: landscape) and (hover: none) and (pointer: coarse) {
+  .orientation-lock {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+    text-align: center;
+    padding: 2rem;
+  }
+  /* Optional: prevent interaction with app underneath */
+  #root { pointer-events: none; }
+}
