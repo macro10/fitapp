@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback, memo, Fragment } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useWorkouts } from "../contexts/WorkoutContext";
@@ -116,6 +116,21 @@ const groupSets = (reps, weights, sets) => {
   return Array.from(map.values());
 };
 
+// ISO week key (YYYY-Www) to group workouts
+const getISOWeekKey = (dateStr) => {
+  const d = new Date(dateStr);
+  // Work with UTC to avoid local DST edge cases
+  const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  // ISO: Monday = 0..Sunday = 6
+  const dayNum = (utc.getUTCDay() + 6) % 7;
+  // Thursday of current week
+  utc.setUTCDate(utc.getUTCDate() - dayNum + 3);
+  const firstThursday = new Date(Date.UTC(utc.getUTCFullYear(), 0, 4));
+  const weekNum = 1 + Math.round((utc - firstThursday) / 604800000); // 7*24*60*60*1000
+  const year = utc.getUTCFullYear();
+  return `${year}-W${String(weekNum).padStart(2, "0")}`;
+};
+
 // Replace the existing DeleteWorkoutDialog with this version
 function DeleteWorkoutDialog({ open, onOpenChange, onConfirm, workoutName }) {
   const displayName = (workoutName || "Untitled Workout").trim();
@@ -156,6 +171,16 @@ function StatPill({ icon: Icon, value, label }) {
       <span className="font-semibold tabular-nums">{value}</span>
       {label ? <span className="text-foreground/60">{label}</span> : null}
     </span>
+  );
+}
+
+function WeekDivider() {
+  return (
+    <div className="relative my-2" role="separator" aria-hidden="true">
+      <div className="h-px w-full bg-primary" />
+      <div className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-primary" />
+      <div className="absolute -right-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-primary" />
+    </div>
   );
 }
 
@@ -514,15 +539,23 @@ export default function WorkoutListPage() {
     return (
       <div className="space-y-4">
         <AnimatePresence mode="popLayout">
-          {workouts.map((workout) => (
-            <WorkoutItem
-              key={workout.id}
-              workout={workout}
-              expanded={expanded}
-              setExpanded={setExpanded}
-              onDelete={handleDeleteWorkout}
-            />
-          ))}
+          {workouts.map((workout, idx) => {
+            const currKey = getISOWeekKey(workout.date);
+            const prevKey = idx > 0 ? getISOWeekKey(workouts[idx - 1].date) : currKey;
+            const showDivider = idx > 0 && currKey !== prevKey;
+
+            return (
+              <Fragment key={workout.id}>
+                {showDivider && <WeekDivider />}
+                <WorkoutItem
+                  workout={workout}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
+                  onDelete={handleDeleteWorkout}
+                />
+              </Fragment>
+            );
+          })}
         </AnimatePresence>
       </div>
     );
