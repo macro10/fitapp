@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback, memo, Fragment } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useWorkouts } from "../contexts/WorkoutContext";
@@ -42,47 +42,64 @@ const formatVolume = (volume) => {
 };
 
 // Add this helper for a time pill like the example
+// Add this helper for a time pill like the example
 const formatTimeOfDay = (dateStr) =>
-  new Date(dateStr).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  new Date(dateStr).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
 
 // Add this helper function near the other helper functions at the top
 const getRelativeTimeString = (dateStr) => {
   const date = new Date(dateStr);
   const now = new Date();
-  const diffTime = now - date;
-  const diffSeconds = Math.floor(diffTime / 1000);
-  const diffMinutes = Math.floor(diffTime / (1000 * 60));
-  const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
-  // Just now: less than 30 seconds
+
+  const diffMs = now - date;
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+  // Compute calendar-day difference in Eastern Time
+  const ymdET = (d) => {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    }).formatToParts(d);
+    const get = (t) => Number(parts.find((p) => p.type === t).value);
+    return { y: get('year'), m: get('month'), d: get('day') };
+  };
+
+  const a = ymdET(date);
+  const b = ymdET(now);
+  const daysDiff = Math.floor(
+    (Date.UTC(b.y, b.m - 1, b.d) - Date.UTC(a.y, a.m - 1, a.d)) / 86400000
+  );
+
+  // Seconds
   if (diffSeconds < 30) return 'just now';
-  // Seconds: 30-59 seconds
   if (diffSeconds < 60) return `${diffSeconds} seconds ago`;
-  // Minutes: 1-59 minutes
-  if (diffMinutes < 60) {
-    return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`;
-  }
-  // Hours: 1-23 hours
-  if (diffHours < 24) {
+
+  // Same ET calendar day → minutes/hours
+  if (daysDiff === 0) {
+    if (diffMinutes < 60) {
+      return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`;
+    }
     return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
   }
-  // Days: 1-6 days
-  if (diffDays < 7) {
-    return diffDays === 1 ? 'yesterday' : `${diffDays} days ago`;
-  }
-  // Weeks: 1-4 weeks
-  if (diffDays < 30) {
-    const weeks = Math.floor(diffDays / 7);
+
+  // Crossed ET day boundary
+  if (daysDiff === 1) return 'yesterday';
+  if (daysDiff < 7) return `${daysDiff} days ago`;
+
+  // Weeks / Months / Years (approximate months/years)
+  if (daysDiff < 30) {
+    const weeks = Math.floor(daysDiff / 7);
     return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
   }
-  // Months: 1-11 months
-  if (diffDays < 365) {
-    const months = Math.floor(diffDays / 30);
+  if (daysDiff < 365) {
+    const months = Math.floor(daysDiff / 30);
     return `${months} ${months === 1 ? 'month' : 'months'} ago`;
   }
-  // Years: 1+ years
-  const years = Math.floor(diffDays / 365);
+  const years = Math.floor(daysDiff / 365);
   return `${years} ${years === 1 ? 'year' : 'years'} ago`;
 };
 
@@ -97,6 +114,21 @@ const groupSets = (reps, weights, sets) => {
     map.get(key).count++;
   }
   return Array.from(map.values());
+};
+
+// ISO week key (YYYY-Www) to group workouts
+const getISOWeekKey = (dateStr) => {
+  const d = new Date(dateStr);
+  // Work with UTC to avoid local DST edge cases
+  const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  // ISO: Monday = 0..Sunday = 6
+  const dayNum = (utc.getUTCDay() + 6) % 7;
+  // Thursday of current week
+  utc.setUTCDate(utc.getUTCDate() - dayNum + 3);
+  const firstThursday = new Date(Date.UTC(utc.getUTCFullYear(), 0, 4));
+  const weekNum = 1 + Math.round((utc - firstThursday) / 604800000); // 7*24*60*60*1000
+  const year = utc.getUTCFullYear();
+  return `${year}-W${String(weekNum).padStart(2, "0")}`;
 };
 
 // Replace the existing DeleteWorkoutDialog with this version
@@ -139,6 +171,16 @@ function StatPill({ icon: Icon, value, label }) {
       <span className="font-semibold tabular-nums">{value}</span>
       {label ? <span className="text-foreground/60">{label}</span> : null}
     </span>
+  );
+}
+
+function WeekDivider() {
+  return (
+    <div className="relative my-2" role="separator" aria-hidden="true">
+      <div className="h-px w-full bg-primary/70" />
+      <div className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-primary/70" />
+      <div className="absolute -right-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-primary/70" />
+    </div>
   );
 }
 
@@ -497,15 +539,23 @@ export default function WorkoutListPage() {
     return (
       <div className="space-y-4">
         <AnimatePresence mode="popLayout">
-          {workouts.map((workout) => (
-            <WorkoutItem
-              key={workout.id}
-              workout={workout}
-              expanded={expanded}
-              setExpanded={setExpanded}
-              onDelete={handleDeleteWorkout}
-            />
-          ))}
+          {workouts.map((workout, idx) => {
+            const currKey = getISOWeekKey(workout.date);
+            const prevKey = idx > 0 ? getISOWeekKey(workouts[idx - 1].date) : currKey;
+            const showDivider = idx > 0 && currKey !== prevKey;
+
+            return (
+              <Fragment key={workout.id}>
+                {showDivider && <WeekDivider />}
+                <WorkoutItem
+                  workout={workout}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
+                  onDelete={handleDeleteWorkout}
+                />
+              </Fragment>
+            );
+          })}
         </AnimatePresence>
       </div>
     );
