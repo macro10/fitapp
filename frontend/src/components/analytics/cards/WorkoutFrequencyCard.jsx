@@ -14,7 +14,7 @@ export default function WorkoutFrequencyCard() {
 
           {/* Title + subtitle */}
           <div className="space-y-1">
-            <CardTitle className="text-2xl">Workout Frequency</CardTitle>
+            <CardTitle className="text-2xl">Weekly Sessions</CardTitle>
             <p className="text-muted-foreground">Workouts per week</p>
           </div>
         </div>

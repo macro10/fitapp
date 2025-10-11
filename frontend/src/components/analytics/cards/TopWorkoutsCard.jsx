@@ -93,7 +93,7 @@ export default function TopWorkoutsCard() {
           </div>
           <div className="space-y-1">
             <CardTitle className="text-2xl tracking-tight">Top Workouts</CardTitle>
-            <p className="text-muted-foreground">Your strongest performances</p>
+            <p className="text-muted-foreground">Highest volume sessions</p>
           </div>
         </div>
       </CardHeader>

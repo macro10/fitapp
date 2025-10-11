@@ -98,8 +98,8 @@ export default function VolumeProgressCard() {
 
             {/* Col 2: title + subtitle */}
             <div className="space-y-1">
-              <CardTitle className="text-2xl">Strength</CardTitle>
-              <p className="text-muted-foreground">Your workout volume by week</p>
+              <CardTitle className="text-2xl">Weekly Volume</CardTitle>
+              <p className="text-muted-foreground">Total and average per week</p>
             </div>
 
             {/* Row 2 in Col 2: number aligned with title; pills flush right */}
