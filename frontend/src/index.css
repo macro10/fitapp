@@ -77,11 +77,16 @@
 /* Remove mobile focus/tap highlight inside the weekly volume chart */
 .weekly-volume-chart:focus,
 .weekly-volume-chart :focus,
-.weekly-volume-chart :focus-visible {
+.weekly-volume-chart :focus-visible,
+.weekly-frequency-chart:focus,
+.weekly-frequency-chart :focus,
+.weekly-frequency-chart :focus-visible {
   outline: none !important;
 }
 .weekly-volume-chart,
-.weekly-volume-chart * {
+.weekly-volume-chart *,
+.weekly-frequency-chart,
+.weekly-frequency-chart * {
   -webkit-tap-highlight-color: transparent;
 }
 
