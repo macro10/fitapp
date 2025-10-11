@@ -4,7 +4,11 @@ import { BarChart } from "lucide-react";
 
 export default function WorkoutFrequencyCard() {
   return (
-    <Card className="pb-4">
+    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50 pb-4">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
+        aria-hidden
+      />
       <CardHeader className="pb-0">
         <div className="grid grid-cols-[36px_1fr] gap-x-3 gap-y-2">
           {/* Icon */}
