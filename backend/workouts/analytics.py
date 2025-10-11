@@ -87,3 +87,30 @@ def get_top_workouts_by_volume(user, limit=5):
     sorted_workouts = sorted(workout_volumes, key=lambda x: x['total_volume'], reverse=True)[:limit]
     
     return sorted_workouts
+
+def get_weekly_workout_frequency(user, start_date=None, end_date=None):
+    """Get weekly workout frequency (count of workouts) for a user"""
+    if not end_date:
+        end_date = timezone.now()
+    if not start_date:
+        start_date = end_date - timedelta(days=180)
+
+    workouts = Workout.objects.filter(
+        user=user,
+        date__range=(start_date, end_date)
+    ).only('date')
+
+    weekly_counts = {}
+    for workout in workouts:
+        year, week, _ = workout.date.isocalendar()
+        week_key = f"{year}-W{week:02d}"
+        weekly_counts[week_key] = weekly_counts.get(week_key, 0) + 1
+
+    # Format and sort by week key ascending
+    formatted = []
+    for week_key, count in sorted(weekly_counts.items()):
+        formatted.append({
+            'week': week_key,
+            'workoutCount': count,
+        })
+    return formatted

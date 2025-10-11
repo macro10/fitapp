@@ -14,6 +14,11 @@ from .services.workout_service import WorkoutService
 from .services.exercise_service import ExerciseService
 from .services.performed_exercise_service import PerformedExerciseService
 from .permissions.permissions import IsOwnerOfWorkout
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from django.utils.dateparse import parse_datetime
+from .analytics import get_weekly_workout_frequency
 
 # Create your views here.
 class ExerciseViewSet(viewsets.ModelViewSet):
@@ -123,3 +128,13 @@ class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def weekly_frequency(request):
+    start_raw = request.query_params.get('start_date')
+    end_raw = request.query_params.get('end_date')
+    start_date = parse_datetime(start_raw) if start_raw else None
+    end_date = parse_datetime(end_raw) if end_raw else None
+    data = get_weekly_workout_frequency(request.user, start_date, end_date)
+    return Response({'weekly_frequency': data})

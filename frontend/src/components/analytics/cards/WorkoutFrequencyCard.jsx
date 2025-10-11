@@ -1,4 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from "../../ui/card";
+import WeeklyFrequencyChart from "../charts/WeeklyFrequencyChart";
 
 export default function WorkoutFrequencyCard() {
   return (
@@ -6,13 +7,11 @@ export default function WorkoutFrequencyCard() {
       <CardHeader>
         <CardTitle>Workout Frequency</CardTitle>
         <p className="text-muted-foreground">
-          Your workout consistency
+          Workouts per week
         </p>
       </CardHeader>
       <CardContent>
-        <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-          Coming Soon
-        </div>
+        <WeeklyFrequencyChart />
       </CardContent>
     </Card>
   );

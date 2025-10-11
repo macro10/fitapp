@@ -11,10 +11,10 @@ export default function OverallProgressTab() {
       <VolumeProgressCard />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <WorkoutFrequencyCard /> 
         <div>
           <TopWorkoutsCard />
         </div>
-        <WorkoutFrequencyCard />
       </div>
     </div>
   );
