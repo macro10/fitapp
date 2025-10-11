@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import { subMonths } from 'date-fns';
 import { getWeeklyVolumeAnalytics } from '../../../api';
-import { format, startOfISOWeek } from 'date-fns';
+import { format, startOfISOWeek, endOfISOWeek, isSameMonth } from 'date-fns';
 
 const getAccentColor = () => {
   if (typeof window === 'undefined') return '#22c55e'; // fallback
@@ -20,6 +20,35 @@ const getAccentColor = () => {
     .getPropertyValue('--accent')
     .trim();
   return raw ? `hsl(${raw})` : '#22c55e';
+};
+
+// Week helpers for clear labels
+const getWeekRange = (weekStr) => {
+  const [year, wk] = weekStr.split('-W');
+  const date = new Date(Number(year), 0, 1);
+  date.setDate(date.getDate() + (Number(wk) - 1) * 7);
+  const start = startOfISOWeek(date);
+  const end = endOfISOWeek(date);
+  return { start, end };
+};
+
+const formatWeekStartLabel = (weekStr) => {
+  try {
+    const { start } = getWeekRange(weekStr);
+    return format(start, 'MMM d');
+  } catch {
+    return weekStr;
+  }
+};
+
+const formatWeekRangeLabel = (weekStr) => {
+  try {
+    const { start, end } = getWeekRange(weekStr);
+    const endFmt = isSameMonth(start, end) ? 'd' : 'MMM d';
+    return `Week of ${format(start, 'MMM d')}–${format(end, endFmt)}`;
+  } catch {
+    return weekStr;
+  }
 };
 
 const WeeklyVolumeChart = () => {
@@ -65,19 +94,6 @@ const WeeklyVolumeChart = () => {
     return () => controller.abort();
   }, []);
 
-  const formatWeekLabel = (weekStr) => {
-    try {
-      const [year, week] = weekStr.split('-W');
-      const date = new Date(year);
-      date.setDate(date.getDate() + (week - 1) * 7);
-      const weekStart = startOfISOWeek(date);
-      return format(weekStart, 'MMM d');
-    } catch (e) {
-      console.error('Error parsing date:', e);
-      return weekStr;
-    }
-  };
-
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-64">
@@ -114,7 +130,7 @@ const WeeklyVolumeChart = () => {
             dataKey="week"
             stroke="#888888"
             tick={{ fill: '#9CA3AF', fontSize: 12 }}
-            tickFormatter={formatWeekLabel}
+            tickFormatter={formatWeekStartLabel}
             interval="preserveStartEnd"
             minTickGap={28}
             height={24}
@@ -145,7 +161,7 @@ const WeeklyVolumeChart = () => {
               const color = isTotal ? accent : '#94a3b8';
               return [`${(value / 1000).toFixed(1)}k`, name, { color }];
             }}
-            labelFormatter={(label) => formatWeekLabel(label)}
+            labelFormatter={(label) => formatWeekRangeLabel(label)}
             wrapperStyle={{ zIndex: 1000 }}
             itemSorter={(item) => (item.dataKey === 'totalVolume' ? -1 : 1)}
           />
