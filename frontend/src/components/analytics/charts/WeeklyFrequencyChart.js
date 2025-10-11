@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { subMonths, format, startOfISOWeek } from 'date-fns';
+import { subMonths, format, startOfISOWeek, endOfISOWeek, isSameMonth } from 'date-fns';
 import { getWeeklyFrequencyAnalytics } from '../../../api';
 
 const getAccentColor = () => {
@@ -18,6 +18,37 @@ const getAccentColor = () => {
     .getPropertyValue('--accent')
     .trim();
   return raw ? `hsl(${raw})` : '#22c55e';
+};
+
+// Derive ISO week start/end from "YYYY-Www"
+const getWeekRange = (weekStr) => {
+  const [year, wk] = weekStr.split('-W');
+  const date = new Date(Number(year), 0, 1);
+  date.setDate(date.getDate() + (Number(wk) - 1) * 7);
+  const start = startOfISOWeek(date);
+  const end = endOfISOWeek(date);
+  return { start, end };
+};
+
+// Compact tick label: show week start only (keeps axis clean)
+const formatWeekStartLabel = (weekStr) => {
+  try {
+    const { start } = getWeekRange(weekStr);
+    return format(start, 'MMM d');
+  } catch {
+    return weekStr;
+  }
+};
+
+// Tooltip label: full range (clear and human-friendly)
+const formatWeekRangeLabel = (weekStr) => {
+  try {
+    const { start, end } = getWeekRange(weekStr);
+    const endFmt = isSameMonth(start, end) ? 'd' : 'MMM d';
+    return `Week of ${format(start, 'MMM d')}–${format(end, endFmt)}`;
+  } catch {
+    return weekStr;
+  }
 };
 
 const WeeklyFrequencyChart = () => {
@@ -62,18 +93,6 @@ const WeeklyFrequencyChart = () => {
     return () => controller.abort();
   }, []);
 
-  const formatWeekLabel = (weekStr) => {
-    try {
-      const [year, wk] = weekStr.split('-W');
-      const date = new Date(Number(year), 0, 1);
-      date.setDate(date.getDate() + (Number(wk) - 1) * 7);
-      const weekStart = startOfISOWeek(date);
-      return format(weekStart, 'MMM d');
-    } catch {
-      return weekStr;
-    }
-  };
-
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-64">
@@ -99,7 +118,7 @@ const WeeklyFrequencyChart = () => {
             dataKey="week"
             stroke="#888888"
             tick={{ fill: '#9CA3AF', fontSize: 12 }}
-            tickFormatter={formatWeekLabel}
+            tickFormatter={formatWeekStartLabel}
             interval="preserveStartEnd"
             minTickGap={28}
             height={24}
@@ -125,7 +144,7 @@ const WeeklyFrequencyChart = () => {
               padding: '10px',
             }}
             formatter={(value) => [value, 'Workouts']}
-            labelFormatter={(label) => formatWeekLabel(label)}
+            labelFormatter={(label) => formatWeekRangeLabel(label)}
             wrapperStyle={{ zIndex: 1000 }}
           />
 
