@@ -1,28 +1,26 @@
-// frontend/src/components/analytics/WeeklyVolumeChart.js
+// frontend/src/components/analytics/charts/WeeklyFrequencyChart.js
 import { useState, useEffect } from 'react';
 import {
-  ComposedChart,
-  Area,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { subMonths } from 'date-fns';
-import { getWeeklyVolumeAnalytics } from '../../../api';
-import { format, startOfISOWeek, endOfISOWeek, isSameMonth } from 'date-fns';
+import { subMonths, format, startOfISOWeek, endOfISOWeek, isSameMonth } from 'date-fns';
+import { getWeeklyFrequencyAnalytics } from '../../../api';
 
 const getAccentColor = () => {
-  if (typeof window === 'undefined') return '#22c55e'; // fallback
+  if (typeof window === 'undefined') return '#22c55e';
   const raw = getComputedStyle(document.documentElement)
     .getPropertyValue('--accent')
     .trim();
   return raw ? `hsl(${raw})` : '#22c55e';
 };
 
-// Week helpers for clear labels
+// Derive ISO week start/end from "YYYY-Www"
 const getWeekRange = (weekStr) => {
   const [year, wk] = weekStr.split('-W');
   const date = new Date(Number(year), 0, 1);
@@ -32,6 +30,7 @@ const getWeekRange = (weekStr) => {
   return { start, end };
 };
 
+// Compact tick label: show week start only (keeps axis clean)
 const formatWeekStartLabel = (weekStr) => {
   try {
     const { start } = getWeekRange(weekStr);
@@ -41,6 +40,7 @@ const formatWeekStartLabel = (weekStr) => {
   }
 };
 
+// Tooltip label: full range (clear and human-friendly)
 const formatWeekRangeLabel = (weekStr) => {
   try {
     const { start, end } = getWeekRange(weekStr);
@@ -51,7 +51,7 @@ const formatWeekRangeLabel = (weekStr) => {
   }
 };
 
-const WeeklyVolumeChart = () => {
+const WeeklyFrequencyChart = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -64,11 +64,10 @@ const WeeklyVolumeChart = () => {
         const startDate = subMonths(new Date(), 6).toISOString();
         const endDate = new Date().toISOString();
 
-        const response = await getWeeklyVolumeAnalytics(startDate, endDate, {
+        const response = await getWeeklyFrequencyAnalytics(startDate, endDate, {
           signal: controller.signal,
         });
-
-        const weekly = response.weekly_volumes || [];
+        const weekly = response.weekly_frequency || [];
 
         // Exclude the current (in-progress) ISO week from the chart
         const currentIsoWeek = format(new Date(), "RRRR-'W'II");
@@ -76,14 +75,14 @@ const WeeklyVolumeChart = () => {
 
         setData(filtered);
         setError(null);
-      } catch (error) {
+      } catch (err) {
         if (
-          error.code !== 'ERR_CANCELED' &&
-          error.name !== 'CanceledError' &&
-          error.name !== 'AbortError'
+          err.code !== 'ERR_CANCELED' &&
+          err.name !== 'CanceledError' &&
+          err.name !== 'AbortError'
         ) {
-          console.error('Error fetching analytics:', error);
-          setError('Failed to load workout data');
+          console.error('Error fetching frequency analytics:', err);
+          setError('Failed to load workout frequency');
         }
       } finally {
         setIsLoading(false);
@@ -101,25 +100,14 @@ const WeeklyVolumeChart = () => {
       </div>
     );
 
-  if (error)
-    return <div className="text-red-500 text-center p-4">{error}</div>;
+  if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
   const accent = getAccentColor();
 
   return (
-    <div className="weekly-volume-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]">
+    <div className="weekly-frequency-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]">
       <ResponsiveContainer width="100%" height={320}>
-        <ComposedChart
-          data={data}
-          margin={{ top: 20, right: 16, left: 0, bottom: 8 }}
-        >
-          <defs>
-            <linearGradient id="totalArea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={accent} stopOpacity={0.24} />
-              <stop offset="95%" stopColor={accent} stopOpacity={0.02} />
-            </linearGradient>
-          </defs>
-
+        <BarChart data={data} margin={{ top: 20, right: 16, left: 0, bottom: 8 }}>
           <CartesianGrid
             vertical={false}
             strokeDasharray="10 10"
@@ -140,11 +128,10 @@ const WeeklyVolumeChart = () => {
           <YAxis
             stroke="#888888"
             tick={{ fill: '#9CA3AF' }}
-            width={42}
-            tickFormatter={(value) => (value === 0 ? '' : `${Math.round(value / 1000)}k`)}
-            tickCount={4}
-            axisLine={{ stroke: 'rgba(148, 163, 184, 0.45)', strokeWidth: 1.25, strokeLinecap: 'round' }}
+            width={36}
+            allowDecimals={false}
             tickLine={false}
+            axisLine={{ stroke: 'rgba(148, 163, 184, 0.45)', strokeWidth: 1.25, strokeLinecap: 'round' }}
           />
 
           <Tooltip
@@ -156,41 +143,21 @@ const WeeklyVolumeChart = () => {
               color: '#ffffff',
               padding: '10px',
             }}
-            formatter={(value, name) => {
-              const isTotal = name === 'Total' || name === 'Total Volume';
-              const color = isTotal ? accent : '#94a3b8';
-              return [`${(value / 1000).toFixed(1)}k`, name, { color }];
-            }}
+            formatter={(value) => [value, 'Workouts']}
             labelFormatter={(label) => formatWeekRangeLabel(label)}
             wrapperStyle={{ zIndex: 1000 }}
-            itemSorter={(item) => (item.dataKey === 'totalVolume' ? -1 : 1)}
           />
 
-          {/* Total as filled area (primary), Average as secondary line */}
-          <Area
-            type="monotone"
-            dataKey="totalVolume"
-            name="Total"
-            stroke={accent}
-            fill="url(#totalArea)"
-            strokeWidth={2.5}
-            dot={false}
-            activeDot={{ r: 5, strokeWidth: 0, fill: accent }}
+          <Bar
+            dataKey="workoutCount"
+            name="Workouts"
+            fill={accent}
+            radius={[4, 4, 0, 0]}
           />
-
-          <Line
-            type="monotone"
-            dataKey="avgVolumePerWorkout"
-            name="Average"
-            stroke="#94a3b8"
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 5, strokeWidth: 0 }}
-          />
-        </ComposedChart>
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );
 };
 
-export default WeeklyVolumeChart;
+export default WeeklyFrequencyChart;

@@ -94,6 +94,14 @@ export const getWeeklyVolumeAnalytics = async (startDate, endDate, config = {}) 
   return response.data;
 };
 
+export const getWeeklyFrequencyAnalytics = async (startDate, endDate, config = {}) => {
+  const response = await api.get(
+    `analytics/weekly-frequency/?start_date=${startDate}&end_date=${endDate}`,
+    config
+  );
+  return response.data;
+};
+
 export const getTopWorkouts = async (limit = 5, config = {}) => {
   const response = await api.get(`analytics/top-workouts/?limit=${limit}`, config);
   return response.data;

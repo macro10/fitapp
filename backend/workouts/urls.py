@@ -1,8 +1,10 @@
 from rest_framework.routers import DefaultRouter
-from .views import ExerciseViewSet, WorkoutViewSet, PerformedExerciseViewSet, UserRegistrationView
+from .views import ExerciseViewSet, WorkoutViewSet, PerformedExerciseViewSet, UserRegistrationView, weekly_frequency
 from django.contrib.auth.models import User
 from rest_framework import serializers, viewsets
 from django.urls import path, include
+from django.utils.dateparse import parse_datetime
+from .analytics import get_weekly_workout_frequency
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,4 +24,5 @@ router.register(r'users', UserViewSet)
 urlpatterns = router.urls + [
     path('register/', UserRegistrationView.as_view(), name='user-register'),
     path('analytics/', include('workouts.api.analytics.urls')),
+    path('analytics/weekly-frequency/', weekly_frequency, name='weekly-frequency'),
 ]
