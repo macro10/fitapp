@@ -38,6 +38,12 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
   const [weight, setWeight] = useState(initialBaseWeight);
   const [isLoading, setIsLoading] = useState(false);
   const [smallPlate, setSmallPlate] = useState(initialSmall);
+  // Wheel height controls (from @ncdai/react-wheel-picker)
+  const OPTION_ITEM_HEIGHT = 28; // px for each row in the wheel
+  const VISIBLE_COUNT_LEFT = 20; // rows visible on the left wheel
+  // const SWITCH_HEIGHT_PX = 60;   // height of the switch (not used when overlapping)
+  // Reduce right visible rows so right wheel + switch == left wheel height
+  const VISIBLE_COUNT_RIGHT = 20
   
   // Update state when defaults change
   useEffect(() => {
@@ -82,6 +88,8 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
                 defaultValue={reps}
                 onValueChange={setReps}
                 infinite={false}
+                visibleCount={VISIBLE_COUNT_LEFT}
+                optionItemHeight={OPTION_ITEM_HEIGHT}
               />
             </WheelPickerWrapper>
           </div>
@@ -90,34 +98,33 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
           <label className="text-sm text-muted-foreground block mb-2">
             What weight (lbs)?
           </label>
-          <div className="rounded-lg border bg-background overflow-hidden">
+          <div className="relative rounded-lg border bg-background overflow-hidden">
             <WheelPickerWrapper className="border-0 rounded-b-none">
               <WheelPicker 
                 options={weightOptions}
                 defaultValue={weight}
                 onValueChange={setWeight}
                 infinite={false}
+                visibleCount={VISIBLE_COUNT_RIGHT}
+                optionItemHeight={OPTION_ITEM_HEIGHT}
               />
             </WheelPickerWrapper>
-            <div className="border-t">
-            <SwitchPrimitives.Root
-              checked={smallPlate}
-              onCheckedChange={setSmallPlate}
-              aria-label="Add 2.5 lb"
-              className="relative block w-full h-6 rounded-b-lg border border-border bg-background shadow-inner
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-              transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(.2,.7,.2,1)]
-              hover:shadow-md"
-            >
-                <div className="absolute inset-0 bg-background" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0">
+              <div className="h-6 bg-gradient-to-t from-background/95 to-transparent" />
+              <SwitchPrimitives.Root
+                checked={smallPlate}
+                onCheckedChange={setSmallPlate}
+                aria-label="Add 2.5 lb"
+                className="pointer-events-auto absolute inset-x-0 bottom-0 h-6 border-t border-border bg-background/95 backdrop-blur-sm
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(.2,.7,.2,1)]"
+              >
                 <SwitchPrimitives.Thumb
-                  className="absolute top-0 left-0 h-full w-1/2 rounded-none
-                            flex items-center justify-center gap-1 font-medium text-sm
-                            transition-[transform,background-color,box-shadow] duration-300 ease-[cubic-bezier(.2,.7,.2,1)]
-                            data-[state=checked]:translate-x-full data-[state=unchecked]:translate-x-0
-                            data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted
-                            data-[state=checked]:text-primary-foreground data-[state=unchecked]:text-foreground
-                            shadow-sm hover:shadow data-[state=checked]:shadow md:active:scale-[0.995]"
+                  className="absolute top-0 left-0 h-full w-1/2 rounded-none flex items-center justify-center gap-1 font-medium text-sm
+                  transition-[transform,background-color,box-shadow] duration-300 ease-[cubic-bezier(.2,.7,.2,1)]
+                  data-[state=checked]:translate-x-full data-[state=unchecked]:translate-x-0
+                  data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted
+                  data-[state=checked]:text-primary-foreground data-[state=unchecked]:text-foreground shadow-sm"
                 >
                   <ArrowLeftRight className="h-3.5 w-3.5" />
                   2.5
