@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Plus, Loader2 } from "lucide-react";
 import { WheelPicker, WheelPickerWrapper } from "../../components/ui/wheel-picker";
 import { RestTimer } from "./RestTimer";
-import { Switch } from "../ui/switch";
+import * as SwitchPrimitives from "@radix-ui/react-switch";
 
 // Helper function to create arrays of options
 const createOptions = (length, add = 0, step = 1) => 
@@ -99,10 +99,21 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
                 infinite={false}
               />
             </WheelPickerWrapper>
-          </div>
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-xs text-muted-foreground">Add 2.5 lb</span>
-            <Switch checked={smallPlate} onCheckedChange={setSmallPlate} aria-label="Add 2.5 lb" />
+            <div className="border-t">
+              <SwitchPrimitives.Root
+                checked={smallPlate}
+                onCheckedChange={setSmallPlate}
+                aria-label="Add 2.5 lb"
+                className="relative block w-full h-12 rounded-b-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <div className="absolute inset-0 bg-background" />
+                <SwitchPrimitives.Thumb
+                  className="absolute top-0 left-0 h-full w-1/2 rounded-none transition-transform duration-200 flex items-center justify-center font-semibold data-[state=checked]:translate-x-full data-[state=unchecked]:translate-x-0 data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted data-[state=checked]:text-primary-foreground data-[state=unchecked]:text-foreground"
+                >
+                  2.5
+                </SwitchPrimitives.Thumb>
+              </SwitchPrimitives.Root>
+            </div>
           </div>
           <div className="text-xs text-muted-foreground mt-1">
             Effective: {(Number(weight) + (smallPlate ? 2.5 : 0)).toString()} lbs
