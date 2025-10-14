@@ -38,12 +38,7 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
   const [weight, setWeight] = useState(initialBaseWeight);
   const [isLoading, setIsLoading] = useState(false);
   const [smallPlate, setSmallPlate] = useState(initialSmall);
-  // Wheel height controls (from @ncdai/react-wheel-picker)
-  const OPTION_ITEM_HEIGHT = 28; // px for each row in the wheel
-  const VISIBLE_COUNT_LEFT = 20; // rows visible on the left wheel
-  // const SWITCH_HEIGHT_PX = 60;   // height of the switch (not used when overlapping)
-  // Reduce right visible rows so right wheel + switch == left wheel height
-  const VISIBLE_COUNT_RIGHT = 20
+  
   
   // Update state when defaults change
   useEffect(() => {
@@ -88,8 +83,6 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
                 defaultValue={reps}
                 onValueChange={setReps}
                 infinite={false}
-                visibleCount={VISIBLE_COUNT_LEFT}
-                optionItemHeight={OPTION_ITEM_HEIGHT}
               />
             </WheelPickerWrapper>
           </div>
@@ -105,8 +98,6 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
                 defaultValue={weight}
                 onValueChange={setWeight}
                 infinite={false}
-                visibleCount={VISIBLE_COUNT_RIGHT}
-                optionItemHeight={OPTION_ITEM_HEIGHT}
               />
             </WheelPickerWrapper>
             <div className="pointer-events-none absolute inset-x-0 bottom-0">
