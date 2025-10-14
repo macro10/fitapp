@@ -215,14 +215,10 @@ export default function WorkoutLoggerPage() {
                       const defaults = getExerciseDefaults(currentExercise.id);
                       if (sets.length > 0) {
                         const lastSet = sets[sets.length - 1];
-                        const lastWeight = lastSet.weight;
-                        const historyWeight = parseInt(defaults.defaultWeight, 10);
-                        if (defaults.defaultWeight === "45" || lastWeight >= historyWeight) {
-                          return {
-                            defaultReps: lastSet.reps.toString(),
-                            defaultWeight: lastSet.weight.toString()
-                          };
-                        }
+                        return {
+                          defaultReps: lastSet.reps.toString(),
+                          defaultWeight: lastSet.weight.toString()
+                        };
                       }
                       return defaults;
                     })()}
