@@ -169,7 +169,7 @@ export const useWorkoutLogger = () => {
   const handleFinishWorkout = async () => {
     try {
       setSaving(true);
-      const totalVolume = calculateTotalVolume(workoutState.exercises);
+      const totalVolume = Math.round(calculateTotalVolume(workoutState.exercises));
       const created = await createWorkoutWithExercises(
         new Date().toISOString(),
         workoutState.exercises,
