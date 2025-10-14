@@ -1,7 +1,7 @@
 // frontend/src/components/workoutLogger/SetLogger.jsx
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, ArrowLeftRight } from "lucide-react";
 import { WheelPicker, WheelPickerWrapper } from "../../components/ui/wheel-picker";
 import { RestTimer } from "./RestTimer";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
@@ -112,13 +112,14 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
                 <div className="absolute inset-0 bg-background" />
                 <SwitchPrimitives.Thumb
                   className="absolute top-0 left-0 h-full w-1/2 rounded-none
-                            flex items-center justify-center font-medium text-sm
+                            flex items-center justify-center gap-1 font-medium text-sm
                             transition-[transform,background-color,box-shadow] duration-300 ease-[cubic-bezier(.2,.7,.2,1)]
                             data-[state=checked]:translate-x-full data-[state=unchecked]:translate-x-0
                             data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted
                             data-[state=checked]:text-primary-foreground data-[state=unchecked]:text-foreground
                             shadow-sm hover:shadow data-[state=checked]:shadow md:active:scale-[0.995]"
                 >
+                  <ArrowLeftRight className="h-3.5 w-3.5" />
                   2.5
                 </SwitchPrimitives.Thumb>
               </SwitchPrimitives.Root>
