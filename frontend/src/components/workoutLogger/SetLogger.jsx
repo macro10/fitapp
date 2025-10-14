@@ -90,8 +90,8 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
           <label className="text-sm text-muted-foreground block mb-2">
             What weight (lbs)?
           </label>
-          <div className="rounded-lg border bg-background">
-            <WheelPickerWrapper>
+          <div className="rounded-lg border bg-background overflow-hidden">
+            <WheelPickerWrapper className="border-0 rounded-b-none">
               <WheelPicker 
                 options={weightOptions}
                 defaultValue={weight}
@@ -104,7 +104,7 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
                 checked={smallPlate}
                 onCheckedChange={setSmallPlate}
                 aria-label="Add 2.5 lb"
-                className="relative block w-full h-12 rounded-b-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="relative block w-full h-5 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="absolute inset-0 bg-background" />
                 <SwitchPrimitives.Thumb
