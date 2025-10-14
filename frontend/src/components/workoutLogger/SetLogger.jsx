@@ -100,15 +100,24 @@ export const SetLogger = ({ setNumber, onComplete, onBack, defaultReps = "10", d
               />
             </WheelPickerWrapper>
             <div className="border-t">
-              <SwitchPrimitives.Root
-                checked={smallPlate}
-                onCheckedChange={setSmallPlate}
-                aria-label="Add 2.5 lb"
-                className="relative block w-full h-5 rounded-b-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
+            <SwitchPrimitives.Root
+              checked={smallPlate}
+              onCheckedChange={setSmallPlate}
+              aria-label="Add 2.5 lb"
+              className="relative block w-full h-6 rounded-b-lg border border-border bg-background shadow-inner
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+              transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(.2,.7,.2,1)]
+              hover:shadow-md"
+            >
                 <div className="absolute inset-0 bg-background" />
                 <SwitchPrimitives.Thumb
-                  className="absolute top-0 left-0 h-full w-1/2 rounded-none transition-transform duration-200 flex items-center justify-center font-medium text-sm data-[state=checked]:translate-x-full data-[state=unchecked]:translate-x-0 data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted data-[state=checked]:text-primary-foreground data-[state=unchecked]:text-foreground"
+                  className="absolute top-0 left-0 h-full w-1/2 rounded-none
+                            flex items-center justify-center font-medium text-sm
+                            transition-[transform,background-color,box-shadow] duration-300 ease-[cubic-bezier(.2,.7,.2,1)]
+                            data-[state=checked]:translate-x-full data-[state=unchecked]:translate-x-0
+                            data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted
+                            data-[state=checked]:text-primary-foreground data-[state=unchecked]:text-foreground
+                            shadow-sm hover:shadow data-[state=checked]:shadow md:active:scale-[0.995]"
                 >
                   2.5
                 </SwitchPrimitives.Thumb>
