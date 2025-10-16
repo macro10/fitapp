@@ -109,7 +109,7 @@ export default function ExerciseSelectorPage() {
       {/* Top navbar (fixed) */}
       <div
         ref={topRef}
-        className="fixed top-0 left-0 right-0 z-20 bg-background/80 border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm"
+        className="fixed top-0 left-0 right-0 z-20 bg-background/80 border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm pt-[env(safe-area-inset-top,0px)]"
       >
         <div className="container mx-auto max-w-2xl px-4 py-3">
           <div className="relative flex items-center justify-center mb-3">
@@ -119,22 +119,27 @@ export default function ExerciseSelectorPage() {
             <h1 className="text-xl font-semibold tracking-tight">Select Exercise</h1>
           </div>
 
-          {/* Group filter chips */}
-          <div className="flex items-center justify-center gap-2 flex-wrap">
-            {groups.map(g => {
-              const active = activeGroups.has(g);
-              return (
-                <Button
-                  key={g}
-                  size="sm"
-                  variant={active ? "default" : "secondary"} // primary vs secondary palette
-                  className="rounded-full px-3 h-8"
-                  onClick={() => toggleGroup(g)}
-                >
-                  {label(g)}
-                </Button>
-              );
-            })}
+          {/* Group filter chips: horizontal scroll with snap */}
+          <div className="-mx-4 px-4">
+            <div
+              className="no-scrollbar flex items-center gap-2 overflow-x-auto whitespace-nowrap snap-x snap-mandatory py-1"
+              style={{ WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}
+            >
+              {groups.map(g => {
+                const active = activeGroups.has(g);
+                return (
+                  <Button
+                    key={g}
+                    size="sm"
+                    variant={active ? "default" : "secondary"}
+                    className="rounded-full h-9 px-4 shrink-0 snap-start tracking-tight"
+                    onClick={() => toggleGroup(g)}
+                  >
+                    {label(g)}
+                  </Button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Search */}
@@ -214,7 +219,7 @@ export default function ExerciseSelectorPage() {
         </div>
       </div>
 
-      {/* Render modal OUTSIDE the fixed bottom bar so it centers correctly */}
+      {/* Modal outside fixed bar */}
       <CustomExerciseModal
         open={customOpen}
         onClose={() => setCustomOpen(false)}
