@@ -213,6 +213,7 @@ const [customOpen, setCustomOpen] = useState(false);
         <CustomExerciseModal
           open={customOpen}
           onClose={() => setCustomOpen(false)}
+          initialName={search.trim()}
           onCreate={async (newExerciseDraft) => {
             try {
               const saved = await createCustomExercise({

@@ -1,14 +1,22 @@
 // /Users/mchaletrotter/Repos/fitapp/frontend/src/components/workoutLogger/CustomExerciseModal.jsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../ui/select";
 
 const GROUPS = ["chest", "back", "shoulders", "arms", "legs", "core"];
 
-export default function CustomExerciseModal({ open, onClose, onCreate }) {
+export default function CustomExerciseModal({ open, onClose, onCreate, initialName }) {
   const [name, setName] = useState("");
   const [group, setGroup] = useState(null);
+
+  // Prefill with whatever the user searched for when opening
+  useEffect(() => {
+    if (open) {
+      setName((initialName || "").trim());
+      setGroup(null);
+    }
+  }, [open, initialName]);
 
   const canSave = useMemo(() => name.trim().length >= 2 && !!group, [name, group]);
 
@@ -47,17 +55,14 @@ export default function CustomExerciseModal({ open, onClose, onCreate }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" onKeyDown={onKeyDown}>
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={handleClose} />
 
-      {/* Panel */}
       <div
         role="dialog"
         aria-modal="true"
         className="relative w-[92vw] max-w-lg rounded-2xl border border-border/60 bg-background/80 shadow-2xl ring-1 ring-white/10 supports-[backdrop-filter]:bg-background/60
                    transition-all duration-200 ease-out translate-y-0 opacity-100"
       >
-        {/* Close button */}
         <button
           type="button"
           aria-label="Close"
