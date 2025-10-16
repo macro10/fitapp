@@ -14,10 +14,10 @@ export default function ExerciseSelectorPage() {
   const navigate = useNavigate();
   const { exercises = [], loading, loadExercises, setExercises } = useExercises();
 
-const [search, setSearch] = useState("");
-const [activeGroups, setActiveGroups] = useState(() => new Set());
-const [visibleCount, setVisibleCount] = useState(25);
-const [customOpen, setCustomOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [activeGroups, setActiveGroups] = useState(() => new Set());
+  const [visibleCount, setVisibleCount] = useState(25);
+  const [customOpen, setCustomOpen] = useState(false);
 
   // measure bars to pad/size the scroll area
   const topRef = useRef(null);
@@ -52,7 +52,7 @@ const [customOpen, setCustomOpen] = useState(false);
     setVisibleCount(25);
   }, [search, activeGroups]);
 
-  const GROUP_ORDER = ['chest','back','shoulders','arms','legs','core'];
+  const GROUP_ORDER = ["chest","back","shoulders","arms","legs","core"];
   const groups = useMemo(() => {
     const s = new Set();
     (exercises || []).forEach(e => e.muscle_group && s.add(e.muscle_group));
@@ -109,31 +109,44 @@ const [customOpen, setCustomOpen] = useState(false);
       {/* Top navbar (fixed) */}
       <div
         ref={topRef}
-        className="fixed top-0 left-0 right-0 z-20 bg-background pt-[env(safe-area-inset-top,0px)] border-b"
+        className="fixed top-0 left-0 right-0 z-20 bg-background/80 border-b backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm"
       >
         <div className="container mx-auto max-w-2xl px-4 py-3">
-          <div className="relative flex items-center justify-center mb-2">
+          <div className="relative flex items-center justify-center mb-3">
             <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="absolute left-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-bold">Select Exercise</h1>
+            <h1 className="text-xl font-semibold tracking-tight">Select Exercise</h1>
           </div>
 
+          {/* Group filter chips */}
           <div className="flex items-center justify-center gap-2 flex-wrap">
             {groups.map(g => {
               const active = activeGroups.has(g);
               return (
                 <Button
                   key={g}
-                  size="default"
-                  variant={active ? "default" : "outline"}
-                  className="rounded-xl px-2 h-8"
+                  size="sm"
+                  variant={active ? "default" : "secondary"} // primary vs secondary palette
+                  className="rounded-full px-3 h-8"
                   onClick={() => toggleGroup(g)}
                 >
                   {label(g)}
                 </Button>
               );
             })}
+          </div>
+
+          {/* Search */}
+          <div className="mt-4 flex items-center gap-2 rounded-2xl border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/60 ring-1 ring-white/10 px-4 py-3">
+            <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <Input
+              type="text"
+              className="border-none bg-transparent"
+              placeholder="Search exercises..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
         </div>
       </div>
@@ -148,32 +161,22 @@ const [customOpen, setCustomOpen] = useState(false);
           style={{ height: `calc(100dvh - ${topH}px - ${bottomH}px)` }}
           onScroll={onScrollLoadMore}
         >
-          {/* Search */}
-          <div className="mt-6 flex items-center gap-2 p-4 mb-4 rounded-lg border bg-background/60 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-            <Input
-              type="text"
-              className="border-none bg-transparent"
-              placeholder="Search exercises..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
           {/* Results */}
-          <div>
+          <div className="pt-2">
             {loading ? (
               <div className="p-4 text-center text-muted-foreground">Loading exercises...</div>
             ) : (
               <Command>
-                <CommandEmpty>No exercise found.</CommandEmpty>
+                <CommandEmpty className="text-muted-foreground px-2">
+                  No exercise found.
+                </CommandEmpty>
                 <CommandGroup className="space-y-3">
                   {visible.map((exercise) => (
                     <CommandItem
                       key={exercise.id}
                       value={exercise.name}
                       onSelect={() => handleSelect(exercise)}
-                      className="cursor-pointer rounded-xl border p-3 mb-1 text-md font-medium hover:bg-accent/50 focus:bg-accent/50"
+                      className="cursor-pointer rounded-xl border bg-background/60 backdrop-blur p-3 mb-1 text-md font-medium transition-colors hover:bg-accent/30 focus:bg-accent/30"
                     >
                       <div className="flex w-full items-center justify-between">
                         <span>{exercise.name}</span>
@@ -198,7 +201,7 @@ const [customOpen, setCustomOpen] = useState(false);
       {/* Bottom navbar (fixed, moves with iOS keyboard) */}
       <div
         ref={bottomRef}
-        className="fixed left-0 right-0 bottom-0 z-20 bg-background pb-[env(safe-area-inset-bottom,0px)] border-t"
+        className="fixed left-0 right-0 bottom-0 z-20 bg-background/80 pb-[env(safe-area-inset-bottom,0px)] border-t backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div className="container mx-auto max-w-2xl px-4 py-3">
           <Button
@@ -209,24 +212,25 @@ const [customOpen, setCustomOpen] = useState(false);
             Custom Add
           </Button>
         </div>
-
-        <CustomExerciseModal
-          open={customOpen}
-          onClose={() => setCustomOpen(false)}
-          initialName={search.trim()}
-          onCreate={async (newExerciseDraft) => {
-            try {
-              const saved = await createCustomExercise({
-                name: newExerciseDraft.name || newExerciseDraft?.name,
-                muscle_group: newExerciseDraft.muscle_group || newExerciseDraft?.muscle_group,
-              });
-              setExercises(prev => [saved, ...prev]);
-            } finally {
-              setCustomOpen(false);
-            }
-          }}
-        />
       </div>
+
+      {/* Render modal OUTSIDE the fixed bottom bar so it centers correctly */}
+      <CustomExerciseModal
+        open={customOpen}
+        onClose={() => setCustomOpen(false)}
+        initialName={search.trim()}
+        onCreate={async (newExerciseDraft) => {
+          try {
+            const saved = await createCustomExercise({
+              name: newExerciseDraft.name || newExerciseDraft?.name,
+              muscle_group: newExerciseDraft.muscle_group || newExerciseDraft?.muscle_group,
+            });
+            setExercises(prev => [saved, ...prev]);
+          } finally {
+            setCustomOpen(false);
+          }
+        }}
+      />
     </div>
   );
 }
