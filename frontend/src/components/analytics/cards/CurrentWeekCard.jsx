@@ -4,7 +4,6 @@ import { Card, CardHeader, CardTitle } from "../../ui/card";
 import { Dumbbell, TrendingUp, TrendingDown, CalendarDays } from "lucide-react";
 import { subMonths } from "date-fns";
 import { getWeeklyVolumeAnalytics } from "../../../api";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../ui/tooltip";
 
 export default function CurrentWeekCard() {
   const [loading, setLoading] = useState(true);
@@ -75,75 +74,46 @@ export default function CurrentWeekCard() {
   })();
 
   return (
-    <TooltipProvider>
-      <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
-          aria-hidden
-        />
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="bg-muted/10 p-2 rounded-md h-9 w-9 flex items-center justify-center">
-                <CalendarDays className="h-5 w-5 text-foreground/70" />
-              </div>
-              <div>
-                <CardTitle className="text-2xl">This Week</CardTitle>
-                <p className="text-muted-foreground">Volume, workouts, average</p>
-              </div>
+    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
+        aria-hidden
+      />
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="bg-muted/10 p-2 rounded-md h-9 w-9 flex items-center justify-center">
+              <CalendarDays className="h-5 w-5 text-foreground/70" />
             </div>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="text-4xl md:text-5xl font-semibold leading-tight tabular-nums tracking-tight cursor-help">
-                  {loading ? "—" : stats.latest.toLocaleString()}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Workout Volume This Week</p>
-              </TooltipContent>
-            </Tooltip>
+            <div>
+              <CardTitle className="text-2xl">This Week</CardTitle>
+              <p className="text-muted-foreground">Volume, workouts, average</p>
+            </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-end gap-3">
-            <span className="hidden sm:inline text-sm text-muted-foreground">Workouts</span>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className={`${pillBase} bg-emerald-500/15 text-emerald-300 ring-emerald-400/25 cursor-help`}
-                  title="Workouts completed this week"
-                >
-                  <Dumbbell className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
-                  {loading ? "—" : stats.workouts}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Workouts Completed This Week</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <span className="hidden sm:inline text-sm text-muted-foreground">Average</span>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div
-                  className={`${pillBase} ${avgPillClass} cursor-help`}
-                  title={
-                    stats.prevAvg
-                      ? `${avgDeltaPct > 0 ? "+" : ""}${avgDeltaPct}% vs last week`
-                      : "Avg volume per workout this week"
-                  }
-                >
-                  <AvgIcon className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
-                  {loading ? "—" : Math.round(stats.avg)}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Average Workout Volume This Week</p>
-              </TooltipContent>
-            </Tooltip>
+          <div className="text-4xl md:text-5xl font-semibold leading-tight tabular-nums tracking-tight">
+            {loading ? "—" : stats.latest.toLocaleString()}
           </div>
-        </CardHeader>
-      </Card>
-    </TooltipProvider>
+        </div>
+
+        <div className="mt-3 flex items-center justify-end gap-3">
+          <span className="hidden sm:inline text-sm text-muted-foreground">Workouts</span>
+          <div
+            className={`${pillBase} bg-emerald-500/15 text-emerald-300 ring-emerald-400/25`}
+          >
+            <Dumbbell className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
+            {loading ? "—" : stats.workouts}
+          </div>
+
+          <span className="hidden sm:inline text-sm text-muted-foreground">Average</span>
+          <div
+            className={`${pillBase} ${avgPillClass}`}
+          >
+            <AvgIcon className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
+            {loading ? "—" : Math.round(stats.avg)}
+          </div>
+        </div>
+      </CardHeader>
+    </Card>
   );
 }
