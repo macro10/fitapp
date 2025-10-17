@@ -67,9 +67,9 @@ export default function CurrentWeekCard() {
     const prev = stats.prevAvg;
     if (!prev) return "bg-muted/20 text-foreground/70 ring-white/5";
     const pct = ((stats.avg - prev) / prev) * 100;
-    if (pct > 0) return "bg-emerald-500/15 text-emerald-300 ring-emerald-400/25";
-    if (pct <= -10) return "bg-red-500/15 text-red-300 ring-red-400/25";
-    return "bg-yellow-500/10 text-yellow-300 ring-yellow-400/20";
+    if (pct > 0) return "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/25";
+    if (pct <= -20) return "bg-red-500/15 text-red-300 ring-1 ring-red-400/25"; // worse by 20%+
+    return "bg-yellow-500/10 text-yellow-300 ring-yellow-400/20"; // within 0–20% lower (neutral)
   })();
 
   const AvgIcon = (() => {
@@ -103,11 +103,11 @@ export default function CurrentWeekCard() {
       : "text-yellow-300";
 
   const deltaChipClass =
-    avgDeltaPct > 0
-      ? "bg-emerald-500/15 text-emerald-300 ring-emerald-400/25"
-      : avgDeltaPct < 0
-      ? "bg-red-500/15 text-red-300 ring-red-400/25"
-      : "bg-muted/20 text-foreground/70 ring-white/5";
+  avgDeltaPct > 0
+    ? "bg-emerald-500/15 text-emerald-300 ring-emerald-400/25"
+    : avgDeltaPct <= -20
+    ? "bg-red-500/15 text-red-300 ring-red-400/25"
+    : "bg-yellow-500/10 text-yellow-300 ring-yellow-400/20"; // neutral for small negatives (0..-20%)
 
   return (
     <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50">
@@ -182,7 +182,7 @@ export default function CurrentWeekCard() {
           {/* Average delta */}
           <div className={`${chipBase} ${deltaChipClass}`}>
             <div className="flex items-center gap-1.5">
-              <span className="opacity-90">Avg Δ</span>
+              <span className="opacity-90">Avg/Workout Δ</span>
             </div>
             <span>
               {loading ? "—" : `${avgDeltaPct > 0 ? "+" : avgDeltaPct < 0 ? "−" : ""}${Math.abs(avgDeltaPct)}%`}
