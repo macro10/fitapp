@@ -174,7 +174,7 @@ export default function CurrentWeekCard() {
           <div className={`${chipBase} ${avgPillClass}`}>
             <div className="flex items-center gap-1.5">
               <AvgIcon className="h-3.5 w-3.5 opacity-80" />
-              <span className="opacity-90">Average workout</span>
+              <span className="opacity-90">Average Workout</span>
             </div>
             <span>{loading ? "—" : Math.round(stats.avg).toLocaleString()}</span>
           </div>
