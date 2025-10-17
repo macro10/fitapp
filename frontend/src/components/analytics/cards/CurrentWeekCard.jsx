@@ -124,7 +124,7 @@ export default function CurrentWeekCard() {
             </div>
             <div>
               <CardTitle className="text-2xl">This Week</CardTitle>
-              <p className="text-muted-foreground">Total and average volume</p>
+              <p className="text-muted-foreground">Volume metrics</p>
             </div>
           </div>
 
@@ -162,7 +162,7 @@ export default function CurrentWeekCard() {
         {/* Key metrics (explicitly labeled chips) */}
         <div className="mt-6 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Workouts */}
-          <div className={`${chipBase} bg-emerald-500/10 text-emerald-300 ring-emerald-400/20`}>
+          <div className={`${chipBase} bg-muted/20 text-foreground/90 ring-white/10`}>
             <div className="flex items-center gap-1.5">
               <Dumbbell className="h-3.5 w-3.5 opacity-80" />
               <span className="opacity-90">Workouts</span>
@@ -174,7 +174,7 @@ export default function CurrentWeekCard() {
           <div className={`${chipBase} ${avgPillClass}`}>
             <div className="flex items-center gap-1.5">
               <AvgIcon className="h-3.5 w-3.5 opacity-80" />
-              <span className="opacity-90">Avg/Workout</span>
+              <span className="opacity-90">Average workout</span>
             </div>
             <span>{loading ? "—" : Math.round(stats.avg).toLocaleString()}</span>
           </div>
@@ -182,7 +182,7 @@ export default function CurrentWeekCard() {
           {/* Average delta */}
           <div className={`${chipBase} ${deltaChipClass}`}>
             <div className="flex items-center gap-1.5">
-              <span className="opacity-90">Avg/Workout Δ</span>
+              <span className="opacity-90">Average Workout Δ</span>
             </div>
             <span>
               {loading ? "—" : `${avgDeltaPct > 0 ? "+" : avgDeltaPct < 0 ? "−" : ""}${Math.abs(avgDeltaPct)}%`}
