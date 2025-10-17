@@ -1,18 +1,32 @@
 // /Users/mchaletrotter/Repos/fitapp/frontend/src/components/workoutLogger/CustomExerciseModal.jsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "../ui/select";
 
-const GROUPS = ['chest','back','shoulders','arms','legs','core'];
+const GROUPS = ["chest", "back", "shoulders", "arms", "legs", "core"];
 
-export default function CustomExerciseModal({ open, onClose, onCreate }) {
+export default function CustomExerciseModal({ open, onClose, onCreate, initialName }) {
   const [name, setName] = useState("");
   const [group, setGroup] = useState(null);
+
+  // Prefill with whatever the user searched for when opening
+  useEffect(() => {
+    if (open) {
+      setName((initialName || "").trim());
+      setGroup(null);
+    }
+  }, [open, initialName]);
 
   const canSave = useMemo(() => name.trim().length >= 2 && !!group, [name, group]);
 
   if (!open) return null;
+
+  const handleClose = () => {
+    setName("");
+    setGroup(null);
+    onClose?.();
+  };
 
   const handleSave = () => {
     if (!canSave) return;
@@ -22,53 +36,91 @@ export default function CustomExerciseModal({ open, onClose, onCreate }) {
       name: name.trim(),
       muscle_group: group,
       isCustom: true,
-      level: 'beginner',
+      level: "beginner",
       primaryMuscles: [],
       secondaryMuscles: [],
       instructions: [],
-      category: 'strength',
+      category: "strength",
       images: [],
     });
-    setName("");
-    setGroup(null);
+    handleClose();
+  };
+
+  const onKeyDown = (e) => {
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      handleClose();
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute left-1/2 top-1/2 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border bg-background p-4 shadow-lg">
-        <h2 className="text-lg font-semibold mb-3">Add Custom Exercise</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center" onKeyDown={onKeyDown}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={handleClose} />
 
-        <div className="space-y-3">
-          <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">Exercise name</label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Romanian Deadlift"
-            />
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="relative w-[92vw] max-w-lg rounded-2xl border border-border/60 bg-background/80 shadow-2xl ring-1 ring-white/10 supports-[backdrop-filter]:bg-background/60
+                   transition-all duration-200 ease-out translate-y-0 opacity-100"
+      >
+        <button
+          type="button"
+          aria-label="Close"
+          onClick={handleClose}
+          className="absolute right-3 top-3 rounded-md p-2 text-muted-foreground hover:text-foreground hover:bg-accent/40 transition-colors"
+        >
+          ×
+        </button>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSave();
+          }}
+          className="p-5 md:p-6"
+        >
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold tracking-tight">Add Custom Exercise</h2>
+            <p className="text-sm text-muted-foreground mt-1">Create an exercise tailored to your routine.</p>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm text-muted-foreground">Muscle group</label>
-            <Select value={group ?? ""} onValueChange={(v) => setGroup(v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select muscle group" />
-              </SelectTrigger>
-              <SelectContent>
-                {GROUPS.map(g => (
-                  <SelectItem key={g} value={g}>
-                    {g.charAt(0).toUpperCase() + g.slice(1)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm text-muted-foreground">Exercise name</label>
+              <Input
+                autoFocus
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g., Romanian Deadlift"
+              />
+            </div>
 
-        <div className="mt-4 flex gap-2">
-          <Button className="flex-1" disabled={!canSave} onClick={handleSave}>Save</Button>
-        </div>
+            <div className="space-y-1.5">
+              <label className="text-sm text-muted-foreground">Muscle group</label>
+              <Select value={group ?? ""} onValueChange={(v) => setGroup(v)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select muscle group" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GROUPS.map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {g.charAt(0).toUpperCase() + g.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="mt-6 flex gap-2">
+            <Button type="button" variant="ghost" className="flex-1" onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button type="submit" className="flex-1" disabled={!canSave}>
+              Save
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

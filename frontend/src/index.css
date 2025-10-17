@@ -109,3 +109,7 @@
   /* Optional: prevent interaction with app underneath */
   #root { pointer-events: none; }
 }
+
+/* Hide horizontal scrollbar but keep scrollability */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
