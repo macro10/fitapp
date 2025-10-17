@@ -54,20 +54,22 @@ export default function CurrentWeekCard() {
     };
   }, []);
 
-  const pillBase =
-    "flex items-center gap-1.5 h-7 px-2.5 rounded-full text-xs font-medium tabular-nums ring-1 transition-colors duration-200";
+  // Styles
+  const chipBase =
+    "flex items-center justify-between gap-2 h-8 px-3 rounded-full text-xs font-medium ring-1 tabular-nums";
 
+  // Average vs last week
   const avgDeltaPct = stats.prevAvg
     ? Math.round(((stats.avg - stats.prevAvg) / stats.prevAvg) * 100)
     : 0;
 
   const avgPillClass = (() => {
     const prev = stats.prevAvg;
-    if (!prev) return "bg-muted/20 text-foreground/70 ring-1 ring-white/5";
+    if (!prev) return "bg-muted/20 text-foreground/70 ring-white/5";
     const pct = ((stats.avg - prev) / prev) * 100;
-    if (pct > 0) return "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/25";
-    if (pct <= -10) return "bg-red-500/15 text-red-300 ring-1 ring-red-400/25";
-    return "bg-yellow-500/10 text-yellow-300 ring-1 ring-yellow-400/20";
+    if (pct > 0) return "bg-emerald-500/15 text-emerald-300 ring-emerald-400/25";
+    if (pct <= -10) return "bg-red-500/15 text-red-300 ring-red-400/25";
+    return "bg-yellow-500/10 text-yellow-300 ring-yellow-400/20";
   })();
 
   const AvgIcon = (() => {
@@ -80,7 +82,7 @@ export default function CurrentWeekCard() {
   // Progress vs last completed week
   const progressPct = stats.prevTotal ? Math.min(999, Math.round((stats.latest / stats.prevTotal) * 100)) : 0;
 
-  // How much of the week has elapsed — for a quick “on-track” signal
+  // Elapsed week (for “on‑track” marker)
   const weekStart = startOfISOWeek(new Date());
   const weekEnd = endOfISOWeek(new Date());
   const weekPct = Math.max(
@@ -90,6 +92,7 @@ export default function CurrentWeekCard() {
       Math.round(((Date.now() - weekStart.getTime()) / (weekEnd.getTime() - weekStart.getTime())) * 100)
     )
   );
+  const markerLeftPct = Math.max(0, Math.min(100, weekPct));
   const paceDelta = progressPct - weekPct;
   const paceLabel = paceDelta >= 5 ? "ahead" : paceDelta <= -5 ? "behind" : "on track";
   const paceClass =
@@ -104,7 +107,7 @@ export default function CurrentWeekCard() {
       ? "bg-emerald-500/15 text-emerald-300 ring-emerald-400/25"
       : avgDeltaPct < 0
       ? "bg-red-500/15 text-red-300 ring-red-400/25"
-      : "bg-muted/20 text-foreground/70 ring-1 ring-white/5";
+      : "bg-muted/20 text-foreground/70 ring-white/5";
 
   return (
     <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50">
@@ -113,6 +116,7 @@ export default function CurrentWeekCard() {
         aria-hidden
       />
       <CardHeader className="pb-4">
+        {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="bg-muted/10 p-2 rounded-md h-9 w-9 flex items-center justify-center">
@@ -133,36 +137,56 @@ export default function CurrentWeekCard() {
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Progress vs last week</span>
-            <div className="flex items-center gap-2">
-              <span className={`tabular-nums ${paceClass}`}>{paceLabel}{stats.prevTotal ? ` (${Math.abs(paceDelta)}%)` : ""}</span>
+            <div className="flex items-center gap-3">
+              <span className={`tabular-nums ${paceClass}`}>
+                {stats.prevTotal ? `${paceLabel} (${Math.abs(paceDelta)}%)` : "—"}
+              </span>
               <span className="tabular-nums">{stats.prevTotal ? `${Math.min(progressPct, 999)}%` : "—"}</span>
             </div>
           </div>
-          <div className="h-2.5 w-full rounded-full bg-muted/20 ring-1 ring-white/5 overflow-hidden">
+
+          <div className="relative h-2.5 w-full rounded-full bg-muted/20 ring-1 ring-white/5 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-emerald-500/70 via-emerald-400/70 to-emerald-300/70"
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500/70 via-emerald-400/70 to-emerald-300/70"
               style={{ width: `${Math.max(0, Math.min(progressPct, 100))}%` }}
+            />
+            {/* On-track marker */}
+            <div
+              className="absolute inset-y-0 w-0.5 bg-white/35"
+              style={{ left: `calc(${markerLeftPct}% - 1px)` }}
+              aria-hidden
             />
           </div>
         </div>
 
-        {/* Right-aligned metrics */}
-        <div className="mt-4 flex items-center justify-end gap-3">
-          <span className="hidden sm:inline text-sm text-muted-foreground">Workouts</span>
-          <div className={`${pillBase} bg-emerald-500/15 text-emerald-300 ring-emerald-400/25`}>
-            <Dumbbell className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
-            {loading ? "—" : stats.workouts}
+        {/* Key metrics (explicitly labeled chips) */}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Workouts */}
+          <div className={`${chipBase} bg-emerald-500/10 text-emerald-300 ring-emerald-400/20`}>
+            <div className="flex items-center gap-1.5">
+              <Dumbbell className="h-3.5 w-3.5 opacity-80" />
+              <span className="opacity-90">Workouts</span>
+            </div>
+            <span>{loading ? "—" : stats.workouts}</span>
           </div>
 
-          <span className="hidden sm:inline text-sm text-muted-foreground">Average</span>
-          <div className={`${pillBase} ${avgPillClass}`}>
-            <AvgIcon className="h-3.5 w-3.5 -ml-0.5 opacity-80" />
-            {loading ? "—" : Math.round(stats.avg)}
+          {/* Avg per workout */}
+          <div className={`${chipBase} ${avgPillClass}`}>
+            <div className="flex items-center gap-1.5">
+              <AvgIcon className="h-3.5 w-3.5 opacity-80" />
+              <span className="opacity-90">Avg/Workout</span>
+            </div>
+            <span>{loading ? "—" : Math.round(stats.avg).toLocaleString()}</span>
           </div>
 
-          <div className={`${pillBase} ${deltaChipClass}`}>
-            {avgDeltaPct > 0 ? "+" : avgDeltaPct < 0 ? "−" : ""}
-            {Math.abs(avgDeltaPct)}%
+          {/* Average delta */}
+          <div className={`${chipBase} ${deltaChipClass}`}>
+            <div className="flex items-center gap-1.5">
+              <span className="opacity-90">Avg Δ</span>
+            </div>
+            <span>
+              {loading ? "—" : `${avgDeltaPct > 0 ? "+" : avgDeltaPct < 0 ? "−" : ""}${Math.abs(avgDeltaPct)}%`}
+            </span>
           </div>
         </div>
       </CardHeader>
