@@ -2,6 +2,7 @@ import { Card } from "../../ui/card";
 import VolumeProgressCard from "../cards/VolumeProgressCard";
 import TopWorkoutsCard from "../cards/TopWorkoutsCard";
 import WorkoutFrequencyCard from "../cards/WorkoutFrequencyCard";
+import CurrentWeekCard from "../cards/CurrentWeekCard";
 
 export default function OverallProgressTab() {
   console.log('OverallProgressTab rendered');
@@ -11,6 +12,7 @@ export default function OverallProgressTab() {
       <VolumeProgressCard />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CurrentWeekCard />
         <WorkoutFrequencyCard /> 
         <div>
           <TopWorkoutsCard />
