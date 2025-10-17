@@ -124,7 +124,7 @@ export default function CurrentWeekCard() {
             </div>
             <div>
               <CardTitle className="text-2xl">This Week</CardTitle>
-              <p className="text-muted-foreground">Volume, workouts, average</p>
+              <p className="text-muted-foreground">Total and average volume</p>
             </div>
           </div>
 
@@ -134,7 +134,7 @@ export default function CurrentWeekCard() {
         </div>
 
         {/* Progress vs last week */}
-        <div className="mt-4 space-y-2">
+        <div className="mt-5 space-y-2 pt-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>Progress vs last week</span>
             <div className="flex items-center gap-3">
@@ -160,7 +160,7 @@ export default function CurrentWeekCard() {
         </div>
 
         {/* Key metrics (explicitly labeled chips) */}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="mt-6 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Workouts */}
           <div className={`${chipBase} bg-emerald-500/10 text-emerald-300 ring-emerald-400/20`}>
             <div className="flex items-center gap-1.5">
