@@ -142,7 +142,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
 
   return (
     <div
-      className="weekly-frequency-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent] text-black dark:text-white"
+      className="weekly-frequency-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent] text-zinc-700 dark:text-zinc-200"
       role="img"
       aria-label="Weekly workout sessions over the last six months"
     >
@@ -173,7 +173,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
           <XAxis
             dataKey="week"
             stroke="#888888"
-            tick={{ fill: '#9CA3AF', fontSize: 12 }}
+            tick={{ fill: 'currentColor', fontSize: 12, opacity: 0.8 }}
             tickFormatter={formatWeekStartLabel}
             interval="preserveStartEnd"
             minTickGap={28}
@@ -183,7 +183,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
 
           <YAxis
             stroke="#888888"
-            tick={{ fill: '#A1A1AA', fontSize: 12 }}
+            tick={{ fill: 'currentColor', fontSize: 12, opacity: 0.8 }}
             width={36}
             allowDecimals={false}
             tickLine={false}
@@ -215,7 +215,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
             label={{
               value: `Avg ${avg.toFixed(1)}`,
               position: 'right',
-              fill: 'rgba(148,163,184,0.9)',
+              fill: 'currentColor',
               fontSize: 11,
               offset: 6,
             }}
@@ -235,7 +235,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
               position="top"
               offset={8}
               className="tabular-nums"
-              fill="#CBD5E1"
+              fill="currentColor"
               fontSize={11}
               isAnimationActive={false}
             />
