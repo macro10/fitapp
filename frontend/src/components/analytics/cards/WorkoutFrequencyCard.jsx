@@ -10,7 +10,7 @@ export default function WorkoutFrequencyCard() {
     "h-7 px-2.5 rounded-full text-[11px] leading-[22px] ring-1 tabular-nums flex items-center gap-1 whitespace-nowrap ring-zinc-900/10 dark:ring-white/10 bg-zinc-950/[.03] dark:bg-muted/15 text-zinc-700 dark:text-foreground/80";
 
   return (
-    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50 pb-4 shadow-[0_2px_20px_-8px_rgba(0,0,0,0.45)]">
+    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50 pb-4">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
         aria-hidden

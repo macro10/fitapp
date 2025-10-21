@@ -119,7 +119,7 @@ export default function CurrentWeekCard() {
   const clampedMarker = Math.max(0, Math.min(markerLeftPct, 100));
 
   return (
-    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50 shadow-[0_2px_20px_-8px_rgba(0,0,0,0.45)]">
+    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
         aria-hidden
