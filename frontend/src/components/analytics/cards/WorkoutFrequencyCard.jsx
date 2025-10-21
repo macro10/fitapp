@@ -7,7 +7,7 @@ export default function WorkoutFrequencyCard() {
   const [stats, setStats] = useState({ avg: 0, max: 0, weeks: 0 });
 
   const chip =
-    "h-7 px-2.5 rounded-full text-[11px] leading-[22px] ring-1 ring-white/10 bg-muted/15 text-foreground/80 tabular-nums flex items-center gap-1";
+    "h-7 px-2.5 rounded-full text-[11px] leading-[22px] ring-1 ring-white/10 bg-muted/15 text-foreground/80 tabular-nums flex items-center gap-1 whitespace-nowrap";
 
   return (
     <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50 pb-4 shadow-[0_2px_20px_-8px_rgba(0,0,0,0.45)]">
@@ -37,12 +37,12 @@ export default function WorkoutFrequencyCard() {
 
       <CardContent className="pt-4 md:pt-6">
         {/* Quick stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-3 gap-2 mb-4">
           <div className={chip}>
             <span className="opacity-70">Average</span>
             <span>{stats.avg ? stats.avg.toFixed(1) : "—"}</span>
           </div>
-          <div className={`${chip} ring-emerald-400/20`}>
+          <div className={`${chip}`}>
             <span className="opacity-70">Best week</span>
             <span>{stats.max || "—"}</span>
           </div>
