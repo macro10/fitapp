@@ -92,7 +92,7 @@ export default function CurrentWeekCard() {
       Math.round(((Date.now() - weekStart.getTime()) / (weekEnd.getTime() - weekStart.getTime())) * 100)
     )
   );
-  const markerLeftPct = Math.max(0, Math.min(100, weekPct));
+  const markerLeftPct = Math.max(0, Math.min(weekPct, 100));
   const paceDelta = progressPct - weekPct;
   const paceLabel = paceDelta >= 5 ? "ahead" : paceDelta <= -5 ? "behind" : "on track";
   const paceClass =
@@ -109,8 +109,17 @@ export default function CurrentWeekCard() {
     ? "bg-red-500/15 text-red-300 ring-red-400/25"
     : "bg-yellow-500/10 text-yellow-300 ring-yellow-400/20"; // neutral for small negatives (0..-20%)
 
+  // formatting and clamped widths
+  const formatNum = (n) =>
+    n >= 100000
+      ? new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(n)
+      : n.toLocaleString();
+
+  const clampedProgress = Math.max(0, Math.min(progressPct, 100));
+  const clampedMarker = Math.max(0, Math.min(markerLeftPct, 100));
+
   return (
-    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50">
+    <Card className="relative rounded-2xl border bg-card/60 ring-1 ring-border/50 shadow-[0_2px_20px_-8px_rgba(0,0,0,0.45)]">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
         aria-hidden
@@ -129,7 +138,11 @@ export default function CurrentWeekCard() {
           </div>
 
           <div className="text-4xl md:text-5xl font-semibold leading-tight tabular-nums tracking-tight">
-            {loading ? "—" : stats.latest.toLocaleString()}
+            {loading ? (
+              <div className="h-8 w-28 rounded bg-muted/20 animate-pulse" />
+            ) : (
+              formatNum(stats.latest)
+            )}
           </div>
         </div>
 
@@ -145,15 +158,29 @@ export default function CurrentWeekCard() {
             </div>
           </div>
 
-          <div className="relative h-2.5 w-full rounded-full bg-muted/20 ring-1 ring-white/5 overflow-hidden">
+          <div className="relative h-2.5 w-full rounded-full bg-muted/20 ring-1 ring-white/5 overflow-hidden" role="progressbar" aria-valuenow={clampedProgress} aria-valuemin={0} aria-valuemax={100}>
+            {/* Fill with animation */}
             <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500/70 via-emerald-400/70 to-emerald-300/70"
-              style={{ width: `${Math.max(0, Math.min(progressPct, 100))}%` }}
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500/70 via-emerald-400/70 to-emerald-300/70 transition-all duration-700 ease-out"
+              style={{ width: `${clampedProgress}%` }}
             />
-            {/* On-track marker */}
+            {/* Subtle diagonal stripes inside the fill */}
+            <div
+              className="absolute inset-y-0 left-0 pointer-events-none transition-all duration-700 ease-out"
+              style={{ width: `${clampedProgress}%` }}
+            >
+              <div className="h-full bg-[linear-gradient(90deg,rgba(255,255,255,.08)_10%,transparent_10%)] bg-[length:8px_8px] mix-blend-overlay" />
+            </div>
+            {/* Progress thumb */}
+            <div
+              className="absolute -top-1.5 h-3 w-3 rounded-full bg-white/80 ring-2 ring-emerald-500/60 shadow-sm transition-all duration-700 ease-out"
+              style={{ left: `calc(${clampedProgress}% - 6px)` }}
+              aria-label="Current week progress"
+            />
+            {/* On-track marker (elapsed week) */}
             <div
               className="absolute inset-y-0 w-0.5 bg-white/35"
-              style={{ left: `calc(${markerLeftPct}% - 1px)` }}
+              style={{ left: `calc(${clampedMarker}% - 1px)` }}
               aria-hidden
             />
           </div>
@@ -162,21 +189,21 @@ export default function CurrentWeekCard() {
         {/* Key metrics (explicitly labeled chips) */}
         <div className="mt-6 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Workouts */}
-          <div className={`${chipBase} bg-muted/20 text-foreground/90 ring-white/10`}>
+          <div className={`${chipBase} bg-muted/20 text-foreground/90 ring-white/10 transition-colors`}>
             <div className="flex items-center gap-1.5">
               <Dumbbell className="h-3.5 w-3.5 opacity-80" />
               <span className="opacity-90">Workouts</span>
             </div>
-            <span>{loading ? "—" : stats.workouts}</span>
+            {loading ? <div className="h-4 w-8 rounded bg-muted/20 animate-pulse" /> : <span>{stats.workouts}</span>}
           </div>
 
           {/* Avg per workout */}
-          <div className={`${chipBase} ${avgPillClass}`}>
+          <div className={`${chipBase} ${avgPillClass} transition-colors`}>
             <div className="flex items-center gap-1.5">
               <AvgIcon className="h-3.5 w-3.5 opacity-80" />
               <span className="opacity-90">Average Workout</span>
             </div>
-            <span>{loading ? "—" : Math.round(stats.avg).toLocaleString()}</span>
+            {loading ? <div className="h-4 w-10 rounded bg-muted/20 animate-pulse" /> : <span>{formatNum(Math.round(stats.avg))}</span>}
           </div>
 
           {/* Average delta */}
