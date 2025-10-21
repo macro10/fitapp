@@ -212,13 +212,6 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
             stroke="rgba(148, 163, 184, 0.6)"
             strokeDasharray="4 4"
             ifOverflow="extendDomain"
-            label={{
-              value: `Avg ${avg.toFixed(1)}`,
-              position: 'right',
-              fill: 'currentColor',
-              fontSize: 11,
-              offset: 6,
-            }}
           />
 
           <Bar
