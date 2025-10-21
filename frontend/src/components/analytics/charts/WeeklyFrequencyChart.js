@@ -108,14 +108,12 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
     return data.length ? Math.max(...data.map((d) => d.workoutCount || 0)) : 0;
   }, [data]);
 
-  const bestIndex = useMemo(() => {
-    if (!data.length) return -1;
-    let best = 0;
-    for (let i = 1; i < data.length; i++) {
-      if ((data[i].workoutCount || 0) > (data[best].workoutCount || 0)) best = i;
-    }
-    return best;
-  }, [data]);
+  const bestIndices = useMemo(() => {
+    if (!data.length) return [];
+    return data
+      .map((d, i) => ((d.workoutCount || 0) === maxVal ? i : -1))
+      .filter((i) => i !== -1);
+  }, [data, maxVal]);
 
   // Give some headroom so tall bars don't hit the top
   const yMax = useMemo(() => Math.max(4, maxVal + 1), [maxVal]);
@@ -194,7 +192,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
           />
 
           <Tooltip
-            cursor={{ stroke: 'rgba(148, 163, 184, 0.35)', strokeDasharray: '3 3' }}
+            cursor={{ fill: 'transparent', stroke: 'rgba(148, 163, 184, 0.35)', strokeDasharray: '3 3' }}
             contentStyle={{
               backgroundColor: 'rgba(24, 24, 27, 0.95)',
               border: '1px solid rgba(148,163,184,0.2)',
@@ -229,6 +227,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
             fill={`url(#${gradId})`}
             radius={[6, 6, 0, 0]}
             isAnimationActive
+            isUpdateAnimationActive={false}
             animationDuration={700}
           >
             <LabelList
@@ -238,13 +237,14 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
               className="tabular-nums"
               fill="#CBD5E1"
               fontSize={11}
+              isAnimationActive={false}
             />
             {data.map((entry, i) => (
               <Cell
                 key={`cell-${i}`}
                 fillOpacity={hoverIndex === i ? 1 : 0.9}
-                stroke={i === bestIndex ? 'rgba(255,255,255,0.9)' : 'none'}
-                strokeWidth={i === bestIndex ? 1.25 : 0}
+                stroke={bestIndices.includes(i) ? 'rgba(255,255,255,0.9)' : 'none'}
+                strokeWidth={bestIndices.includes(i) ? 1.25 : 0}
                 onMouseEnter={() => {
                   setHoverIndex(i);
                   onHover?.({

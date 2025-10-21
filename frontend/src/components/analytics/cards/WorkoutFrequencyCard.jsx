@@ -37,7 +37,7 @@ export default function WorkoutFrequencyCard() {
 
       <CardContent className="pt-4 md:pt-6">
         {/* Quick stats */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="grid grid-cols-3 gap-2 mb-4 pl-[38px] pr-[20px]">
           <div className={chip}>
             <span className="opacity-70">Average</span>
             <span>{stats.avg ? stats.avg.toFixed(1) : "—"}</span>
