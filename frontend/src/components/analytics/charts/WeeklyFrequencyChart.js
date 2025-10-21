@@ -142,7 +142,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
 
   return (
     <div
-      className="weekly-frequency-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]"
+      className="weekly-frequency-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent] text-black dark:text-white"
       role="img"
       aria-label="Weekly workout sessions over the last six months"
     >
@@ -243,7 +243,7 @@ const WeeklyFrequencyChart = ({ onHover, onStats }) => {
               <Cell
                 key={`cell-${i}`}
                 fillOpacity={hoverIndex === i ? 1 : 0.9}
-                stroke={bestIndices.includes(i) ? 'rgba(255,255,255,0.9)' : 'none'}
+                stroke={bestIndices.includes(i) ? 'currentColor' : 'none'}
                 strokeWidth={bestIndices.includes(i) ? 1.25 : 0}
                 onMouseEnter={() => {
                   setHoverIndex(i);
