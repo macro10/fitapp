@@ -1,5 +1,5 @@
 // frontend/src/components/analytics/charts/WeeklyFrequencyChart.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useId } from 'react';
 import {
   BarChart,
   Bar,
@@ -8,6 +8,9 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ReferenceLine,
+  Cell,
+  LabelList,
 } from 'recharts';
 import { subMonths, format, startOfISOWeek, endOfISOWeek, isSameMonth } from 'date-fns';
 import { getWeeklyFrequencyAnalytics } from '../../../api';
@@ -30,7 +33,7 @@ const getWeekRange = (weekStr) => {
   return { start, end };
 };
 
-// Compact tick label: show week start only (keeps axis clean)
+// Compact tick label
 const formatWeekStartLabel = (weekStr) => {
   try {
     const { start } = getWeekRange(weekStr);
@@ -40,7 +43,7 @@ const formatWeekStartLabel = (weekStr) => {
   }
 };
 
-// Tooltip label: full range (clear and human-friendly)
+// Tooltip label: full range
 const formatWeekRangeLabel = (weekStr) => {
   try {
     const { start, end } = getWeekRange(weekStr);
@@ -51,10 +54,12 @@ const formatWeekRangeLabel = (weekStr) => {
   }
 };
 
-const WeeklyFrequencyChart = () => {
+const WeeklyFrequencyChart = ({ onHover, onStats }) => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hoverIndex, setHoverIndex] = useState(-1);
+  const gradId = useId();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -69,7 +74,7 @@ const WeeklyFrequencyChart = () => {
         });
         const weekly = response.weekly_frequency || [];
 
-        // Exclude the current (in-progress) ISO week from the chart
+        // Exclude current in-progress ISO week
         const currentIsoWeek = format(new Date(), "RRRR-'W'II");
         const filtered = weekly.filter((d) => d?.week !== currentIsoWeek);
 
@@ -93,6 +98,30 @@ const WeeklyFrequencyChart = () => {
     return () => controller.abort();
   }, []);
 
+  // Aggregate stats for chips and reference line
+  const avg = useMemo(() => {
+    if (!data.length) return 0;
+    return data.reduce((a, b) => a + (b.workoutCount || 0), 0) / data.length;
+  }, [data]);
+
+  const maxVal = useMemo(() => {
+    return data.length ? Math.max(...data.map((d) => d.workoutCount || 0)) : 0;
+  }, [data]);
+
+  const bestIndices = useMemo(() => {
+    if (!data.length) return [];
+    return data
+      .map((d, i) => ((d.workoutCount || 0) === maxVal ? i : -1))
+      .filter((i) => i !== -1);
+  }, [data, maxVal]);
+
+  // Give some headroom so tall bars don't hit the top
+  const yMax = useMemo(() => Math.max(4, maxVal + 1), [maxVal]);
+
+  useEffect(() => {
+    onStats?.({ avg, max: maxVal, weeks: data.length });
+  }, [avg, maxVal, data.length, onStats]);
+
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-64">
@@ -102,22 +131,49 @@ const WeeklyFrequencyChart = () => {
 
   if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
 
+  if (!data.length)
+    return (
+      <div className="h-64 flex items-center justify-center text-muted-foreground/80">
+        No weekly sessions in this range
+      </div>
+    );
+
   const accent = getAccentColor();
 
   return (
-    <div className="weekly-frequency-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent]">
+    <div
+      className="weekly-frequency-chart w-full select-none outline-none focus:outline-none focus-visible:outline-none [-webkit-tap-highlight-color:transparent] text-zinc-700 dark:text-zinc-200"
+      role="img"
+      aria-label="Weekly workout sessions over the last six months"
+    >
       <ResponsiveContainer width="100%" height={320}>
-        <BarChart data={data} margin={{ top: 20, right: 16, left: 0, bottom: 8 }}>
+        <BarChart
+          data={data}
+          margin={{ top: 20, right: 20, left: 2, bottom: 8 }}
+          barCategoryGap="22%"
+          barGap={4}
+          onMouseLeave={() => {
+            setHoverIndex(-1);
+            onHover?.(null);
+          }}
+        >
+          <defs>
+            <linearGradient id={gradId} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor={accent} stopOpacity="0.95" />
+              <stop offset="100%" stopColor={accent} stopOpacity="0.72" />
+            </linearGradient>
+          </defs>
+
           <CartesianGrid
             vertical={false}
             strokeDasharray="10 10"
-            stroke="rgba(148, 163, 184, 0.25)"
+            stroke="rgba(148, 163, 184, 0.22)"
           />
 
           <XAxis
             dataKey="week"
             stroke="#888888"
-            tick={{ fill: '#9CA3AF', fontSize: 12 }}
+            tick={{ fill: 'currentColor', fontSize: 12, opacity: 0.8 }}
             tickFormatter={formatWeekStartLabel}
             interval="preserveStartEnd"
             minTickGap={28}
@@ -127,15 +183,16 @@ const WeeklyFrequencyChart = () => {
 
           <YAxis
             stroke="#888888"
-            tick={{ fill: '#9CA3AF' }}
+            tick={{ fill: 'currentColor', fontSize: 12, opacity: 0.8 }}
             width={36}
             allowDecimals={false}
             tickLine={false}
             axisLine={{ stroke: 'rgba(148, 163, 184, 0.45)', strokeWidth: 1.25, strokeLinecap: 'round' }}
+            domain={[0, yMax]}
           />
 
           <Tooltip
-            cursor={{ stroke: 'rgba(148, 163, 184, 0.35)', strokeDasharray: '3 3' }}
+            cursor={{ fill: 'transparent', stroke: 'rgba(148, 163, 184, 0.35)', strokeDasharray: '3 3' }}
             contentStyle={{
               backgroundColor: 'rgba(24, 24, 27, 0.95)',
               border: '1px solid rgba(148,163,184,0.2)',
@@ -143,17 +200,54 @@ const WeeklyFrequencyChart = () => {
               color: '#ffffff',
               padding: '10px',
             }}
+            itemStyle={{ color: '#E5E7EB' }}
+            labelStyle={{ color: '#A3A3A3' }}
             formatter={(value) => [value, 'Workouts']}
             labelFormatter={(label) => formatWeekRangeLabel(label)}
             wrapperStyle={{ zIndex: 1000 }}
           />
 
+          <ReferenceLine
+            y={avg}
+            stroke="rgba(148, 163, 184, 0.6)"
+            strokeDasharray="4 4"
+            ifOverflow="extendDomain"
+          />
+
           <Bar
             dataKey="workoutCount"
             name="Workouts"
-            fill={accent}
-            radius={[4, 4, 0, 0]}
-          />
+            fill={`url(#${gradId})`}
+            radius={[6, 6, 0, 0]}
+            isAnimationActive
+            isUpdateAnimationActive={false}
+            animationDuration={700}
+          >
+            <LabelList
+              dataKey="workoutCount"
+              position="top"
+              offset={8}
+              className="tabular-nums"
+              fill="currentColor"
+              fontSize={11}
+              isAnimationActive={false}
+            />
+            {data.map((entry, i) => (
+              <Cell
+                key={`cell-${i}`}
+                fillOpacity={hoverIndex === i ? 1 : 0.9}
+                stroke={bestIndices.includes(i) ? 'currentColor' : 'none'}
+                strokeWidth={bestIndices.includes(i) ? 1.25 : 0}
+                onMouseEnter={() => {
+                  setHoverIndex(i);
+                  onHover?.({
+                    ...entry,
+                    hoverLabel: formatWeekRangeLabel(entry.week),
+                  });
+                }}
+              />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>

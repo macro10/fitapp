@@ -14,11 +14,11 @@ export default function AnalyticsPage() {
       </div>
       
       <Tabs defaultValue="overall" className="space-y-4">
-        <TabsList>
+        {/*<TabsList>
           <TabsTrigger value="overall">Overall</TabsTrigger>
           <TabsTrigger value="muscle-groups" disabled>Muscle Groups</TabsTrigger>
           <TabsTrigger value="exercises" disabled>Exercises</TabsTrigger>
-        </TabsList>
+        </TabsList>*/}
 
         <TabsContent value="overall">
           <OverallProgressTab />
