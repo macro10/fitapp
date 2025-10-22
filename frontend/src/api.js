@@ -106,3 +106,16 @@ export const getTopWorkouts = async (limit = 5, config = {}) => {
   const response = await api.get(`analytics/top-workouts/?limit=${limit}`, config);
   return response.data;
 };
+
+export const getMuscleGroupsSummary = async (
+  { weeks = 12, currentWindow = 2, threshold = 0.2 } = {},
+  config = {}
+) => {
+  const params = new URLSearchParams({
+    weeks: String(weeks),
+    currentWindow: String(currentWindow),
+    threshold: String(threshold),
+  });
+  const res = await api.get(`analytics/muscle-groups/summary/?${params.toString()}`, config);
+  return res.data;
+};

@@ -45,3 +45,28 @@ def top_workouts_by_volume(request):
     return Response({
         'top_workouts': data
     })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def muscle_groups_summary(request):
+    try:
+        weeks = int(request.query_params.get('weeks', 12))
+    except (TypeError, ValueError):
+        weeks = 12
+    try:
+        current_window = int(request.query_params.get('currentWindow', 2))
+    except (TypeError, ValueError):
+        current_window = 2
+    try:
+        threshold = float(request.query_params.get('threshold', 0.2))
+    except (TypeError, ValueError):
+        threshold = 0.2
+
+    from ...analytics import muscle_groups_summary as compute_summary
+    data = compute_summary(
+        user=request.user,
+        weeks=weeks,
+        current_window=current_window,
+        threshold=threshold
+    )
+    return Response(data)
