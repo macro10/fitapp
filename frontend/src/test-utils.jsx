@@ -1,5 +1,18 @@
 import { render } from '@testing-library/react';
 import { createContext, useContext, useMemo } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Create a new QueryClient for each test to ensure isolation
+function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        gcTime: 0,
+      },
+    },
+  });
+}
 
 // Create a mock AuthContext to avoid localStorage side effects in tests
 const MockAuthContext = createContext(null);
@@ -31,18 +44,24 @@ export function useMockAuth() {
 }
 
 // Test providers wrapper with configurable user state
-export function TestProviders({ children, user = 'test-token' }) {
+export function TestProviders({ children, user = 'test-token', queryClient }) {
+  const client = queryClient || createTestQueryClient();
   return (
-    <MockAuthProvider user={user}>
-      {children}
-    </MockAuthProvider>
+    <QueryClientProvider client={client}>
+      <MockAuthProvider user={user}>
+        {children}
+      </MockAuthProvider>
+    </QueryClientProvider>
   );
 }
 
+// Export createTestQueryClient for tests that need direct access
+export { createTestQueryClient };
+
 // Custom render that wraps with test providers
-export function renderWithProviders(ui, { user = 'test-token', ...options } = {}) {
+export function renderWithProviders(ui, { user = 'test-token', queryClient, ...options } = {}) {
   function Wrapper({ children }) {
-    return <TestProviders user={user}>{children}</TestProviders>;
+    return <TestProviders user={user} queryClient={queryClient}>{children}</TestProviders>;
   }
   return render(ui, { wrapper: Wrapper, ...options });
 }
