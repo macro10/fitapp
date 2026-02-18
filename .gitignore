@@ -47,3 +47,7 @@ yarn-error.log*
 .vscode/
 *.swp
 *.swo
+
+# Claude Code
+.claude/command-log.txt
+.claude/settings.local.json
